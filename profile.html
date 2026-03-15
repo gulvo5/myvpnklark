@@ -197,28 +197,35 @@
 
     // ─── Основные функции ───────────────────────────────────────
 
-    async function checkSession() {
-      if (!supabaseClient) return;
+async function checkSession() {
+  if (!supabaseClient) return;
 
-      try {
-        const { data: { user }, error } = await supabaseClient.auth.getUser();
-        if (error) throw error;
+  try {
+    // ← меняем getUser() → getSession()
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
 
-        const authForm = document.getElementById('auth-form');
-        const profile = document.getElementById('profile-content');
-
-        if (user) {
-          authForm.style.display = 'none';
-          profile.style.display = 'block';
-          await loadProfile(user.id);           // ← здесь твоя функция
-        } else {
-          authForm.style.display = 'block';
-          profile.style.display = 'none';
-        }
-      } catch (err) {
-        console.error('checkSession error:', err);
-      }
+    if (error) {
+      console.error("getSession error:", error);
+      // можно показать сообщение, но не обязательно
     }
+
+    const user = session?.user;
+
+    const authForm = document.getElementById('auth-form');
+    const profile = document.getElementById('profile-content');
+
+    if (user) {
+      authForm.style.display = 'none';
+      profile.style.display = 'block';
+      await loadProfile(user.id);
+    } else {
+      authForm.style.display = 'block';
+      profile.style.display = 'none';
+    }
+  } catch (err) {
+    console.error('checkSession error:', err);
+  }
+}
 
     async function signUp() {
       const email = document.getElementById('email')?.value?.trim();
