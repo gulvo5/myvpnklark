@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Моя VPN Подписка • Happ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: linear-gradient(135deg, #0f172a, #1e2937); }
+    .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); }
+  </style>
+</head>
+<body class="text-white min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-md w-full card rounded-3xl p-8 shadow-2xl border border-white/10">
+    <h1 class="text-4xl font-bold text-center mb-2">🚀 Моя VPN</h1>
+    <p class="text-center text-emerald-400 text-xl mb-8">Подписка для Happ</p>
+    
+    <div class="bg-black/50 rounded-2xl p-6 mb-8 break-all text-sm font-mono" id="sub-link">
+      https://gist.githubusercontent.com/ТВОЙ_ЛОГИН/ХЭШ/raw/subscription.txt
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <button onclick="copyLink()" 
+              class="bg-emerald-500 hover:bg-emerald-600 py-4 rounded-2xl font-bold text-lg transition">
+        📋 Скопировать ссылку
+      </button>
+      
+      <a href="https://gist.githubusercontent.com/ТВОЙ_ЛОГИН/ХЭШ/raw/subscription.txt" 
+         target="_blank"
+         class="bg-white/10 hover:bg-white/20 py-4 rounded-2xl font-bold text-lg text-center transition">
+        📲 Открыть в Happ (одним кликом)
+      </a>
+    </div>
+
+    <div class="mt-10 text-center">
+      <p class="text-sm opacity-70 mb-3">Или отсканируй QR-код</p>
+      <img id="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://gist.githubusercontent.com/ТВОЙ_ЛОГИН/ХЭШ/raw/subscription.txt" 
+           class="mx-auto rounded-2xl shadow-xl" alt="QR">
+    </div>
+
+    <div class="mt-10 text-xs opacity-60 text-center">
+      Как подключить:<br>
+      1. Открой Happ → нажми «+»<br>
+      2. Выбери «Добавить подписку»<br>
+      3. Вставь ссылку или отсканируй QR
+    </div>
+  </div>
+
+  <script>
+    function copyLink() {
+      const link = document.getElementById('sub-link').innerText;
+      navigator.clipboard.writeText(link).then(() => {
+        alert('✅ Ссылка скопирована! Вставь в Happ');
+      });
+    }
+  </script>
+</body>
+</html>
