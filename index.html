@@ -3,89 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KlarkVpn Подписка • Happ</title>
+  <title>KlarkVpn • Подписка Happ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background: linear-gradient(135deg, #0f172a, #1e2937); }
-    .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); }
+    body { 
+      background: linear-gradient(135deg, #4c1d95, #1e1b4b, #2e1065); 
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .card { 
+      background: rgba(30, 27, 75, 0.92); 
+      backdrop-filter: blur(20px); 
+      border: 1px solid rgba(167, 139, 250, 0.25);
+    }
+    .header { background: #6d28d9; }
+    .logo-cloud { filter: drop-shadow(0 10px 30px rgba(167, 139, 250, 0.5)); }
+    .pulse-dot {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
   </style>
 </head>
-<body class="text-white min-h-screen flex items-center justify-center p-6">
-  <div class="max-w-md w-full card rounded-3xl p-8 shadow-2xl border border-white/10">
-    <h1 class="text-4xl font-bold text-center mb-2">🚀 KlarkVpn</h1>
-    <p class="text-center text-emerald-400 text-xl mb-8">Подписка для Happ</p>
-    
-    <div class="bg-black/50 rounded-2xl p-6 mb-8 break-all text-sm font-mono" id="sub-link">
-     https://gist.githubusercontent.com/gulvo5/9fea6d7966860c48e65ecda453d869e0/raw/1ee3318e588064c2e8ddbe5942122c251e097f73/VpnKlark
+<body class="text-white min-h-screen flex flex-col items-center p-0">
+
+  <!-- Верхняя панель как в Telegram Mini App -->
+  <div class="header w-full px-6 py-4 flex items-center justify-between text-base font-medium shadow-md">
+    <button onclick="history.back()" class="text-white/90">Закрыть</button>
+    <div class="font-bold tracking-wide">KLARK VPN</div>
+    <div class="text-violet-200 text-sm">МИНИ-ПРИЛОЖЕНИЕ</div>
+  </div>
+
+  <div class="w-full max-w-md card flex-1 rounded-b-3xl shadow-2xl overflow-hidden">
+
+    <!-- Логотип (облако + щит + молния) -->
+    <div class="flex justify-center mt-10 mb-6">
+      <div class="relative w-44 h-44 logo-cloud">
+        <svg width="176" height="176" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Облако -->
+          <path d="M35 120 Q25 80 60 70 Q80 45 120 60 Q150 50 170 85 Q185 115 160 135 Q135 160 100 155 Q65 170 35 145 Z" fill="#7c3aed" opacity="0.9"/>
+          <!-- Щит -->
+          <path d="M90 85 L77 102 L77 132 L123 132 L123 102 Z" fill="#e0e7ff" stroke="#5b21b6" stroke-width="14" stroke-linejoin="round"/>
+          <!-- Молния -->
+          <path d="M100 92 L87 119 L110 119 L97 142 Z" fill="#c4b5fd"/>
+        </svg>
+      </div>
     </div>
 
-    <div class="flex flex-col gap-4">
-      <button onclick="copyLink()" 
-              class="bg-emerald-500 hover:bg-emerald-600 py-4 rounded-2xl font-bold text-lg transition">
-        📋 Скопировать ссылку
-      </button>
+    <h1 class="text-5xl font-extrabold text-center mb-1 tracking-tight text-violet-100">KlarkVpn</h1>
+    <p class="text-center text-violet-300 text-xl mb-10">Подписка для Happ</p>
+
+    <!-- Блок статуса подписки (как в скрине) -->
+    <div class="mx-6 mb-10 bg-violet-950/60 rounded-2xl p-6 border border-violet-500/30">
+      <div class="flex justify-between items-center mb-5">
+        <div class="flex items-center gap-3">
+          <span class="pulse-dot inline-block w-4 h-4 bg-emerald-400 rounded-full shadow-lg shadow-emerald-500/50"></span>
+          <span class="text-lg font-semibold">KlarkVpn</span>
+        </div>
+        <div class="text-emerald-300 font-medium">до 9 июля 2026 г.</div>
+      </div>
       
-      <a href="happ://crypt5/hfqaoqn5UcyylXxl6a29W6kaQR9nZmaCpz5MNxnxpNDE7l4jBCmP2/WZExYAMin8mMJx/mIQSJ2YwmTYzt+YdWPvjvgTVjKPewO8Ibhemq6rjSqi6alNl+KRSZjdP2xoWIfCShUHIYyRSWVCSBHT5NBC3Riy+TZnvAchO5Nn4MtnHmehIN4DT3Kpx6IocK0M5octXnqhsDS/5Z6tRhwXI9It1QP+MZ9XzIzG5DRb9N0wthDkLeLx9cvLf+ALOKKUTZ77wWbtY6dohoWs4VlFGayN3Xi5Jj1C2RL/OytRiGc6++3F95uQBDrA==wgYmDJGfGdKcQFtBApUZp7H1g1WOMHdzkPNZONFRMFBLTYv8N/kFqW/LLtyUV5DHvgIHt4a2zSn/Y6Nuj/X0cn7MAda9qmC3lJyBrOigbV38Vmne5yrkeWce1SqeaZSeE1oGzOhTZyfRp5KIHWGICunzoKMHWcSg5IqX9ceL49t92FoTtVSRrHyd6f1L/M169vV8/wO46Ji8Mx/msplvHjTCSC9MRAFT1IqczYl/U9ZyeJw0Tj5/vlQ8IEqDsqchGZ+FpjHM2zt0yUQa89m6tEGkHD2SeIKshILDfDMWIfTETnrHvaFBc8zcULIGBCbnxhR4tn3bOyTzgmISdkRuSI2SZlO53f2VJ0pW2yZ0IsSnLGvLACbGHTA/5FO5wlHB7S3VsaZuLZAX4s6wFE7CEeTC5l/++LGdqew64KXuttvdvfFP3Voobh1DfS/NCyp4a9C/74rlF3VACmfpCqpuegxoZ+IEHIphS1ULzjQU0GcJPevk0Fxn1I7NIVdccFioPkTM7FdePh5njTDDuWZH5KVmMj8ulcOZ4yhV6bIWHiw4MBJqoMde5sOyRR1pJCImgG7Ez26ANQaP6dU4o33kbt2OOUhRvr+gllZ8seBcVP+ZO4hN2nF6cPIX/hNzDz7E877eXDluxXEA2fijl+rEZi1Jyd/sOCG89x8bvHTIt1s=ggxctr" 
-         target="_blank"
-         class="bg-white/10 hover:bg-white/20 py-4 rounded-2xl font-bold text-lg text-center transition">
-        📲 Открыть в Happ (одним кликом)
+      <div class="flex justify-between text-sm opacity-90">
+        <div class="flex items-center gap-2">
+          <span>Устройств</span>
+          <span class="font-mono bg-emerald-900/50 px-2 py-1 rounded">• 1</span>
+        </div>
+        <div class="text-emerald-400 font-semibold">Подписка активна</div>
+      </div>
+    </div>
+
+    <!-- Главная кнопка "Открыть в Happ" -->
+    <a href="happ://crypt5/hfqaoqn5UcyylXxl6a29W6kaQR9nZmaCpz5MNxnxpNDE7l4jBCmP2/WZExYAMin8mMJx/mIQSJ2YwmTYzt+YdWPvjvgTVjKPewO8Ibhemq6rjSqi6alNl+KRSZjdP2xoWIfCShUHIYyRSWVCSBHT5NBC3Riy+TZnvAchO5Nn4MtnHmehIN4DT3Kpx6IocK0M5octXnqhsDS/5Z6tRhwXI9It1QP+MZ9XzIzG5DRb9N0wthDkLeLx9cvLf+ALOKKUTZ77wWbtY6dohoWs4VlFGayN3Xi5Jj1C2RL/OytRiGc6++3F95uQBDrA==wgYmDJGfGdKcQFtBApUZp7H1g1WOMHdzkPNZONFRMFBLTYv8N/kFqW/LLtyUV5DHvgIHt4a2zSn/Y6Nuj/X0cn7MAda9qmC3lJyBrOigbV38Vmne5yrkeWce1SqeaZSeE1oGzOhTZyfRp5KIHWGICunzoKMHWcSg5IqX9ceL49t92FoTtVSRrHyd6f1L/M169vV8/wO46Ji8Mx/msplvHjTCSC9MRAFT1IqczYl/U9ZyeJw0Tj5/vlQ8IEqDsqchGZ+FpjHM2zt0yUQa89m6tEGkHD2SeIKshILDfDMWIfTETnrHvaFBc8zcULIGBCbnxhR4tn3bOyTzgmISdkRuSI2SZlO53f2VJ0pW2yZ0IsSnLGvLACbGHTA/5FO5wlHB7S3VsaZuLZAX4s6wFE7CEeTC5l/++LGdqew64KXuttvdvfFP3Voobh1DfS/NCyp4a9C/74rlF3VACmfpCqpuegxoZ+IEHIphS1ULzjQU0GcJPevk0Fxn1I7NIVdccFioPkTM7FdePh5njTDDuWZH5KVmMj8ulcOZ4yhV6bIWHiw4MBJqoMde5sOyRR1pJCImgG7Ez26ANQaP6dU4o33kbt2OOUhRvr+gllZ8seBcVP+ZO4hN2nF6cPIX/hNzDz7E877eXDluxXEA2fijl+rEZi1Jyd/sOCG89x8bvHTIt1s=ggxctr"
+       target="_blank"
+       class="mx-6 block bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 py-5 text-center rounded-2xl font-bold text-xl shadow-2xl mb-6 transition-all duration-300">
+      📲 Открыть в Happ одним кликом
+    </a>
+
+    <!-- Кнопка продления -->
+    <div class="mx-6 mb-10 text-center">
+      <a href="https://t.me/CKOPO4" target="_blank"
+         class="inline-flex items-center justify-center gap-3 w-full bg-gradient-to-r from-violet-700 to-purple-700 hover:from-violet-800 hover:to-purple-800 py-5 rounded-2xl font-bold text-xl shadow-xl transition-all duration-300">
+        💳 Продлить подписку
+        <span class="bg-white/20 px-4 py-1 rounded-xl text-base">от 50 ₽</span>
+      </a>
+      <p class="text-sm mt-3 opacity-80">Нажми → чат с @CKOPO4 в Telegram</p>
+    </div>
+
+    <!-- QR и инструкция -->
+    <div class="mx-6 mb-10">
+      <div class="flex items-center gap-3 mb-5 text-violet-300 font-medium">
+        <div class="w-8 h-8 bg-violet-600/40 rounded-xl flex items-center justify-center text-lg">📱</div>
+        <span>Установка и настройка</span>
+      </div>
+
+      <p class="text-center text-sm opacity-80 mb-5">
+        Отсканируй QR-код → Happ добавит скрытую подписку автоматически
+      </p>
+
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=380x380&ecc=H&data=happ%3A%2F%2Fcrypt5%2Fhfqaoqn5UcyylXxl6a29W6kaQR9nZmaCpz5MNxnxpNDE7l4jBCmP2%2FWZExYAMin8mMJx%2FmIQSJ2YwmTYzt%2BYdWPvjvgTVjKPewO8Ibhemq6rjSqi6alNl%2BKRSZjdP2xoWIfCShUHIYyRSWVCSBHT5NBC3Riy%2BTZnvAchO5Nn4MtnHmehIN4DT3Kpx6IocK0M5octXnqhsDS%2F5Z6tRhwXI9It1QP%2BMZ9XzIzG5DRb9N0wthDkLeLx9cvLf%2BALOKKUTZ77wWbtY6dohoWs4VlFGayN3Xi5Jj1C2RL%2FOytRiGc6%2B%2B3F95uQBDrA%3D%3DwgYmDJGfGdKcQFtBApUZp7H1g1WOMHdzkPNZONFRMFBLTYv8N%2FkFqW%2FLLtyUV5DHvgIHt4a2zSn%2FY6Nuj%2FX0cn7MAda9qmC3lJyBrOigbV38Vmne5yrkeWce1SqeaZSeE1oGzOhTZyfRp5KIHWGICunzoKMHWcSg5IqX9ceL49t92FoTtVSRrHyd6f1L%2FM169vV8%2FwO46Ji8Mx%2FmsplvHjTCSC9MRAFT1IqczYl%2FU9ZyeJw0Tj5%2FvlQ8IEqDsqchGZ%2BFpjHM2zt0yUQa89m6tEGkHD2SeIKshILDfDMWIfTETnrHvaFBc8zcULIGBCbnxhR4tn3bOyTzgmISdkRuSI2SZlO53f2VJ0pW2yZ0IsSnLGvLACbGHTA%2F5FO5wlHB7S3VsaZuLZAX4s6wFE7CEeTC5l%2F%2B%2BLGdqew64KXuttvdvfFP3Voobh1DfS%2FNCyp4a9C%2F74rlF3VACmfpCqpuegxoZ%2BIEHIphS1ULzjQU0GcJPevk0Fxn1I7NIVdccFioPkTM7FdePh5njTDDuWZH5KVmMj8ulcOZ4yhV6bIWHiw4MBJqoMde5sOyRR1pJCImgG7Ez26ANQaP6dU4o33kbt2OOUhRvr%2BgllZ8seBcVP%2BZO4hN2nF6cPIX%2FhNzDz7E877eXDluxXEA2fijl%2BrEZi1Jyd%2FsOCG89x8bvHTIt1s%3Dggxctr"
+           class="mx-auto rounded-3xl shadow-2xl border-4 border-violet-500/60 w-80 h-80 object-contain" 
+           alt="QR-код для Happ">
+
+      <p class="text-xs mt-6 text-center opacity-70 leading-relaxed">
+        В Happ: «+» → «Сканировать QR» или наведи камеру.<br>
+        crypt5 — серверы скрыты и защищены.
+      </p>
+    </div>
+
+    <!-- Нижние кнопки -->
+    <div class="grid grid-cols-2 gap-4 px-6 pb-10">
+      <button class="bg-violet-900/60 hover:bg-violet-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2">
+        👤 Профиль
+      </button>
+      <a href="https://t.me/CKOPO4" target="_blank" class="bg-violet-900/60 hover:bg-violet-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2">
+        💬 Помощь
       </a>
     </div>
 
-<div class="mt-12 text-center">
-  <p class="text-lg font-semibold mb-4 text-emerald-300">
-    Продлить подписку — всего 50 ₽
-  </p>
-  
-  <a href="https://t.me/CKOPO4" 
-     target="_blank"
-     class="inline-block bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 
-            text-white font-bold py-5 px-10 rounded-3xl text-xl shadow-2xl transform hover:scale-105 transition-all duration-300">
-    💳 Продлить подписку 50 ₽
-  </a>
-  
-  <p class="text-sm opacity-70 mt-4">
-    Нажми кнопку → откроется чат с @CKOPO4 в Telegram<br>
-  </p>
-</div>
-    
-<div class="mt-10 text-center">
-  <p class="text-sm opacity-70 mb-3">Отсканируй QR-код → Happ добавит скрытую подписку автоматически</p>
-  
-  <!-- Основной QR (самый надёжный способ) -->
-  <img 
-    src="https://api.qrserver.com/v1/create-qr-code/?size=380x380&ecc=H&data=happ%3A%2F%2Fcrypt5%2FhfqahwpumD8T2TBH8h28z8DmpbKUHOGtwaFeIrGX%2FJVY6CnHuKa7%2FNeCXGmQ%2BqH%2Fqz7P7d63DncSkFPMysPow67jZp3b49EYpQwK7FmDOGtJG%2BDI1tE64i%2B19%2FBXcF8DwDbwrU51c8DjJTcgPh5X9Jui7Be3n%2BoTLaLmA%2BMeByRN4I3IeBjamRO7UjbW9ASIcVUXH2VnUdYbToKqjPcOwvl1txu%2Bm6ZhOR760yaED3VmtapUJ0ztx7EyR5RRbXGJZPmd8T9T%2BJa0wOh1VNB2Ct%2F7vVEP9v8cYjSjs6AHhiRiDU%2FFEuW8ZKZC7lqFl%2FUvnMUkNeVZZNvHSUQo2O9zlt5zXzSSL0q2o3R%2FJ122lEJXLdArn9uwr9qw0YPOk6YpNzELujD7BrIkd8EUwpn2bTQakhvRfgkIdV3ateyqUWb%2Bpay2DJ8glGxXon3f4tXIV1cW3rRvRj%2FVesl6qctyQab5py4ySrZlGXqrjZ6pE%2B3iR8XHQUMC%2FDHSGbWIkeeI5%2B%2B1sFNMIqHc0dstOC5sed%2BLgeL%2FJl219T0uFWHJWBw%2FtTGz9ygGegN9GQTmOBt%2BMNyMYwjKEMg%2Bw44dA7AbulIRg4rncILhiXS0gxOQr3ZL9Z21dfWM1E8b09%2BeUJdzPAUnF0dISgZ0V%2FOdTjzH%2FSUCIJODcAxVL2LrXE26d7%2B2qq%2Fh1wDpGB5ApzdpE113bbNmokTVDvYWMPd9e5iE%2BublZOHTlw0yE2mYJiYtDDUMnvp4%2BoodAbhtX6ZdTGpBVmB7T4FHd57wwJrx71jhyw5f6Jk2zHvVwYdwClzVCm48zPt7dBz3sWaKLF7E0fkRZbC3OZwXIRUCTOajNbe2ootaICZyUtjsmCoYEbDB21aGm60WqEO5bM%2FMpYo47lsFpBdjzyTPSjMmeFafj7p0S8Snz0rRuZ%2ByVZwPQH7Bze4m%2Fnabv7uitSIdDRAa%2BIYr%2BaVPaCeo3DlnuM0uXut45%2BOZz2SNo%3D1Exctr"
-    class="mx-auto rounded-2xl shadow-2xl border-4 border-emerald-500 w-80 h-80 object-contain"
-    alt="QR-код зашифрованной подписки Happ (crypt5)"
-    loading="lazy"
-  >
+  </div>
 
-  <!-- Короткое пояснение + fallback -->
-  <p class="text-xs mt-4 opacity-60 leading-relaxed">
-    В Happ нажми «+» → «Сканировать QR» (или просто наведи камеру).<br>
-    Подписка добавится скрыто — серверы никто не увидит и не скопирует.
-  </p>
-
-  <!-- Если QR не загрузился — текстовая ссылка как запасной вариант -->
-  <p class="text-xs mt-6 opacity-50 break-all">
-    Не сканируется? Скопируй и вставь в Happ вручную:<br>
+  <!-- Скрытый блок для копирования ссылки (если нужно) -->
+  <div id="sub-link" class="hidden">
     https://gist.githubusercontent.com/gulvo5/9fea6d7966860c48e65ecda453d869e0/raw/1ee3318e588064c2e8ddbe5942122c251e097f73/VpnKlark
-  </p>
-</div>
-
-    <div class="mt-10 text-xs opacity-60 text-center">
-      Как подключить:<br>
-      1. Открой Happ → нажми «+»<br>
-      2. Выбери «Добавить подписку»<br>
-      3. Вставь ссылку или отсканируй QR
-    </div>
   </div>
 
   <script>
     function copyLink() {
       const link = document.getElementById('sub-link').innerText;
       navigator.clipboard.writeText(link).then(() => {
-        alert('✅ Ссылка скопирована! Вставь в Happ');
+        alert('Ссылка скопирована! Вставь в Happ');
       });
     }
   </script>
