@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Профиль — KLARK VPN</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Supabase клиент -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
+
+  <!-- Supabase клиент — актуальный CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Impact:wght@900&family=Inter:wght@400;600;700&display=swap');
     body {
@@ -20,20 +20,14 @@
       border: 1px solid rgba(64, 196, 255, 0.3);
     }
     .neon-text {
-      text-shadow:
-        0 0 10px #40c4ff,
-        0 0 20px #1b98e0,
-        0 0 40px #0d47a1,
-        0 0 60px #7c3aed;
+      text-shadow: 0 0 10px #40c4ff, 0 0 20px #1b98e0, 0 0 40px #0d47a1, 0 0 60px #7c3aed;
     }
     .glow-button {
-      box-shadow: 0 0 25px rgba(64, 196, 255, 0.6),
-                  0 0 50px rgba(124, 58, 237, 0.4);
+      box-shadow: 0 0 25px rgba(64, 196, 255, 0.6), 0 0 50px rgba(124, 58, 237, 0.4);
       transition: all 0.3s ease;
     }
     .glow-button:hover {
-      box-shadow: 0 0 40px rgba(64, 196, 255, 0.9),
-                  0 0 70px rgba(124, 58, 237, 0.7);
+      box-shadow: 0 0 40px rgba(64, 196, 255, 0.9), 0 0 70px rgba(124, 58, 237, 0.7);
       transform: scale(1.03);
     }
     .avatar-glow {
@@ -86,7 +80,6 @@
 
     <!-- Профиль (скрыт по умолчанию) -->
     <div id="profile-content" style="display: none;">
-
       <!-- Аватар + имя -->
       <div class="flex flex-col items-center mb-8">
         <div class="relative">
@@ -101,7 +94,7 @@
         <p class="text-cyan-300 text-sm">Premium пользователь</p>
       </div>
 
-      <!-- Главная карточка статуса -->
+      <!-- Статус подписки -->
       <div class="glass rounded-3xl p-8 mb-8">
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-3">
@@ -110,8 +103,6 @@
           </div>
           <span id="profile-end" class="text-emerald-400 font-semibold text-xl">Загрузка...</span>
         </div>
-
-        <!-- Устройства -->
         <div class="mb-8">
           <div class="flex justify-between text-sm mb-2">
             <span class="text-blue-300">Устройств</span>
@@ -122,97 +113,113 @@
           </div>
         </div>
 
-<!-- Ссылка HAPP -->
-<div id="happ-section" style="display: none;">
-  <a id="happ-link" href="#" target="_blank"
-     class="glow-button block text-center py-6 rounded-3xl bg-gradient-to-r from-emerald-500 to-teal-500 text-2xl font-bold tracking-wider hover:opacity-90 transition">
-    📲 МОЯ ЛИЧНАЯ ССЫЛКА HAPP
-  </a>
-</div>
+        <!-- HAPP ссылка -->
+        <div id="happ-section" style="display: none;">
+          <a id="happ-link" href="#" target="_blank"
+             class="glow-button block text-center py-6 rounded-3xl bg-gradient-to-r from-emerald-500 to-teal-500 text-2xl font-bold tracking-wider hover:opacity-90 transition">
+            📲 МОЯ ЛИЧНАЯ ССЫЛКА HAPP
+          </a>
+        </div>
 
-      <!-- Мини-карточки -->
-      <div class="grid grid-cols-2 gap-4 mb-8">
-        <div class="glass rounded-3xl p-6 stat-card text-center">
-          <div class="text-5xl mb-2">🔒</div>
-          <div class="text-sm text-blue-300">Статус</div>
-          <div id="profile-status" class="text-2xl font-bold text-emerald-400">Загрузка...</div>
+        <!-- Мини-карточки -->
+        <div class="grid grid-cols-2 gap-4 mb-8">
+          <div class="glass rounded-3xl p-6 stat-card text-center">
+            <div class="text-5xl mb-2">🔒</div>
+            <div class="text-sm text-blue-300">Статус</div>
+            <div id="profile-status" class="text-2xl font-bold text-emerald-400">Загрузка...</div>
+          </div>
+          <div class="glass rounded-3xl p-6 stat-card text-center">
+            <div class="text-5xl mb-2">📅</div>
+            <div class="text-sm text-blue-300">Осталось</div>
+            <div id="days-left" class="text-2xl font-bold text-cyan-300">—</div>
+          </div>
         </div>
-        <div class="glass rounded-3xl p-6 stat-card text-center">
-          <div class="text-5xl mb-2">📅</div>
-          <div class="text-sm text-blue-300">Осталось</div>
-          <div id="days-left" class="text-2xl font-bold text-cyan-300">—</div>
-        </div>
-      </div>
 
-      <!-- Админ-панель (видна только админу) -->
-      <div id="admin-panel" class="glass rounded-3xl p-6 hidden">
-        <h3 class="text-xl font-bold neon-text mb-4">Админ: Управление подпиской</h3>
-        
-        <div class="mb-4">
-          <label class="block text-blue-300 mb-2">Дата окончания подписки (ДД.ММ.ГГГГ)</label>
-          <input id="admin-sub-end" type="text" placeholder="Например: 31.12.2026" 
-                 class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400">
+        <!-- АДМИН-ПАНЕЛЬ -->
+        <div id="admin-panel" class="glass rounded-3xl p-6 hidden">
+          <h3 class="text-xl font-bold neon-text mb-4">Админ: Выдать подписку</h3>
+
+          <!-- Поиск пользователя -->
+          <div class="mb-4">
+            <label class="block text-blue-300 mb-2">Email пользователя</label>
+            <input id="admin-user-email" type="email" placeholder="user@example.com"
+                   class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400">
+            <button onclick="adminFindUser()" class="mt-2 w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl font-bold">
+              Найти пользователя
+            </button>
+          </div>
+
+          <!-- Результат поиска -->
+          <p id="admin-user-info" class="text-center mb-4 text-yellow-300 min-h-[1.5rem]"></p>
+
+          <!-- Дата окончания -->
+          <div class="mb-4">
+            <label class="block text-blue-300 mb-2">Дата окончания (выберите)</label>
+            <input id="admin-sub-end" type="date" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400">
+          </div>
+
+          <button onclick="adminGrantSubscription()"
+                  class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold hover:opacity-90 transition">
+            Выдать / Обновить подписку
+          </button>
+
+          <p id="admin-message" class="text-center mt-4 text-yellow-300 min-h-[1.5rem]"></p>
         </div>
-        
-        <button onclick="adminGrantSubscription()"
-                class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold hover:opacity-90 transition">
-          Выдать подписку этому пользователю
+
+        <!-- Выход -->
+        <button onclick="logout()"
+                class="mt-8 w-full py-5 text-red-400 font-medium text-lg border border-red-400/30 rounded-3xl hover:bg-red-400/10 transition-all">
+          Выйти из профиля
         </button>
-        
-        <p id="admin-message" class="text-center mt-4 text-yellow-300 min-h-[1.5rem]"></p>
       </div>
-
-      <!-- Выход -->
-      <button onclick="logout()"
-              class="mt-8 w-full py-5 text-red-400 font-medium text-lg border border-red-400/30 rounded-3xl hover:bg-red-400/10 transition-all">
-        Выйти из профиля
-      </button>
-
     </div>
-
   </div>
 
-  <!-- Supabase логика -->
   <script>
-    // === ТВОИ ДАННЫЕ Supabase ===
+    // Supabase
     const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
 
-    const { createClient } = supabase;
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    window.supabase = supabaseClient;
+    let supabase;
+    window.addEventListener('load', () => {
+      if (typeof window.supabase === 'undefined') {
+        console.error("Supabase не загрузился");
+        document.getElementById('auth-message').textContent = 'Ошибка загрузки Supabase';
+        return;
+      }
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Авто-проверка при загрузке
-    window.addEventListener('load', async () => {
+      checkSession();
+    });
+
+    async function checkSession() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         document.getElementById('auth-form').style.display = 'none';
         document.getElementById('profile-content').style.display = 'block';
-        await loadProfile();
+        await loadProfile(user.id);
       } else {
         document.getElementById('auth-form').style.display = 'block';
         document.getElementById('profile-content').style.display = 'none';
       }
-    });
+    }
 
     async function signUp() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const msg = document.getElementById('auth-message');
+      msg.textContent = '';
 
       if (!email || !password) {
-        msg.className = 'text-center mt-4 text-red-400';
         msg.textContent = 'Введите email и пароль';
         return;
       }
 
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) {
-        msg.className = 'text-center mt-4 text-red-400';
         msg.textContent = error.message;
       } else {
-        msg.className = 'text-center mt-4 text-green-400';
-        msg.textContent = 'Зарегистрирован! Проверьте почту и войдите.';
+        msg.textContent = 'Зарегистрирован! Проверьте почту.';
       }
     }
 
@@ -220,107 +227,141 @@
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const msg = document.getElementById('auth-message');
+      msg.textContent = '';
 
       if (!email || !password) {
-        msg.className = 'text-center mt-4 text-red-400';
         msg.textContent = 'Введите email и пароль';
         return;
       }
 
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        msg.className = 'text-center mt-4 text-red-400';
         msg.textContent = error.message;
       } else {
-        msg.className = 'text-center mt-4 text-green-400';
         msg.textContent = 'Вход выполнен!';
-        setTimeout(async () => {
-          document.getElementById('auth-form').style.display = 'none';
-          document.getElementById('profile-content').style.display = 'block';
-          await loadProfile();
-        }, 700);
+        setTimeout(checkSession, 800);
       }
     }
 
-    async function loadProfile() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
+    async function loadProfile(userId) {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('*, is_admin')   // ← берём is_admin
-        .eq('id', user.id)
+        .select('*')
+        .eq('id', userId)
         .single();
 
       if (error || !profile) {
-        alert('Профиль не найден. Возможно, запись в profiles отсутствует.');
-        console.error(error);
+        console.error('Профиль не найден', error);
+        // Можно автоматически создать профиль, если админ
         return;
       }
 
-      // Основные поля
-      document.getElementById('profile-username').textContent = profile.username || user.email.split('@')[0];
+      document.getElementById('profile-username').textContent = profile.username || 'Пользователь';
 
+      // Подписка
       const subEnd = profile.subscription_end;
-
       if (subEnd) {
         document.getElementById('profile-end').textContent = subEnd;
         document.getElementById('profile-status').textContent = 'Активна';
-
-        // Расчёт оставшихся дней
         try {
           const [day, month, year] = subEnd.split('.').map(Number);
           const endDate = new Date(year, month - 1, day);
-          const now = new Date();
-          const daysLeft = Math.max(0, Math.ceil((endDate - now) / (1000 * 60 * 60 * 24)));
+          const daysLeft = Math.max(0, Math.ceil((endDate - new Date()) / (86400000)));
           document.getElementById('days-left').textContent = daysLeft + ' дней';
-        } catch (e) {
-          document.getElementById('days-left').textContent = '—';
-        }
+        } catch {}
       } else {
-        document.getElementById('profile-end').textContent = 'Нет активной подписки';
+        document.getElementById('profile-end').textContent = 'Нет подписки';
         document.getElementById('profile-status').textContent = 'Не активна';
-        document.getElementById('days-left').textContent = '—';
       }
 
+      // Устройства
       const used = profile.used_devices || 0;
-      const max  = profile.max_devices  || 3;
+      const max = profile.max_devices || 3;
       document.getElementById('devices-text').textContent = `${used} / ${max}`;
       document.getElementById('devices-bar').style.width = `${(used / max) * 100}%`;
 
-      document.getElementById('happ-link').href = profile.happ_link || '#';
+      // HAPP
+      if (profile.happ_link) {
+        document.getElementById('happ-link').href = profile.happ_link;
+        document.getElementById('happ-section').style.display = 'block';
+      }
 
-      // Показываем админ-панель только админу
+      // Админ?
       if (profile.is_admin === true) {
         document.getElementById('admin-panel').classList.remove('hidden');
       }
     }
 
-    async function adminGrantSubscription() {
-      const newEndDate = document.getElementById('admin-sub-end').value.trim();
-      const msg = document.getElementById('admin-message');
+    // Админ: найти пользователя
+    let currentAdminTargetId = null;
 
-      if (!newEndDate || !/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(newEndDate)) {
-        msg.className = 'text-center mt-4 text-red-400';
-        msg.textContent = 'Введите дату в формате ДД.ММ.ГГГГ';
+    async function adminFindUser() {
+      const email = document.getElementById('admin-user-email').value.trim();
+      const msg = document.getElementById('admin-user-info');
+      msg.textContent = 'Поиск...';
+
+      if (!email) {
+        msg.textContent = 'Введите email';
         return;
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: userFromAuth, error: authErr } = await supabase.auth.admin.listUsers();
+      if (authErr) {
+        msg.textContent = 'Ошибка доступа (RLS?)';
+        console.error(authErr);
+        return;
+      }
+
+      const targetUser = userFromAuth.users.find(u => u.email === email);
+      if (!targetUser) {
+        msg.textContent = 'Пользователь не найден';
+        return;
+      }
+
+      currentAdminTargetId = targetUser.id;
+      msg.innerHTML = `Найден: ${email} (ID: ${targetUser.id.slice(0,8)}... )`;
+
+      // Проверяем/создаём профиль
+      const { data: profile } = await supabase.from('profiles').select('subscription_end').eq('id', targetUser.id).single();
+      if (!profile) {
+        await supabase.from('profiles').insert({ id: targetUser.id, email: email });
+        msg.innerHTML += '<br>Создан новый профиль';
+      }
+    }
+
+    async function adminGrantSubscription() {
+      if (!currentAdminTargetId) {
+        document.getElementById('admin-message').textContent = 'Сначала найдите пользователя';
+        return;
+      }
+
+      const dateInput = document.getElementById('admin-sub-end').value;
+      if (!dateInput) {
+        document.getElementById('admin-message').textContent = 'Выберите дату';
+        return;
+      }
+
+      // Преобразуем YYYY-MM-DD → ДД.ММ.ГГГГ
+      const [year, month, day] = dateInput.split('-');
+      const formattedDate = `${day}.${month}.${year}`;
+
+      const msg = document.getElementById('admin-message');
+      msg.textContent = 'Обновление...';
 
       const { error } = await supabase
         .from('profiles')
-        .update({ subscription_end: newEndDate })
-        .eq('id', user.id);
+        .update({ subscription_end: formattedDate })
+        .eq('id', currentAdminTargetId);
 
       if (error) {
-        msg.className = 'text-center mt-4 text-red-400';
         msg.textContent = 'Ошибка: ' + error.message;
         console.error(error);
       } else {
-        msg.className = 'text-center mt-4 text-green-400';
-        msg.textContent = 'Подписка выдана! Страница обновится через 2 секунды...';
-        setTimeout(loadProfile, 2000);
+        msg.textContent = 'Подписка выдана!';
+        // Если это свой профиль — обновить отображение
+        if (currentAdminTargetId === (await supabase.auth.getUser()).data.user?.id) {
+          loadProfile(currentAdminTargetId);
+        }
       }
     }
 
@@ -329,6 +370,5 @@
       location.reload();
     }
   </script>
-
 </body>
 </html>
