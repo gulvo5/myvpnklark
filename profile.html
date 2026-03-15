@@ -264,37 +264,63 @@
     }
 
 async function loadProfile(userId) {
-  // ... твой текущий код отображения имени, аватара и т.д. ...
+  console.log("[loadProfile] Запуск для пользователя:", userId);
+
+  // элементы, которые будем заполнять
+  const usernameEl   = document.getElementById('profile-username');
+  const statusEl     = document.getElementById('profile-status');
+  const endEl        = document.getElementById('profile-end');
+  const daysEl       = document.getElementById('days-left');
+  const adminPanel   = document.getElementById('admin-panel');
+
+  if (!usernameEl) {
+    console.error("Не найден элемент profile-username");
+    return;
+  }
+
+  usernameEl.textContent = "Загружаем...";
 
   try {
     const { data: profile, error } = await supabaseClient
       .from('profiles')
-      .select('role, is_admin')           // или только 'role', или только 'is_admin'
+      .select('is_admin')               // ← только то, что реально есть
       .eq('id', userId)
       .single();
 
     if (error) {
-      console.error('Ошибка получения роли:', error.message);
+      console.error("Ошибка Supabase:", error.message, error.code);
+      usernameEl.textContent = "Ошибка загрузки профиля";
       return;
     }
 
-    // Варианты проверки — выбери один, который соответствует твоей базе
-    const isAdmin =
-      profile?.role === 'admin' ||
-      profile?.role === 'administrator' ||
-      profile?.is_admin === true ||
-      profile?.is_admin === 1;
+    if (!profile) {
+      console.warn("Профиль не найден в таблице profiles");
+      usernameEl.textContent = "Профиль не найден";
+      return;
+    }
 
-    if (isAdmin) {
-      const panel = document.getElementById('admin-panel');
-      if (panel) panel.classList.remove('hidden');
-      console.log('Админ-панель показана — пользователь имеет права');
+    // ──────────────────────────────
+    // Заполняем видимые поля (пока заглушки, потом подставишь реальные данные)
+    usernameEl.textContent = "Пользователь";   // ← можно потом username из базы
+    statusEl.textContent   = "Активен";
+    endEl.textContent      = "∞";
+    daysEl.textContent     = "∞";
+
+    // Проверка админ-прав
+    const isAdmin = !!profile.is_admin;   // true / 1 / "true" → true, остальное → false
+
+    console.log("is_admin из базы:", profile.is_admin, "→ права админа:", isAdmin);
+
+    if (isAdmin && adminPanel) {
+      adminPanel.classList.remove('hidden');
+      console.log("Админ-панель показана");
     } else {
-      console.log('Админ-панель НЕ показана — нет прав');
+      console.log("Админ-панель НЕ показана (нет прав или панель не найдена)");
     }
 
   } catch (err) {
-    console.error('Проблема в loadProfile (роли):', err);
+    console.error("Критическая ошибка в loadProfile:", err);
+    usernameEl.textContent = "Ошибка: " + (err.message || "?");
   }
 }
   </script>
