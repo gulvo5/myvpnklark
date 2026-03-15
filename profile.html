@@ -165,180 +165,86 @@
   </div>
 
   <!-- Скрипт -->
-  <script>
-    const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
+<script>
+  // Только одно объявление supabase
+  let supabase = null;
 
-    let supabase = null;
+  const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
 
-    window.addEventListener('load', () => {
-      console.log("Страница загружена");
-
-      if (typeof window.supabase === 'undefined') {
-        console.error("Supabase библиотека не загрузилась");
-        showMessage('auth-message', 'Ошибка загрузки Supabase', 'red');
-        return;
-      }
-
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log("Supabase клиент создан");
-
-      // Привязка событий
-      document.getElementById('signup-btn')?.addEventListener('click', signUp);
-      document.getElementById('signin-btn')?.addEventListener('click', signIn);
-      document.getElementById('logout-btn')?.addEventListener('click', logout);
-      document.getElementById('admin-grant-btn')?.addEventListener('click', adminGrantSubscription);
-
-      checkSession();
-    });
-
-    async function checkSession() {
-      if (!supabase) return;
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log("Проверка сессии:", user ? "залогинен" : "не залогинен");
-
-      if (user) {
-        document.getElementById('auth-form').style.display = 'none';
-        document.getElementById('profile-content').style.display = 'block';
-        await loadProfile(user.id);
-      } else {
-        document.getElementById('auth-form').style.display = 'block';
-        document.getElementById('profile-content').style.display = 'none';
-      }
+  window.addEventListener('load', () => {
+    // Проверяем, загрузилась ли библиотека
+    if (typeof window.supabase === 'undefined') {
+      console.error('Supabase библиотека не загрузилась');
+      document.getElementById('auth-message').textContent = 'Ошибка загрузки Supabase';
+      return;
     }
 
-    async function signUp() {
-      if (!supabase) return showMessage('auth-message', 'Supabase не готов', 'red');
-      const email = document.getElementById('email')?.value?.trim();
-      const password = document.getElementById('password')?.value;
-      if (!email || !password) return showMessage('auth-message', 'Введите email и пароль', 'red');
+    // Инициализируем клиент — один раз
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('Supabase готов');
 
-      const { error } = await supabase.auth.signUp({ email, password });
-      showMessage('auth-message', error ? error.message : 'Зарегистрирован! Проверьте почту.', error ? 'red' : 'green');
+    // Привязываем события к кнопкам
+    document.getElementById('signup-btn')?.addEventListener('click', signUp);
+    document.getElementById('signin-btn')?.addEventListener('click', signIn);
+    document.getElementById('logout-btn')?.addEventListener('click', logout);
+    document.getElementById('admin-grant-btn')?.addEventListener('click', adminGrantSubscription);
+
+    checkSession();
+  });
+
+  // ──────────────────────────────────────────────
+  // Остальные функции — копируй свои из старого кода
+  // ──────────────────────────────────────────────
+
+  async function checkSession() {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      document.getElementById('auth-form').style.display = 'none';
+      document.getElementById('profile-content').style.display = 'block';
+      await loadProfile(user.id);
+    } else {
+      document.getElementById('auth-form').style.display = 'block';
+      document.getElementById('profile-content').style.display = 'none';
     }
+  }
 
-    async function signIn() {
-      if (!supabase) return showMessage('auth-message', 'Supabase не готов', 'red');
-      const email = document.getElementById('email')?.value?.trim();
-      const password = document.getElementById('password')?.value;
-      if (!email || !password) return showMessage('auth-message', 'Введите email и пароль', 'red');
+  async function signUp() {
+    if (!supabase) return alert('Supabase не готов');
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const msg = document.getElementById('auth-message');
+    if (!email || !password) return msg.textContent = 'Введите email и пароль';
+    const { error } = await supabase.auth.signUp({ email, password });
+    msg.textContent = error ? error.message : 'Зарегистрирован! Проверьте почту.';
+    msg.style.color = error ? 'red' : 'lime';
+  }
 
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        showMessage('auth-message', error.message, 'red');
-      } else {
-        showMessage('auth-message', 'Вход выполнен!', 'green');
-        setTimeout(checkSession, 800);
-      }
+  async function signIn() {
+    if (!supabase) return alert('Supabase не готов');
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const msg = document.getElementById('auth-message');
+    if (!email || !password) return msg.textContent = 'Введите email и пароль';
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      msg.textContent = error.message;
+      msg.style.color = 'red';
+    } else {
+      msg.textContent = 'Вход выполнен!';
+      msg.style.color = 'lime';
+      setTimeout(checkSession, 800);
     }
+  }
 
-    function showMessage(id, text, color = 'red') {
-      const el = document.getElementById(id);
-      if (el) {
-        el.textContent = text;
-        el.className = `text-center mt-4 text-${color}-400`;
-      } else {
-        console.log("Сообщение:", text);
-      }
-    }
+  async function logout() {
+    if (supabase) await supabase.auth.signOut();
+    location.reload();
+  }
 
-    async function loadProfile(userId) {
-      if (!supabase) return;
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error || !profile) {
-        console.error('Профиль не найден', error);
-        return;
-      }
-
-      document.getElementById('profile-username').textContent = profile.username || 'Пользователь';
-
-      const subEnd = profile.subscription_end;
-      if (subEnd) {
-        document.getElementById('profile-end').textContent = subEnd;
-        document.getElementById('profile-status').textContent = 'Активна';
-        try {
-          const [day, month, year] = subEnd.split('.').map(Number);
-          const endDate = new Date(year, month - 1, day);
-          const daysLeft = Math.max(0, Math.ceil((endDate - new Date()) / 86400000));
-          document.getElementById('days-left').textContent = daysLeft + ' дней';
-        } catch {
-          document.getElementById('days-left').textContent = '—';
-        }
-      } else {
-        document.getElementById('profile-end').textContent = 'Нет подписки';
-        document.getElementById('profile-status').textContent = 'Не активна';
-      }
-
-      const used = profile.used_devices || 0;
-      const max = profile.max_devices || 3;
-      document.getElementById('devices-text').textContent = `${used} / ${max}`;
-      document.getElementById('devices-bar').style.width = `${(used / max) * 100}%`;
-
-      if (profile.happ_link) {
-        document.getElementById('happ-link').href = profile.happ_link;
-        document.getElementById('happ-section').style.display = 'block';
-      }
-
-      if (profile.is_admin === true) {
-        document.getElementById('admin-panel').classList.remove('hidden');
-      }
-    }
-
-    async function adminGrantSubscription() {
-      if (!supabase) return showMessage('admin-message', 'Supabase не готов', 'red');
-
-      const identifier = document.getElementById('admin-user-identifier')?.value?.trim();
-      const dateStr = document.getElementById('admin-sub-end')?.value?.trim();
-      const msg = document.getElementById('admin-message');
-      if (!msg) return;
-
-      if (!identifier || !dateStr || !/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(dateStr)) {
-        msg.textContent = 'Введите email/ID и дату в формате ДД.ММ.ГГГГ';
-        return;
-      }
-
-      msg.textContent = 'Обновление...';
-
-      let targetId = identifier;
-
-      // Если ввели email — пытаемся найти ID
-      if (identifier.includes('@')) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', identifier)
-          .single();
-
-        if (error || !data) {
-          msg.textContent = 'Пользователь не найден по email';
-          return;
-        }
-        targetId = data.id;
-      }
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({ subscription_end: dateStr })
-        .eq('id', targetId);
-
-      if (error) {
-        msg.textContent = 'Ошибка: ' + error.message;
-        console.error(error);
-      } else {
-        msg.textContent = 'Подписка выдана!';
-        msg.className = 'text-green-400';
-      }
-    }
-
-    async function logout() {
-      if (supabase) await supabase.auth.signOut();
-      location.reload();
-    }
-  </script>
+  // ... сюда вставь свои функции loadProfile, adminGrantSubscription, adminFindUser и т.д. ...
+  // Убедись, что в них тоже нет повторного let/const supabase
+</script>
 </body>
 </html>
