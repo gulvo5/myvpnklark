@@ -1,19 +1,15 @@
-<!-- 
-  ЭТОТ БЛОК — ШАПКА СТРАНИЦЫ
-  Здесь подключаем стили, шрифты, иконки и т.д.
-  Если хочешь поменять цвета или добавить Tailwind — редактируй <head>
--->
+<!DOCTYPE html>
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>KLARK VPN — Подписка Happ</title>
-  
-  <!-- Подключаем Tailwind CSS (если используешь) -->
+ 
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <!-- Твои кастомные стили (неон, анимации и т.д.) -->
+ 
+  <!-- Кастомные стили -->
   <style>
     .neon-text {
       text-shadow: 0 0 10px #40c4ff, 0 0 20px #1b98e0, 0 0 30px #0d47a1;
@@ -23,14 +19,14 @@
     }
     @keyframes pulse {
       0%, 100% { transform: scale(1); opacity: 1; }
-      50%      { transform: scale(1.4); opacity: 0.7; }
+      50% { transform: scale(1.4); opacity: 0.7; }
     }
     .fade-in-up {
       animation: fadeInUp 0.8s ease-out forwards;
     }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .btn-glow {
       box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
@@ -38,9 +34,35 @@
     .btn-glow:hover {
       box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
     }
+    .neon-k {
+      filter: drop-shadow(0 0 8px #00f0ff) drop-shadow(0 0 20px #00f0ff);
+    }
+    .glitch {
+      animation: glitch 2s infinite;
+    }
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(2px, -2px); }
+      60% { transform: translate(-1px, 1px); }
+      80% { transform: translate(1px, -1px); }
+      100% { transform: translate(0); }
+    }
+    .animate-flicker {
+      animation: flicker 3s infinite alternate;
+    }
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+      20%, 24%, 55% { opacity: 0.4; }
+    }
+    .animate-pulse-slow { animation: pulse 6s infinite ease-in-out; }
+    .animate-pulse-fast { animation: pulse 1.8s infinite ease-in-out; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.15); }
+    }
   </style>
 </head>
-
 <body class="bg-gradient-to-b from-blue-950 to-black text-white min-h-screen font-sans">
 
   <!-- ЛОГО + НАЗВАНИЕ -->
@@ -48,150 +70,166 @@
     KLARK VPN
   </div>
 
-  <!-- SVG-ЛОГО (щит с буквой K) -->
-  <!-- Здесь находится картинка-логотип. Если хочешь заменить → меняй весь блок <div class="logo-shield">...</div> -->
-<!-- Новое лого: киберпанк-неон щит + импульс -->
-<div class="flex justify-center mt-10 mb-8 relative">
-  <div class="logo-shield relative">
-    <!-- Фоновая пульсация -->
-    <div class="absolute inset-0 rounded-full bg-cyan-500/20 blur-3xl animate-pulse-slow"></div>
-    
-    <svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Внешний контур щита (неон-глоу) -->
-      <path d="M110 20 C50 20 20 70 20 110 C20 150 50 200 110 200 C170 200 200 150 200 110 C200 70 170 20 110 20 Z" 
-            fill="none" stroke="#00f0ff" stroke-width="12" stroke-opacity="0.6" filter="url(#glow)"/>
-      
-      <!-- Основной щит -->
-      <path d="M110 30 C60 30 30 75 30 110 C30 145 60 190 110 190 C160 190 190 145 190 110 C190 75 160 30 110 30 Z" 
-            fill="#0a1f44" stroke="#40c4ff" stroke-width="8"/>
-      
-      <!-- Внутренний градиент -->
-      <path d="M110 45 C70 45 45 80 45 110 C45 140 70 175 110 175 C150 175 175 140 175 110 C175 80 150 45 110 45 Z" 
-            fill="url(#cyberGrad)"/>
-      
-      <!-- Буква K с неоном и лёгким glitch-эффектом -->
-      <text x="110" y="148" font-family="Arial Black, 'Impact', sans-serif" font-size="140" font-weight="900" 
-            fill="none" stroke="#e0f7ff" stroke-width="3" stroke-opacity="0.9" text-anchor="middle" 
-            class="neon-k glitch" letter-spacing="-8">K</text>
-      
-      <text x="110" y="148" font-family="Arial Black, 'Impact', sans-serif" font-size="140" font-weight="900" 
-            fill="#00f0ff" text-anchor="middle" dominant-baseline="middle" letter-spacing="-8" 
-            class="neon-text animate-flicker">K</text>
-      
-      <!-- Маленькая молния/импульс сбоку -->
-      <path d="M155 90 L175 110 L155 130 L170 110 Z" fill="#ff00aa" opacity="0.7" class="animate-pulse-fast"/>
-      
-      <defs>
-        <linearGradient id="cyberGrad" x1="45" y1="45" x2="175" y2="175">
-          <stop offset="0%" stop-color="#40c4ff"/>
-          <stop offset="50%" stop-color="#00f0ff"/>
-          <stop offset="100%" stop-color="#7c3aed"/>
-        </linearGradient>
-        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
-          <feMerge>
-            <feMergeNode in="coloredBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-      </defs>
-    </svg>
+  <!-- SVG-ЛОГО -->
+  <div class="flex justify-center mt-10 mb-8 relative">
+    <div class="logo-shield relative">
+      <div class="absolute inset-0 rounded-full bg-cyan-500/20 blur-3xl animate-pulse-slow"></div>
+     
+      <svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M110 20 C50 20 20 70 20 110 C20 150 50 200 110 200 C170 200 200 150 200 110 C200 70 170 20 110 20 Z"
+              fill="none" stroke="#00f0ff" stroke-width="12" stroke-opacity="0.6" filter="url(#glow)"/>
+        <path d="M110 30 C60 30 30 75 30 110 C30 145 60 190 110 190 C160 190 190 145 190 110 C190 75 160 30 110 30 Z"
+              fill="#0a1f44" stroke="#40c4ff" stroke-width="8"/>
+        <path d="M110 45 C70 45 45 80 45 110 C45 140 70 175 110 175 C150 175 175 140 175 110 C175 80 150 45 110 45 Z"
+              fill="url(#cyberGrad)"/>
+        <text x="110" y="148" font-family="Arial Black, 'Impact', sans-serif" font-size="140" font-weight="900"
+              fill="none" stroke="#e0f7ff" stroke-width="3" stroke-opacity="0.9" text-anchor="middle"
+              class="neon-k glitch" letter-spacing="-8">K</text>
+        <text x="110" y="148" font-family="Arial Black, 'Impact', sans-serif" font-size="140" font-weight="900"
+              fill="#00f0ff" text-anchor="middle" dominant-baseline="middle" letter-spacing="-8"
+              class="neon-text animate-flicker">K</text>
+        <path d="M155 90 L175 110 L155 130 L170 110 Z" fill="#ff00aa" opacity="0.7" class="animate-pulse-fast"/>
+       
+        <defs>
+          <linearGradient id="cyberGrad" x1="45" y1="45" x2="175" y2="175">
+            <stop offset="0%" stop-color="#40c4ff"/>
+            <stop offset="50%" stop-color="#00f0ff"/>
+            <stop offset="100%" stop-color="#7c3aed"/>
+          </linearGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+      </svg>
+    </div>
   </div>
-</div>
 
-<style>
-  .neon-k {
-    filter: drop-shadow(0 0 8px #00f0ff) drop-shadow(0 0 20px #00f0ff);
-  }
-  .glitch {
-    animation: glitch 2s infinite;
-  }
-  @keyframes glitch {
-    0% { transform: translate(0); }
-    20% { transform: translate(-2px, 2px); }
-    40% { transform: translate(2px, -2px); }
-    60% { transform: translate(-1px, 1px); }
-    80% { transform: translate(1px, -1px); }
-    100% { transform: translate(0); }
-  }
-  .animate-flicker {
-    animation: flicker 3s infinite alternate;
-  }
-  @keyframes flicker {
-    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
-    20%, 24%, 55% { opacity: 0.4; }
-  }
-  .animate-pulse-slow { animation: pulse 6s infinite ease-in-out; }
-  .animate-pulse-fast  { animation: pulse 1.8s infinite ease-in-out; }
-  @keyframes pulse {
-    0%, 100% { opacity: 0.2; transform: scale(1); }
-    50%      { opacity: 0.6; transform: scale(1.15); }
-  }
-</style>
-  
-  <!-- Большой заголовок -->
+  <!-- Заголовок -->
   <h1 class="text-5xl font-extrabold text-center mb-1 tracking-tighter neon-text fade-in-up" style="animation-delay: 0.2s;">
     KlarkVpn
   </h1>
 
-  <!-- Подзаголовок -->
   <p class="text-center text-blue-300 text-xl mb-10 fade-in-up" style="animation-delay: 0.4s;">
     Подписка для Happ
   </p>
 
-  <!-- БЛОК СТАТУС ПОДПИСКИ -->
-  <!-- Здесь показывается информация о подписке. Меняй даты, количество устройств и статус здесь -->
-  <div class="mx-6 mb-10 bg-blue-950/50 rounded-2xl p-6 border border-blue-500/40 fade-in-up" style="animation-delay: 0.6s;">
+  <!-- ──────────────────────────────────────────────── -->
+  <!--      БЛОКИ СТАТУСА ПОДПИСКИ (ДИНАМИЧЕСКИЕ)       -->
+  <!-- ──────────────────────────────────────────────── -->
+
+  <!-- Блок показывается ТОЛЬКО при активной подписке -->
+  <div id="subscription-block" class="hidden mx-6 mb-10 bg-blue-950/50 rounded-2xl p-6 border border-blue-500/40 fade-in-up" style="animation-delay: 0.6s;">
     <div class="flex justify-between items-center mb-5">
       <div class="flex items-center gap-3">
         <span class="pulse-dot inline-block w-4 h-4 bg-cyan-400 rounded-full shadow-lg shadow-cyan-500/60"></span>
         <span class="text-lg font-semibold">KlarkVpn</span>
       </div>
-      <!-- ← Дата окончания подписки — меняй здесь -->
-      <div class="text-cyan-300 font-medium">до 9 июля 2026 г.</div>
+      <div id="expires-date" class="text-cyan-300 font-medium">до 9 июля 2026 г.</div>
     </div>
     <div class="flex justify-between text-sm opacity-90">
       <div class="flex items-center gap-2">
         <span>Устройств</span>
-        <!-- ← Кол-во устройств — меняй число -->
-        <span class="font-mono bg-cyan-900/50 px-2 py-1 rounded">• 1</span>
+        <span id="devices-count" class="font-mono bg-cyan-900/50 px-2 py-1 rounded">• 1</span>
       </div>
-      <!-- ← Текст статуса — можно поменять на "Истекает через 3 дня" и т.д. -->
       <div class="text-cyan-400 font-semibold">Подписка активна</div>
     </div>
   </div>
 
-  <!-- КНОПКА ПРОДЛИТЬ ПОДПИСКУ -->
-  <!-- Ссылка на тг-чат для оплаты/продления -->
-  <div class="mx-6 mb-10 text-center">
+  <!-- Блок для НЕавторизованных или без активной подписки -->
+  <div id="no-subscription-block" class="hidden mx-6 mb-10 bg-red-950/30 rounded-2xl p-6 border border-red-500/30 text-center fade-in-up" style="animation-delay: 0.6s;">
+    <p class="text-xl font-semibold text-red-300 mb-3">Подписка не активна</p>
+    <p class="text-blue-200 mb-4">Оформите подписку, чтобы пользоваться KLARK VPN без ограничений</p>
     <a href="https://t.me/CKOPO4" target="_blank" 
+       class="inline-block bg-red-700 hover:bg-red-600 px-8 py-3 rounded-xl font-bold text-lg shadow-lg transition-all">
+       Оформить подписку
+    </a>
+  </div>
+
+  <!-- Кнопка продления -->
+  <div class="mx-6 mb-10 text-center">
+    <a href="https://t.me/CKOPO4" target="_blank"
        class="inline-flex btn-glow items-center justify-center gap-3 w-full bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 py-5 rounded-2xl font-bold text-xl shadow-xl transition-all duration-400">
-      💳 Продлить подписку 
+      💳 Продлить подписку
       <span class="bg-white/15 px-4 py-1 rounded-xl text-base">от 50 ₽</span>
     </a>
     <p class="text-sm mt-3 opacity-80">Нажми → чат с @CKOPO4</p>
   </div>
 
-<!-- Нижние кнопки -->
-<div class="grid grid-cols-2 gap-4 px-6 pb-10">
-  <!-- Было: просто button, теперь делаем ссылку на profile.html -->
-  <a href="profile.html" class="btn-glow bg-blue-900/60 hover:bg-blue-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2 transition-all">
-    👤 Профиль
-  </a>
+  <!-- Нижние кнопки -->
+  <div class="grid grid-cols-2 gap-4 px-6 pb-10">
+    <a href="profile.html" class="btn-glow bg-blue-900/60 hover:bg-blue-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2 transition-all">
+      👤 Профиль
+    </a>
+    <a href="https://t.me/CKOPO4" target="_blank" class="btn-glow bg-blue-900/60 hover:bg-blue-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2 transition-all">
+      💬 Помощь
+    </a>
+  </div>
 
-  <a href="https://t.me/CKOPO4" target="_blank" class="btn-glow bg-blue-900/60 hover:bg-blue-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2 transition-all">
-    💬 Помощь
-  </a>
-</div>
-
+  <!-- Supabase + логика проверки подписки -->
   <script>
-  // Замени на свои реальные значения из Supabase дашборда!
-  const SUPABASE_URL = 'https://твой-project-ref.supabase.co';  // например https://abcde123.supabase.co
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';  // твой anon public key
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // ОБЯЗАТЕЛЬНО замени на СВОИ значения из Supabase
+    const SUPABASE_URL    = 'https://твой-project-ref.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.твой_anon_key_сюда';
 
-  // Создаём клиент Supabase (теперь supabase доступен везде)
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function loadSubscriptionStatus() {
+      const subBlock   = document.getElementById('subscription-block');
+      const noSubBlock = document.getElementById('no-subscription-block');
+
+      try {
+        // 1. Проверяем авторизацию
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+          noSubBlock.classList.remove('hidden');
+          return;
+        }
+
+        // 2. Запрос к таблице подписок — ПОДСТАВЬ СВОИ НАЗВАНИЯ ТАБЛИЦЫ И ПОЛЕЙ
+        const { data, error } = await supabase
+          .from('subscriptions')                      // ← поменяй если таблица называется иначе (profiles, user_subscriptions и т.д.)
+          .select('expires_at, max_devices, status')  // ← подставь точные имена колонок
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (!data || !data.expires_at) {
+          noSubBlock.classList.remove('hidden');
+          return;
+        }
+
+        const expires = new Date(data.expires_at);
+        const now = new Date();
+
+        if (expires > now && (data.status === 'active' || !data.status || data.status === null)) {
+          subBlock.classList.remove('hidden');
+
+          // Красивая дата на русском
+          document.getElementById('expires-date').textContent = 
+            `до ${expires.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} г.`;
+
+          document.getElementById('devices-count').textContent = 
+            `• ${data.max_devices || 1}`;
+        } else {
+          noSubBlock.classList.remove('hidden');
+        }
+
+      } catch (err) {
+        console.error('Ошибка при проверке подписки:', err);
+        noSubBlock.classList.remove('hidden');
+      }
+    }
+
+    // Запуск при загрузке страницы
+    document.addEventListener('DOMContentLoaded', loadSubscriptionStatus);
+  </script>
 
 </body>
 </html>
