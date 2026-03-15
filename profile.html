@@ -122,8 +122,35 @@ async function signIn() {
 }
 </script>
 
-    <!-- КРАСИВЫЙ ПРОФИЛЬ (показывается после входа) -->
-    <div id="profile-screen" class="hidden fade-in-up">
+<script>
+async function loadProfile() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    // не вошёл → показываем форму
+    document.getElementById('auth-form').style.display = 'block';
+    document.getElementById('profile-content').style.display = 'none';
+    return;
+  }
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (error || !profile) {
+    alert('Профиль не найден');
+    return;
+  }
+
+  // Заполняем поля (добавь id в html-элементы)
+  document.getElementById('profile-username').textContent = profile.username || user.email;
+  document.getElementById('profile-end').textContent     = profile.subscription_end || 'Не установлено';
+  document.getElementById('devices-text').textContent    = `${profile.used_devices} / ${profile.max_devices}`;
+  document.getElementById('happ-link').href              = profile.happ_link || '#';
+  // ... остальные поля
+}
+</script>
 
       <!-- Аватар + имя -->
       <div class="flex flex-col items-center mb-8">
