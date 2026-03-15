@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Профиль — KLARK VPN</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase — стабильный CDN -->
+  <!-- Supabase CDN (umd версия) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Impact:wght@900&family=Inter:wght@400;600;700&display=swap');
     body {
       background: linear-gradient(180deg, #0a1428 0%, #000000 100%);
+      font-family: 'Inter', sans-serif;
     }
     .glass {
       background: rgba(15, 23, 42, 0.75);
@@ -48,7 +49,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen text-white font-sans">
+<body class="min-h-screen text-white">
 
   <!-- Шапка -->
   <div class="flex items-center justify-between px-6 py-6">
@@ -60,23 +61,21 @@
 
   <div class="max-w-md mx-auto px-5 pb-12">
 
-    <!-- Форма входа / регистрации -->
+    <!-- Форма авторизации -->
     <div id="auth-form" class="max-w-md mx-auto p-8 glass rounded-3xl fade-in-up">
       <h2 class="text-3xl font-bold neon-text text-center mb-6">Вход / Регистрация</h2>
-      <input id="email" type="email" placeholder="Email" class="w-full p-4 mb-4 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400">
-      <input id="password" type="password" placeholder="Пароль" class="w-full p-4 mb-4 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400">
-
+      <input id="email" type="email" placeholder="Email" class="w-full p-4 mb-4 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/50">
+      <input id="password" type="password" placeholder="Пароль" class="w-full p-4 mb-4 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/50">
       <button id="signup-btn" class="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-xl font-bold mb-3 hover:opacity-90 transition">
         Зарегистрироваться
       </button>
       <button id="signin-btn" class="w-full py-4 bg-gradient-to-r from-green-600 to-teal-600 rounded-xl font-bold hover:opacity-90 transition">
         Войти
       </button>
-
       <p id="auth-message" class="text-center mt-4 text-red-400 min-h-[1.5rem]"></p>
     </div>
 
-    <!-- Профиль -->
+    <!-- Профиль (скрыт по умолчанию) -->
     <div id="profile-content" style="display: none;">
       <!-- Аватар + имя -->
       <div class="flex flex-col items-center mb-8">
@@ -92,8 +91,8 @@
         <p class="text-cyan-300 text-sm">Premium пользователь</p>
       </div>
 
-      <!-- Статус подписки -->
       <div class="glass rounded-3xl p-8 mb-8">
+        <!-- Статус подписки -->
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-3">
             <span class="pulse-dot w-5 h-5 bg-emerald-400 rounded-full"></span>
@@ -112,14 +111,14 @@
           </div>
         </div>
 
-        <!-- HAPP -->
+        <!-- HAPP ссылка -->
         <div id="happ-section" style="display: none;">
           <a id="happ-link" href="#" target="_blank" class="glow-button block text-center py-6 rounded-3xl bg-gradient-to-r from-emerald-500 to-teal-500 text-2xl font-bold tracking-wider hover:opacity-90 transition">
             📲 МОЯ ЛИЧНАЯ ССЫЛКА HAPP
           </a>
         </div>
 
-        <!-- Мини-карточки -->
+        <!-- Статистика карточки -->
         <div class="grid grid-cols-2 gap-4 mb-8">
           <div class="glass rounded-3xl p-6 stat-card text-center">
             <div class="text-5xl mb-2">🔒</div>
@@ -133,30 +132,24 @@
           </div>
         </div>
 
-        <!-- АДМИН-ПАНЕЛЬ -->
+        <!-- Админ-панель (если нужно) -->
         <div id="admin-panel" class="glass rounded-3xl p-6 hidden">
           <h3 class="text-xl font-bold neon-text mb-4">Админ: Выдать подписку</h3>
-
           <div class="mb-4">
             <label class="block text-blue-300 mb-2">Email или User ID</label>
-            <input id="admin-user-identifier" type="text" placeholder="user@example.com или uuid"
-                   class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400">
+            <input id="admin-user-identifier" type="text" placeholder="user@example.com или uuid" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400">
           </div>
-
           <div class="mb-4">
             <label class="block text-blue-300 mb-2">Дата окончания (ДД.ММ.ГГГГ)</label>
-            <input id="admin-sub-end" type="text" placeholder="31.12.2026"
-                   class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400">
+            <input id="admin-sub-end" type="text" placeholder="31.12.2026" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400">
           </div>
-
           <button id="admin-grant-btn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold hover:opacity-90 transition">
             Выдать / Обновить подписку
           </button>
-
           <p id="admin-message" class="text-center mt-4 text-yellow-300 min-h-[1.5rem]"></p>
         </div>
 
-        <!-- Выход -->
+        <!-- Кнопка выхода -->
         <button id="logout-btn" class="mt-8 w-full py-5 text-red-400 font-medium text-lg border border-red-400/30 rounded-3xl hover:bg-red-400/10 transition-all">
           Выйти из профиля
         </button>
@@ -164,87 +157,136 @@
     </div>
   </div>
 
-  <!-- Скрипт -->
-<script>
-  // Только одно объявление supabase
-  let supabase = null;
+  <!-- ────────────────────────────────────────────── -->
+  <!--                JavaScript                        -->
+  <!-- ────────────────────────────────────────────── -->
 
-  const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
+  <script>
+    // Глобальный клиент Supabase — объявляем ОДИН раз
+    let supabaseClient = null;
 
-  window.addEventListener('load', () => {
-    // Проверяем, загрузилась ли библиотека
-    if (typeof window.supabase === 'undefined') {
-      console.error('Supabase библиотека не загрузилась');
-      document.getElementById('auth-message').textContent = 'Ошибка загрузки Supabase';
-      return;
+    const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
+
+    // Запускаем после загрузки страницы и скрипта Supabase
+    window.addEventListener('load', initializeApp);
+
+    async function initializeApp() {
+      const msgEl = document.getElementById('auth-message');
+
+      // Проверка загрузки библиотеки
+      if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+        console.error('Supabase не загрузился');
+        if (msgEl) msgEl.textContent = 'Ошибка: Supabase не доступен';
+        return;
+      }
+
+      // Создаём клиент только один раз
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('Supabase инициализирован');
+
+      // Привязываем обработчики событий
+      document.getElementById('signup-btn')?.addEventListener('click', signUp);
+      document.getElementById('signin-btn')?.addEventListener('click', signIn);
+      document.getElementById('logout-btn')?.addEventListener('click', logout);
+      document.getElementById('admin-grant-btn')?.addEventListener('click', adminGrantSubscription);
+
+      // Проверяем сессию
+      await checkSession();
     }
 
-    // Инициализируем клиент — один раз
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('Supabase готов');
+    // ─── Основные функции ───────────────────────────────────────
 
-    // Привязываем события к кнопкам
-    document.getElementById('signup-btn')?.addEventListener('click', signUp);
-    document.getElementById('signin-btn')?.addEventListener('click', signIn);
-    document.getElementById('logout-btn')?.addEventListener('click', logout);
-    document.getElementById('admin-grant-btn')?.addEventListener('click', adminGrantSubscription);
+    async function checkSession() {
+      if (!supabaseClient) return;
 
-    checkSession();
-  });
+      try {
+        const { data: { user }, error } = await supabaseClient.auth.getUser();
+        if (error) throw error;
 
-  // ──────────────────────────────────────────────
-  // Остальные функции — копируй свои из старого кода
-  // ──────────────────────────────────────────────
+        const authForm = document.getElementById('auth-form');
+        const profile = document.getElementById('profile-content');
 
-  async function checkSession() {
-    if (!supabase) return;
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      document.getElementById('auth-form').style.display = 'none';
-      document.getElementById('profile-content').style.display = 'block';
-      await loadProfile(user.id);
-    } else {
-      document.getElementById('auth-form').style.display = 'block';
-      document.getElementById('profile-content').style.display = 'none';
+        if (user) {
+          authForm.style.display = 'none';
+          profile.style.display = 'block';
+          await loadProfile(user.id);           // ← здесь твоя функция
+        } else {
+          authForm.style.display = 'block';
+          profile.style.display = 'none';
+        }
+      } catch (err) {
+        console.error('checkSession error:', err);
+      }
     }
-  }
 
-  async function signUp() {
-    if (!supabase) return alert('Supabase не готов');
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const msg = document.getElementById('auth-message');
-    if (!email || !password) return msg.textContent = 'Введите email и пароль';
-    const { error } = await supabase.auth.signUp({ email, password });
-    msg.textContent = error ? error.message : 'Зарегистрирован! Проверьте почту.';
-    msg.style.color = error ? 'red' : 'lime';
-  }
+    async function signUp() {
+      const email = document.getElementById('email')?.value?.trim();
+      const password = document.getElementById('password')?.value;
+      const msg = document.getElementById('auth-message');
 
-  async function signIn() {
-    if (!supabase) return alert('Supabase не готов');
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const msg = document.getElementById('auth-message');
-    if (!email || !password) return msg.textContent = 'Введите email и пароль';
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      msg.textContent = error.message;
-      msg.style.color = 'red';
-    } else {
-      msg.textContent = 'Вход выполнен!';
-      msg.style.color = 'lime';
-      setTimeout(checkSession, 800);
+      if (!email || !password) {
+        msg.textContent = 'Введите email и пароль';
+        return;
+      }
+
+      try {
+        const { error } = await supabaseClient.auth.signUp({ email, password });
+        msg.textContent = error ? error.message : 'Зарегистрирован! Проверьте почту.';
+        msg.style.color = error ? 'red' : 'lime';
+      } catch (err) {
+        msg.textContent = 'Ошибка регистрации: ' + err.message;
+        msg.style.color = 'red';
+      }
     }
-  }
 
-  async function logout() {
-    if (supabase) await supabase.auth.signOut();
-    location.reload();
-  }
+    async function signIn() {
+      const email = document.getElementById('email')?.value?.trim();
+      const password = document.getElementById('password')?.value;
+      const msg = document.getElementById('auth-message');
 
-  // ... сюда вставь свои функции loadProfile, adminGrantSubscription, adminFindUser и т.д. ...
-  // Убедись, что в них тоже нет повторного let/const supabase
-</script>
+      if (!email || !password) {
+        msg.textContent = 'Введите email и пароль';
+        return;
+      }
+
+      try {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        msg.textContent = 'Вход выполнен!';
+        msg.style.color = 'lime';
+        setTimeout(checkSession, 700);
+      } catch (err) {
+        msg.textContent = err.message || 'Ошибка входа';
+        msg.style.color = 'red';
+      }
+    }
+
+    async function logout() {
+      if (supabaseClient) {
+        await supabaseClient.auth.signOut();
+      }
+      location.reload();
+    }
+
+    // ─── Заглушки для твоих функций (добавь свою логику) ───────
+
+    async function loadProfile(userId) {
+      document.getElementById('profile-username').textContent = 'Пользователь';
+      document.getElementById('profile-end').textContent = 'Активна';
+      document.getElementById('profile-status').textContent = 'Активен';
+      document.getElementById('days-left').textContent = '∞';
+      // Здесь подгружай реальные данные из базы
+      console.log('Загрузка профиля для user:', userId);
+    }
+
+    async function adminGrantSubscription() {
+      alert('Функция выдачи подписки — добавь свою реализацию');
+      // Здесь будет вызов supabaseClient.from('subscriptions').upsert(...)
+    }
+
+    // Если будут другие функции — добавляй сюда, используй supabaseClient
+  </script>
 </body>
 </html>
