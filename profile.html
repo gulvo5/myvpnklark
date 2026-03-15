@@ -263,6 +263,30 @@
       }
     }
 
+    async function logout() {
+  if (!supabaseClient) {
+    console.warn("supabaseClient не инициализирован");
+    location.reload();
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) {
+      console.error("Ошибка выхода:", error.message);
+      // можно показать сообщение пользователю
+      document.getElementById('auth-message').textContent = "Ошибка выхода: " + error.message;
+      return;
+    }
+    console.log("Выход выполнен успешно");
+  } catch (err) {
+    console.error("Критическая ошибка при signOut:", err);
+  }
+
+  // В любом случае перезагружаем страницу или перенаправляем
+  location.reload();  // или window.location.href = "index.html";
+}
+
 async function loadProfile(userId) {
   console.log("[loadProfile] Запуск для пользователя:", userId);
 
