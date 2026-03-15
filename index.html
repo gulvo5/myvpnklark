@@ -48,25 +48,85 @@
 
   <!-- SVG-ЛОГО (щит с буквой K) -->
   <!-- Здесь находится картинка-логотип. Если хочешь заменить → меняй весь блок <div class="logo-shield">...</div> -->
-  <div class="flex justify-center mt-10 mb-8">
-    <div class="logo-shield">
-      <svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Щит (фон) -->
-        <path d="M96 16 C40 16 16 56 16 96 C16 136 40 176 96 176 C152 176 176 136 176 96 C176 56 152 16 96 16 Z M96 32 C140 32 160 64 160 96 C160 128 140 160 96 160 C52 160 32 128 32 96 C32 64 52 32 96 32 Z" fill="#1b98e0" stroke="#0d47a1" stroke-width="8"/>
-        <!-- Градиент внутри щита -->
-        <path d="M96 40 C62 40 40 68 40 96 C40 124 62 152 96 152 C130 152 152 124 152 96 C152 68 130 40 96 40 Z" fill="url(#blueGrad)"/>
-        <defs>
-          <linearGradient id="blueGrad" x1="40" y1="40" x2="152" y2="152">
-            <stop offset="0%" stop-color="#40c4ff"/>
-            <stop offset="100%" stop-color="#1b98e0"/>
-          </linearGradient>
-        </defs>
-        <!-- Буква K внутри щита -->
-        <text x="96" y="135" font-family="Arial Black, sans-serif" font-size="120" font-weight="900" fill="#e3f2fd" text-anchor="middle" dominant-baseline="middle" letter-spacing="-6" class="neon-text">K</text>
-      </svg>
-    </div>
+<!-- Новое лого: киберпанк-неон щит + импульс -->
+<div class="flex justify-center mt-10 mb-8 relative">
+  <div class="logo-shield relative">
+    <!-- Фоновая пульсация -->
+    <div class="absolute inset-0 rounded-full bg-cyan-500/20 blur-3xl animate-pulse-slow"></div>
+    
+    <svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Внешний контур щита (неон-глоу) -->
+      <path d="M110 20 C50 20 20 70 20 110 C20 150 50 200 110 200 C170 200 200 150 200 110 C200 70 170 20 110 20 Z" 
+            fill="none" stroke="#00f0ff" stroke-width="12" stroke-opacity="0.6" filter="url(#glow)"/>
+      
+      <!-- Основной щит -->
+      <path d="M110 30 C60 30 30 75 30 110 C30 145 60 190 110 190 C160 190 190 145 190 110 C190 75 160 30 110 30 Z" 
+            fill="#0a1f44" stroke="#40c4ff" stroke-width="8"/>
+      
+      <!-- Внутренний градиент -->
+      <path d="M110 45 C70 45 45 80 45 110 C45 140 70 175 110 175 C150 175 175 140 175 110 C175 80 150 45 110 45 Z" 
+            fill="url(#cyberGrad)"/>
+      
+      <!-- Буква K с неоном и лёгким glitch-эффектом -->
+      <text x="110" y="148" font-family="Arial Black, 'Impact', sans-serif" font-size="140" font-weight="900" 
+            fill="none" stroke="#e0f7ff" stroke-width="3" stroke-opacity="0.9" text-anchor="middle" 
+            class="neon-k glitch" letter-spacing="-8">K</text>
+      
+      <text x="110" y="148" font-family="Arial Black, 'Impact', sans-serif" font-size="140" font-weight="900" 
+            fill="#00f0ff" text-anchor="middle" dominant-baseline="middle" letter-spacing="-8" 
+            class="neon-text animate-flicker">K</text>
+      
+      <!-- Маленькая молния/импульс сбоку -->
+      <path d="M155 90 L175 110 L155 130 L170 110 Z" fill="#ff00aa" opacity="0.7" class="animate-pulse-fast"/>
+      
+      <defs>
+        <linearGradient id="cyberGrad" x1="45" y1="45" x2="175" y2="175">
+          <stop offset="0%" stop-color="#40c4ff"/>
+          <stop offset="50%" stop-color="#00f0ff"/>
+          <stop offset="100%" stop-color="#7c3aed"/>
+        </linearGradient>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+    </svg>
   </div>
+</div>
 
+<style>
+  .neon-k {
+    filter: drop-shadow(0 0 8px #00f0ff) drop-shadow(0 0 20px #00f0ff);
+  }
+  .glitch {
+    animation: glitch 2s infinite;
+  }
+  @keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(2px, -2px); }
+    60% { transform: translate(-1px, 1px); }
+    80% { transform: translate(1px, -1px); }
+    100% { transform: translate(0); }
+  }
+  .animate-flicker {
+    animation: flicker 3s infinite alternate;
+  }
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+    20%, 24%, 55% { opacity: 0.4; }
+  }
+  .animate-pulse-slow { animation: pulse 6s infinite ease-in-out; }
+  .animate-pulse-fast  { animation: pulse 1.8s infinite ease-in-out; }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50%      { opacity: 0.6; transform: scale(1.15); }
+  }
+</style>
+  
   <!-- Большой заголовок -->
   <h1 class="text-5xl font-extrabold text-center mb-1 tracking-tighter neon-text fade-in-up" style="animation-delay: 0.2s;">
     KlarkVpn
