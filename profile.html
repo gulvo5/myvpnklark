@@ -249,5 +249,15 @@
       }
     };
   </script>
+
+<script>
+  // Замени на свои реальные значения из Supabase дашборда!
+  const SUPABASE_URL = 'https://твой-project-ref.supabase.co';  // например https://abcde123.supabase.co
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';  // твой anon public key
+
+  // Создаём клиент Supabase (теперь supabase доступен везде)
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
+  
 </body>
 </html>
