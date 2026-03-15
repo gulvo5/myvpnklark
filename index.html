@@ -35,16 +35,30 @@
 
   <div class="w-full max-w-md card flex-1 rounded-b-3xl shadow-2xl overflow-hidden">
 
-    <!-- Логотип (облако + щит + молния) -->
-    <div class="flex justify-center mt-10 mb-6">
-      <div class="relative w-44 h-44 logo-cloud">
-        <svg width="176" height="176" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Облако -->
-          <path d="M35 120 Q25 80 60 70 Q80 45 120 60 Q150 50 170 85 Q185 115 160 135 Q135 160 100 155 Q65 170 35 145 Z" fill="#7c3aed" opacity="0.9"/>
-          <!-- Щит -->
-          <path d="M90 85 L77 102 L77 132 L123 132 L123 102 Z" fill="#e0e7ff" stroke="#5b21b6" stroke-width="14" stroke-linejoin="round"/>
-          <!-- Молния -->
-          <path d="M100 92 L87 119 L110 119 L97 142 Z" fill="#c4b5fd"/>
+<!-- Новый логотип: буква K в щите -->
+    <div class="flex justify-center mt-12 mb-8">
+      <div class="relative w-48 h-48 logo-shield">
+        <svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Щит (основная форма) -->
+          <path d="M96 16 C40 16 16 56 16 96 C16 136 40 176 96 176 C152 176 176 136 176 96 C176 56 152 16 96 16 Z 
+                   M96 32 C140 32 160 64 160 96 C160 128 140 160 96 160 C52 160 32 128 32 96 C32 64 52 32 96 32 Z" 
+                fill="#7c3aed" stroke="#5b21b6" stroke-width="8"/>
+          
+          <!-- Внутренний градиентный щит -->
+          <path d="M96 40 C62 40 40 68 40 96 C40 124 62 152 96 152 C130 152 152 124 152 96 C152 68 130 40 96 40 Z" 
+                fill="url(#grad)"/>
+          <defs>
+            <linearGradient id="grad" x1="40" y1="40" x2="152" y2="152" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#c4b5fd"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Большая буква K (жирная, современная) -->
+          <text x="96" y="135" font-family="Arial Black, sans-serif" font-size="110" font-weight="900" 
+                fill="#e0e7ff" text-anchor="middle" dominant-baseline="middle" letter-spacing="-4">
+            K
+          </text>
         </svg>
       </div>
     </div>
