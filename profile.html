@@ -347,6 +347,68 @@ async function loadProfile(userId) {
     usernameEl.textContent = "Ошибка: " + (err.message || "?");
   }
 }
+
+    async function adminGrantSubscription() {
+  const identifierInput = document.getElementById('admin-user-identifier');
+  const endDateInput    = document.getElementById('admin-sub-end');
+  const messageEl       = document.getElementById('admin-message');
+
+  if (!identifierInput || !endDateInput || !messageEl) {
+    console.error("Не найдены поля админ-панели");
+    return;
+  }
+
+  const identifier = identifierInput.value.trim();
+  const endDateStr = endDateInput.value.trim();
+
+  if (!identifier || !endDateStr) {
+    messageEl.textContent = "Заполните email/ID и дату окончания";
+    messageEl.style.color = "red";
+    return;
+  }
+
+  // Преобразуем ДД.ММ.ГГГГ → YYYY-MM-DD
+  let endsAt;
+  try {
+    const [dd, mm, yyyy] = endDateStr.split('.');
+    endsAt = `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+    new Date(endsAt); // проверка валидности
+  } catch {
+    messageEl.textContent = "Неверный формат даты (ДД.ММ.ГГГГ)";
+    messageEl.style.color = "red";
+    return;
+  }
+
+  messageEl.textContent = "Обработка...";
+  messageEl.style.color = "yellow";
+
+  try {
+    // Пример: обновляем/создаём запись в таблице subscriptions
+    // Измени название таблицы и поля под свою структуру базы!
+    const { error } = await supabaseClient
+      .from('subscriptions')                      // ← твоя таблица
+      .upsert({
+        user_id: identifier,                      // или email, если ищешь по email
+        status: 'active',
+        ends_at: endsAt + 'T23:59:59Z',           // конец дня
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+
+    if (error) throw error;
+
+    messageEl.textContent = `Подписка выдана/обновлена до ${endDateStr}`;
+    messageEl.style.color = "lime";
+
+    // опционально: очистить поля после успеха
+    identifierInput.value = '';
+    endDateInput.value = '';
+
+  } catch (err) {
+    console.error("Ошибка выдачи подписки:", err);
+    messageEl.textContent = "Ошибка: " + (err.message || "неизвестная ошибка");
+    messageEl.style.color = "red";
+  }
+} 
   </script>
 </body>
 </html>
