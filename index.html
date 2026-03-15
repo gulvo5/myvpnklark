@@ -1,179 +1,133 @@
-<!DOCTYPE html>
-<html lang="ru">
+<!-- 
+  ЭТОТ БЛОК — ШАПКА СТРАНИЦЫ
+  Здесь подключаем стили, шрифты, иконки и т.д.
+  Если хочешь поменять цвета или добавить Tailwind — редактируй <head>
+-->
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KlarkVpn • Подписка Happ</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KLARK VPN — Подписка Happ</title>
+  
+  <!-- Подключаем Tailwind CSS (если используешь) -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Твои кастомные стили (неон, анимации и т.д.) -->
   <style>
-    body {
-      background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
-      background-size: 200% 200%;
-      animation: gradientShift 15s ease infinite;
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      overflow-x: hidden;
-    }
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .card {
-      background: rgba(27, 38, 59, 0.92);
-      backdrop-filter: blur(24px);
-      border: 1px solid rgba(65, 90, 119, 0.4);
-      box-shadow: 0 0 60px rgba(65, 90, 119, 0.3);
-    }
-    .header { background: #1b98e0; }
-    .logo-shield {
-      filter: drop-shadow(0 0 35px rgba(65, 90, 119, 0.8));
-      transition: transform 0.6s ease, filter 0.6s ease;
-    }
-    .logo-shield:hover {
-      transform: scale(1.08) rotate(3deg);
-      filter: drop-shadow(0 0 60px rgba(100, 150, 255, 0.9)) brightness(1.2);
+    .neon-text {
+      text-shadow: 0 0 10px #40c4ff, 0 0 20px #1b98e0, 0 0 30px #0d47a1;
     }
     .pulse-dot {
-      animation: pulseGlow 2.5s infinite ease-in-out;
+      animation: pulse 2s infinite;
     }
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(100, 255, 218, 0.7); }
-      50% { box-shadow: 0 0 0 15px rgba(100, 255, 218, 0); }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50%      { transform: scale(1.4); opacity: 0.7; }
     }
     .fade-in-up {
-      opacity: 0;
-      transform: translateY(40px);
-      animation: fadeUp 1.2s forwards ease-out;
+      animation: fadeInUp 0.8s ease-out forwards;
     }
-    @keyframes fadeUp {
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     .btn-glow {
-      position: relative;
-      overflow: hidden;
-      transition: all 0.4s ease;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
     }
-    .btn-glow::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(100, 200, 255, 0.4) 0%, transparent 60%);
-      opacity: 0;
-      transition: opacity 0.6s;
-      pointer-events: none;
-    }
-    .btn-glow:hover::before {
-      opacity: 1;
-      animation: ripple 1.5s infinite;
-    }
-    @keyframes ripple {
-      0% { transform: scale(0.5); opacity: 0.8; }
-      100% { transform: scale(2); opacity: 0; }
-    }
-    .neon-text {
-      text-shadow: 0 0 10px #6490ff, 0 0 20px #6490ff, 0 0 40px #6490ff;
+    .btn-glow:hover {
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
     }
   </style>
 </head>
-<body class="text-white">
-  <!-- Верхняя панель -->
-  <div class="header w-full px-6 py-4 flex items-center justify-between text-base font-medium shadow-lg">
-    <div class="font-bold tracking-wide neon-text">KLARK VPN</div>
+
+<body class="bg-gradient-to-b from-blue-950 to-black text-white min-h-screen font-sans">
+
+  <!-- ЛОГО + НАЗВАНИЕ -->
+  <div class="font-bold tracking-wide neon-text text-4xl text-center pt-10">
+    KLARK VPN
   </div>
 
-  <div class="w-full max-w-md card mx-auto mt-4 mb-8 rounded-3xl shadow-2xl overflow-hidden">
-    <!-- Логотип: K в щите -->
-    <div class="flex justify-center mt-10 mb-8">
-      <div class="logo-shield">
-        <svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Щит -->
-          <path d="M96 16 C40 16 16 56 16 96 C16 136 40 176 96 176 C152 176 176 136 176 96 C176 56 152 16 96 16 Z 
-                   M96 32 C140 32 160 64 160 96 C160 128 140 160 96 160 C52 160 32 128 32 96 C32 64 52 32 96 32 Z" 
-                fill="#1b98e0" stroke="#0d47a1" stroke-width="8"/>
-          
-          <!-- Градиент внутри -->
-          <path d="M96 40 C62 40 40 68 40 96 C40 124 62 152 96 152 C130 152 152 124 152 96 C152 68 130 40 96 40 Z" 
-                fill="url(#blueGrad)"/>
-          <defs>
-            <linearGradient id="blueGrad" x1="40" y1="40" x2="152" y2="152">
-              <stop offset="0%" stop-color="#40c4ff"/>
-              <stop offset="100%" stop-color="#1b98e0"/>
-            </linearGradient>
-          </defs>
-          <!-- Буква K -->
-          <text x="96" y="135" font-family="Arial Black, sans-serif" font-size="120" font-weight="900" 
-                fill="#e3f2fd" text-anchor="middle" dominant-baseline="middle" letter-spacing="-6" class="neon-text">
-            K
-          </text>
-        </svg>
-      </div>
+  <!-- SVG-ЛОГО (щит с буквой K) -->
+  <!-- Здесь находится картинка-логотип. Если хочешь заменить → меняй весь блок <div class="logo-shield">...</div> -->
+  <div class="flex justify-center mt-10 mb-8">
+    <div class="logo-shield">
+      <svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Щит (фон) -->
+        <path d="M96 16 C40 16 16 56 16 96 C16 136 40 176 96 176 C152 176 176 136 176 96 C176 56 152 16 96 16 Z M96 32 C140 32 160 64 160 96 C160 128 140 160 96 160 C52 160 32 128 32 96 C32 64 52 32 96 32 Z" fill="#1b98e0" stroke="#0d47a1" stroke-width="8"/>
+        <!-- Градиент внутри щита -->
+        <path d="M96 40 C62 40 40 68 40 96 C40 124 62 152 96 152 C130 152 152 124 152 96 C152 68 130 40 96 40 Z" fill="url(#blueGrad)"/>
+        <defs>
+          <linearGradient id="blueGrad" x1="40" y1="40" x2="152" y2="152">
+            <stop offset="0%" stop-color="#40c4ff"/>
+            <stop offset="100%" stop-color="#1b98e0"/>
+          </linearGradient>
+        </defs>
+        <!-- Буква K внутри щита -->
+        <text x="96" y="135" font-family="Arial Black, sans-serif" font-size="120" font-weight="900" fill="#e3f2fd" text-anchor="middle" dominant-baseline="middle" letter-spacing="-6" class="neon-text">K</text>
+      </svg>
     </div>
+  </div>
 
-    <h1 class="text-5xl font-extrabold text-center mb-1 tracking-tighter neon-text fade-in-up" style="animation-delay: 0.2s;">KlarkVpn</h1>
-    <p class="text-center text-blue-300 text-xl mb-10 fade-in-up" style="animation-delay: 0.4s;">Подписка для Happ</p>
+  <!-- Большой заголовок -->
+  <h1 class="text-5xl font-extrabold text-center mb-1 tracking-tighter neon-text fade-in-up" style="animation-delay: 0.2s;">
+    KlarkVpn
+  </h1>
 
-    <!-- Статус -->
-    <div class="mx-6 mb-10 bg-blue-950/50 rounded-2xl p-6 border border-blue-500/40 fade-in-up" style="animation-delay: 0.6s;">
-      <div class="flex justify-between items-center mb-5">
-        <div class="flex items-center gap-3">
-          <span class="pulse-dot inline-block w-4 h-4 bg-cyan-400 rounded-full shadow-lg shadow-cyan-500/60"></span>
-          <span class="text-lg font-semibold">KlarkVpn</span>
-        </div>
-        <div class="text-cyan-300 font-medium">до 9 июля 2026 г.</div>
+  <!-- Подзаголовок -->
+  <p class="text-center text-blue-300 text-xl mb-10 fade-in-up" style="animation-delay: 0.4s;">
+    Подписка для Happ
+  </p>
+
+  <!-- БЛОК СТАТУС ПОДПИСКИ -->
+  <!-- Здесь показывается информация о подписке. Меняй даты, количество устройств и статус здесь -->
+  <div class="mx-6 mb-10 bg-blue-950/50 rounded-2xl p-6 border border-blue-500/40 fade-in-up" style="animation-delay: 0.6s;">
+    <div class="flex justify-between items-center mb-5">
+      <div class="flex items-center gap-3">
+        <span class="pulse-dot inline-block w-4 h-4 bg-cyan-400 rounded-full shadow-lg shadow-cyan-500/60"></span>
+        <span class="text-lg font-semibold">KlarkVpn</span>
       </div>
-      
-      <div class="flex justify-between text-sm opacity-90">
-        <div class="flex items-center gap-2">
-          <span>Устройств</span>
-          <span class="font-mono bg-cyan-900/50 px-2 py-1 rounded">• 1</span>
-        </div>
-        <div class="text-cyan-400 font-semibold">Подписка активна</div>
-      </div>
+      <!-- ← Дата окончания подписки — меняй здесь -->
+      <div class="text-cyan-300 font-medium">до 9 июля 2026 г.</div>
     </div>
+    <div class="flex justify-between text-sm opacity-90">
+      <div class="flex items-center gap-2">
+        <span>Устройств</span>
+        <!-- ← Кол-во устройств — меняй число -->
+        <span class="font-mono bg-cyan-900/50 px-2 py-1 rounded">• 1</span>
+      </div>
+      <!-- ← Текст статуса — можно поменять на "Истекает через 3 дня" и т.д. -->
+      <div class="text-cyan-400 font-semibold">Подписка активна</div>
+    </div>
+  </div>
 
-    <!-- Кнопка Открыть в Happ -->
-    <a href="happ://crypt5/hfqaoqn5UcyylXxl6a29W6kaQR9nZmaCpz5MNxnxpNDE7l4jBCmP2/WZExYAMin8mMJx/mIQSJ2YwmTYzt+YdWPvjvgTVjKPewO8Ibhemq6rjSqi6alNl+KRSZjdP2xoWIfCShUHIYyRSWVCSBHT5NBC3Riy+TZnvAchO5Nn4MtnHmehIN4DT3Kpx6IocK0M5octXnqhsDS/5Z6tRhwXI9It1QP+MZ9XzIzG5DRb9N0wthDkLeLx9cvLf+ALOKKUTZ77wWbtY6dohoWs4VlFGayN3Xi5Jj1C2RL/OytRiGc6++3F95uQBDrA==wgYmDJGfGdKcQFtBApUZp7H1g1WOMHdzkPNZONFRMFBLTYv8N/kFqW/LLtyUV5DHvgIHt4a2zSn/Y6Nuj/X0cn7MAda9qmC3lJyBrOigbV38Vmne5yrkeWce1SqeaZSeE1oGzOhTZyfRp5KIHWGICunzoKMHWcSg5IqX9ceL49t92FoTtVSRrHyd6f1L/M169vV8/wO46Ji8Mx/msplvHjTCSC9MRAFT1IqczYl/U9ZyeJw0Tj5/vlQ8IEqDsqchGZ+FpjHM2zt0yUQa89m6tEGkHD2SeIKshILDfDMWIfTETnrHvaFBc8zcULIGBCbnxhR4tn3bOyTzgmISdkRuSI2SZlO53f2VJ0pW2yZ0IsSnLGvLACbGHTA/5FO5wlHB7S3VsaZuLZAX4s6wFE7CEeTC5l/++LGdqew64KXuttvdvfFP3Voobh1DfS/NCyp4a9C/74rlF3VACmfpCqpuegxoZ+IEHIphS1ULzjQU0GcJPevk0Fxn1I7NIVdccFioPkTM7FdePh5njTDDuWZH5KVmMj8ulcOZ4yhV6bIWHiw4MBJqoMde5sOyRR1pJCImgG7Ez26ANQaP6dU4o33kbt2OOUhRvr+gllZ8seBcVP+ZO4hN2nF6cPIX/hNzDz7E877eXDluxXEA2fijl+rEZi1Jyd/sOCG89x8bvHTIt1s=ggxctr"
-       target="\_blank"
-       class="mx-6 block btn-glow bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 py-5 text-center rounded-2xl font-bold text-xl shadow-2xl mb-6 transition-all duration-400 text-white">
-      📲 Открыть в Happ одним кликом
+  <!-- ГЛАВНАЯ КНОПКА — ОТКРЫТЬ В HAPP -->
+  <!-- Самая важная часть! Здесь ссылка happ://... — именно она запускает приложение -->
+  <a href="happ://crypt5/hfqaoqn5UcyylXxl6a29W6kaQR9nZmaCpz5MNxnxpNDE7l4jBCmP2/WZExYAMin8mMJx/mIQSJ2YwmTYzt+YdWPvjvgTVjKPewO8Ibhemq6rjSqi6alNl+KRSZjdP2xoWIfCShUHIYyRSWVCSBHT5NBC3Riy+TZnvAchO5Nn4MtnHmehIN4DT3Kpx6IocK0M5octXnqhsDS/5Z6tRhwXI9It1QP+MZ9XzIzG5DRb9N0wthDkLeLx9cvLf+ALOKKUTZ77wWbtY6dohoWs4VlFGayN3Xi5Jj1C2RL/OytRiGc6++3F95uQBDrA==wgYmDJGfGdKcQFtBApUZp7H1g1WOMHdzkPNZONFRMFBLTYv8N/kFqW/LLtyUV5DHvgIHt4a2zSn/Y6Nuj/X0cn7MAda9qmC3lJyBrOigbV38Vmne5yrkeWce1SqeaZSeE1oGzOhTZyfRp5KIHWGICunzoKMHWcSg5IqX9ceL49t92FoTtVSRrHyd6f1L/M169vV8/wO46Ji8Mx/msplvHjTCSC9MRAFT1IqczYl/U9ZyeJw0Tj5/vlQ8IEqDsqchGZ+FpjHM2zt0yUQa89m6tEGkHD2SeIKshILDfDMWIfTETnrHvaFBc8zcULIGBCbnxhR4tn3bOyTzgmISdkRuSI2SZlO53f2VJ0pW2yZ0IsSnLGvLACbGHTA/5FO5wlHB7S3VsaZuLZAX4s6wFE7CEeTC5l/++LGdqew64KXuttvdvfFP3Voobh1DfS/NCyp4a9C/74rlF3VACmfpCqpuegxoZ+IEHIphS1ULzjQU0GcJPevk0Fxn1I7NIVdccFioPkTM7FdePh5njTDDuWZH5KVmMj8ulcOZ4yhV6bIWHiw4MBJqoMde5sOyRR1pJCImgG7Ez26ANQaP6dU4o33kbt2OOUhRvr+gllZ8seBcVP+ZO4hN2nF6cPIX/hNzDz7E877eXDluxXEA2fijl+rEZi1Jyd/sOCG89x8bvHTIt1s=ggxctr" 
+     target="_blank" 
+     class="mx-6 block btn-glow bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 py-5 text-center rounded-2xl font-bold text-xl shadow-2xl mb-6 transition-all duration-400 text-white">
+     📲 Открыть в Happ одним кликом
+  </a>
+
+  <!-- КНОПКА ПРОДЛИТЬ ПОДПИСКУ -->
+  <!-- Ссылка на тг-чат для оплаты/продления -->
+  <div class="mx-6 mb-10 text-center">
+    <a href="https://t.me/CKOPO4" target="_blank" 
+       class="inline-flex btn-glow items-center justify-center gap-3 w-full bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 py-5 rounded-2xl font-bold text-xl shadow-xl transition-all duration-400">
+      💳 Продлить подписку 
+      <span class="bg-white/15 px-4 py-1 rounded-xl text-base">от 50 ₽</span>
     </a>
-
-    <!-- Продлить -->
-    <div class="mx-6 mb-10 text-center">
-      <a href="https://t.me/CKOPO4" target="\_blank"
-         class="inline-flex btn-glow items-center justify-center gap-3 w-full bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 py-5 rounded-2xl font-bold text-xl shadow-xl transition-all duration-400">
-        💳 Продлить подписку
-        <span class="bg-white/15 px-4 py-1 rounded-xl text-base">от 50 ₽</span>
-      </a>
-      <p class="text-sm mt-3 opacity-80">Нажми → чат с @CKOPO4</p>
-    </div>
-
-    <!-- Нижние кнопки -->
-    <div class="grid grid-cols-2 gap-4 px-6 pb-10">
-      <button class="btn-glow bg-blue-900/60 hover:bg-blue-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2 transition-all">
-        👤 Профиль
-      </button>
-      <a href="https://t.me/CKOPO4" target="\_blank" class="btn-glow bg-blue-900/60 hover:bg-blue-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2 transition-all">
-        💬 Помощь
-      </a>
-    </div>
+    <p class="text-sm mt-3 opacity-80">Нажми → чат с @CKOPO4</p>
   </div>
 
-  <!-- Скрытый блок для копирования -->
-  <div id="sub-link" class="hidden">
-    https://gist.githubusercontent.com/gulvo5/9fea6d7966860c48e65ecda453d869e0/raw/1ee3318e588064c2e8ddbe5942122c251e097f73/VpnKlark
+  <!-- НИЖНИЕ КНОПКИ (Профиль + Помощь) -->
+  <div class="grid grid-cols-2 gap-4 px-6 pb-10">
+    <button class="btn-glow bg-blue-900/60 hover:bg-blue-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2 transition-all">
+      👤 Профиль
+    </button>
+    <a href="https://t.me/CKOPO4" target="_blank" 
+       class="btn-glow bg-blue-900/60 hover:bg-blue-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2 transition-all">
+      💬 Помощь
+    </a>
   </div>
-  <script>
-    function copyLink() {
-      const link = document.getElementById('sub-link').innerText;
-      navigator.clipboard.writeText(link).then(() => {
-        alert('Ссылка скопирована! Вставь в Happ');
-      });
-    }
-  </script>
+
 </body>
 </html>
