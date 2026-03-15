@@ -10,6 +10,8 @@
   
   <!-- Подключаем Tailwind CSS (если используешь) -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <!-- Твои кастомные стили (неон, анимации и т.д.) -->
   <style>
@@ -189,6 +191,15 @@
     💬 Помощь
   </a>
 </div>
+
+  <script>
+  // Замени на свои реальные значения из Supabase дашборда!
+  const SUPABASE_URL = 'https://твой-project-ref.supabase.co';  // например https://abcde123.supabase.co
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';  // твой anon public key
+
+  // Создаём клиент Supabase (теперь supabase доступен везде)
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
 
 </body>
 </html>
