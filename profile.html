@@ -263,30 +263,40 @@
       }
     }
 
-    async function logout() {
-      if (supabaseClient) {
-        await supabaseClient.auth.signOut();
-      }
-      location.reload();
+async function loadProfile(userId) {
+  // ... твой текущий код отображения имени, аватара и т.д. ...
+
+  try {
+    const { data: profile, error } = await supabaseClient
+      .from('profiles')
+      .select('role, is_admin')           // или только 'role', или только 'is_admin'
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Ошибка получения роли:', error.message);
+      return;
     }
 
-    // ─── Заглушки для твоих функций (добавь свою логику) ───────
+    // Варианты проверки — выбери один, который соответствует твоей базе
+    const isAdmin =
+      profile?.role === 'admin' ||
+      profile?.role === 'administrator' ||
+      profile?.is_admin === true ||
+      profile?.is_admin === 1;
 
-    async function loadProfile(userId) {
-      document.getElementById('profile-username').textContent = 'Пользователь';
-      document.getElementById('profile-end').textContent = 'Активна';
-      document.getElementById('profile-status').textContent = 'Активен';
-      document.getElementById('days-left').textContent = '∞';
-      // Здесь подгружай реальные данные из базы
-      console.log('Загрузка профиля для user:', userId);
+    if (isAdmin) {
+      const panel = document.getElementById('admin-panel');
+      if (panel) panel.classList.remove('hidden');
+      console.log('Админ-панель показана — пользователь имеет права');
+    } else {
+      console.log('Админ-панель НЕ показана — нет прав');
     }
 
-    async function adminGrantSubscription() {
-      alert('Функция выдачи подписки — добавь свою реализацию');
-      // Здесь будет вызов supabaseClient.from('subscriptions').upsert(...)
-    }
-
-    // Если будут другие функции — добавляй сюда, используй supabaseClient
+  } catch (err) {
+    console.error('Проблема в loadProfile (роли):', err);
+  }
+}
   </script>
 </body>
 </html>
