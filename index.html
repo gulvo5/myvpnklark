@@ -1,201 +1,230 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>KLARK VPN — Подписка Happ</title>
+  <title>KLARK VPN — Элитная защита • Подписка Happ</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <!-- FingerprintJS v4 -->
   <script src="https://openfpcdn.io/fingerprintjs/v4"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    .neon-text {
-      text-shadow: 0 0 10px #40c4ff, 0 0 20px #1b98e0, 0 0 30px #0d47a1;
+    :root {
+      --neon-cyan: #00f0ff;
+      --neon-blue: #40c4ff;
+      --neon-purple: #a78bfa;
+      --bg-start: #0f172a;
+      --bg-end: #000000;
     }
-    .pulse-dot {
-      animation: pulse 2s infinite;
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      overflow-x: hidden;
+    }
+    h1, .font-orbitron {
+      font-family: 'Orbitron', monospace;
+    }
+    .glass {
+      background: rgba(30, 41, 59, 0.45);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(96, 165, 250, 0.25);
+      box-shadow: 0 8px 32px rgba(0, 240, 255, 0.12);
+    }
+    .neon-glow {
+      text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-blue);
+    }
+    .neon-glow-purple {
+      text-shadow: 0 0 15px var(--neon-purple), 0 0 30px var(--neon-purple);
+    }
+    .pulse-slow {
+      animation: pulse 8s infinite ease-in-out;
     }
     @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.4); opacity: 0.7; }
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50%      { opacity: 1;   transform: scale(1.08); }
     }
-    .fade-in-up {
-      animation: fadeInUp 0.8s ease-out forwards;
+    .btn-neon {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .btn-neon::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%; right: -50%; bottom: -50%;
+      background: conic-gradient(from 0deg, transparent, var(--neon-cyan), transparent 30%);
+      opacity: 0;
+      transition: opacity 0.6s;
     }
-    .btn-glow {
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    .btn-neon:hover::before { opacity: 0.7; }
+    .btn-neon:hover {
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 20px 40px rgba(0, 240, 255, 0.4);
     }
-    .btn-glow:hover {
-      box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+    /* Фоновая анимация */
+    .bg-particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 20% 30%, rgba(64, 196, 255, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 80% 70%, rgba(167, 139, 250, 0.06) 0%, transparent 50%);
+      animation: floatBg 25s infinite linear;
     }
-    .animate-pulse-slow { animation: pulse 6s infinite ease-in-out; }
+    @keyframes floatBg {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(40px, -30px); }
+      100% { transform: translate(0, 0); }
+    }
+    @media (max-width: 640px) {
+      h1 { font-size: 3.5rem; }
+      .text-5xl { font-size: 3rem; }
+    }
   </style>
 </head>
-<body class="bg-gradient-to-b from-blue-950 to-black text-white min-h-screen font-sans">
+<body class="text-white min-h-screen relative">
 
-  <!-- ЛОГО + НАЗВАНИЕ -->
-  <div class="font-bold tracking-wide neon-text text-4xl text-center pt-10">
-    KLARK VPN
-  </div>
+  <div class="bg-particles"></div>
 
-  <!-- SVG-ЛОГО (оставил как есть, можно дополнить) -->
-  <div class="flex justify-center mt-10 mb-8 relative">
-    <div class="logo-shield relative">
-      <div class="absolute inset-0 rounded-full bg-cyan-500/20 blur-3xl animate-pulse-slow"></div>
-      <svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M110 20 C50 20 20 70 20 110 C20 150 50 200 110 200 C170 200 200 150 200 110 C200 70 170 20 110 20 Z"
-              fill="none" stroke="#00f0ff" stroke-width="12" stroke-opacity="0.6"/>
-        <!-- Здесь можно добавить остальные элементы логотипа -->
+  <!-- Логотип + заголовок -->
+  <header class="relative pt-12 pb-10 px-6 text-center">
+    <div class="inline-block relative">
+      <div class="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 blur-3xl pulse-slow"></div>
+      <svg width="140" height="140" viewBox="0 0 220 220" class="mx-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="grad1" cx="50%" cy="50%">
+            <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="110" cy="110" r="95" stroke="url(#grad1)" stroke-width="14" stroke-opacity="0.8"/>
+        <circle cx="110" cy="110" r="65" stroke="#40c4ff" stroke-width="8" stroke-dasharray="12 8" opacity="0.6">
+          <animate attributeName="stroke-dashoffset" from="0" to="100" dur="12s" repeatCount="indefinite"/>
+        </circle>
       </svg>
     </div>
-  </div>
 
-  <h1 class="text-5xl font-extrabold text-center mb-1 tracking-tighter neon-text fade-in-up" style="animation-delay: 0.2s;">
-    KlarkVpn
-  </h1>
-  <p class="text-center text-blue-300 text-xl mb-10 fade-in-up" style="animation-delay: 0.4s;">
-    Подписка для Happ
-  </p>
+    <h1 class="mt-6 text-5xl md:text-7xl font-black tracking-tighter neon-glow font-orbitron">
+      KLARK<span class="text-cyan-400">.</span>VPN
+    </h1>
+    <p class="mt-3 text-xl md:text-2xl text-blue-300/90 font-light neon-glow-purple">
+      Элитная защита • Happ Edition
+    </p>
+  </header>
 
-  <!-- Блок активной подписки -->
-  <div id="subscription-block" class="hidden mx-6 mb-10 bg-blue-950/50 rounded-2xl p-6 border border-blue-500/40 fade-in-up" style="animation-delay: 0.6s;">
-    <div class="flex justify-between items-center mb-5">
-      <div class="flex items-center gap-3">
-        <span class="pulse-dot inline-block w-4 h-4 bg-cyan-400 rounded-full shadow-lg shadow-cyan-500/60"></span>
-        <span class="text-lg font-semibold">KlarkVpn</span>
+  <!-- Активная подписка -->
+  <section id="subscription-block" class="hidden max-w-2xl mx-auto px-5 pb-12">
+    <div class="glass rounded-3xl p-8 md:p-10 shadow-2xl fade-in-up">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
+        <div class="flex items-center gap-4">
+          <span class="relative flex h-5 w-5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-5 w-5 bg-cyan-500"></span>
+          </span>
+          <span class="text-2xl font-bold neon-glow">KLARK VPN</span>
+        </div>
+        <div id="expires-date" class="text-2xl font-semibold text-cyan-300 neon-glow">
+          загружается...
+        </div>
       </div>
-      <div id="expires-date" class="text-cyan-300 font-medium">загружается...</div>
-    </div>
-    <div class="flex justify-between text-sm opacity-90">
-      <div class="flex items-center gap-2">
-        <span>Устройств</span>
-        <span id="devices-count" class="font-mono bg-cyan-900/50 px-2 py-1 rounded">• ?</span>
+
+      <div class="grid grid-cols-2 gap-6 text-lg opacity-90">
+        <div>
+          <span class="block text-blue-300 text-sm mb-1">Устройств</span>
+          <span id="devices-count" class="font-mono text-3xl font-bold text-white">• ?</span>
+        </div>
+        <div class="text-right">
+          <span class="block text-green-400 font-semibold text-xl">АКТИВНА</span>
+          <span class="text-sm text-green-300/80">премиум-доступ</span>
+        </div>
       </div>
-      <div class="text-cyan-400 font-semibold">Подписка активна</div>
+
+      <div class="mt-10 pt-6 border-t border-cyan-500/20 text-center">
+        <p class="text-lg text-blue-200">Ты под защитой неона. Никто не увидит.</p>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Блок НЕ активной подписки -->
-  <div id="no-subscription-block" class="hidden mx-6 mb-10 bg-red-950/30 rounded-2xl p-6 border border-red-500/30 text-center fade-in-up" style="animation-delay: 0.6s;">
-    <p class="text-xl font-semibold text-red-300 mb-3">Подписка не активна</p>
-    <p class="text-blue-200 mb-4">Оформите подписку, чтобы пользоваться KLARK VPN без ограничений</p>
-    <a href="https://t.me/CKOPO4" target="_blank"
-       class="inline-block bg-red-700 hover:bg-red-600 px-8 py-3 rounded-xl font-bold text-lg shadow-lg transition-all">
-       Оформить подписку
-    </a>
-  </div>
+  <!-- Нет подписки -->
+  <section id="no-subscription-block" class="hidden max-w-2xl mx-auto px-5 pb-12">
+    <div class="glass rounded-3xl p-10 text-center shadow-2xl border border-red-500/20">
+      <h2 class="text-4xl font-bold text-red-300 neon-glow mb-4">ПОДПИСКА НЕАКТИВНА</h2>
+      <p class="text-xl text-blue-200 mb-8">Активируй элитный доступ и исчезни из чужих радаров</p>
+      <a href="https://t.me/CKOPO4" target="_blank"
+         class="btn-neon inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-700 rounded-2xl text-2xl font-bold shadow-2xl">
+        🚀 ОФОРМИТЬ ПОДПИСКУ
+      </a>
+    </div>
+  </section>
 
-  <!-- Кнопка продления -->
-  <div class="mx-6 mb-10 text-center">
+  <!-- Кнопка продления / основная CTA -->
+  <section class="max-w-2xl mx-auto px-5 pb-12 text-center">
     <a href="https://t.me/CKOPO4" target="_blank"
-       class="inline-flex btn-glow items-center justify-center gap-3 w-full bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 py-5 rounded-2xl font-bold text-xl shadow-xl transition-all duration-400">
-      💳 Продлить подписку
-      <span class="bg-white/15 px-4 py-1 rounded-xl text-base">от 50 ₽</span>
+       class="btn-neon inline-flex items-center justify-center gap-4 w-full max-w-md mx-auto py-7 px-10 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 rounded-3xl text-2xl md:text-3xl font-bold shadow-2xl transition-all">
+      💳 ПРОДЛИТЬ • от 50 ₽
+      <span class="text-base bg-white/20 px-5 py-2 rounded-2xl">самый дешёвый премиум</span>
     </a>
-    <p class="text-sm mt-3 opacity-80">Нажми → чат с @CKOPO4</p>
-  </div>
+    <p class="mt-4 text-blue-300/80">Пиши @CKOPO4 → мгновенная активация</p>
+  </section>
 
   <!-- Нижние кнопки -->
-  <div class="grid grid-cols-2 gap-4 px-6 pb-10">
-    <a href="profile.html" class="btn-glow bg-blue-900/60 hover:bg-blue-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2 transition-all">
+  <footer class="grid grid-cols-2 gap-5 px-6 pb-16 max-w-md mx-auto">
+    <a href="profile.html" class="glass btn-neon py-6 rounded-2xl text-xl font-semibold flex items-center justify-center gap-3 hover:scale-105 transition-transform">
       👤 Профиль
     </a>
-    <a href="https://t.me/CKOPO4" target="_blank" class="btn-glow bg-blue-900/60 hover:bg-blue-800 py-4 rounded-2xl text-base font-medium flex items-center justify-center gap-2 transition-all">
-      💬 Помощь
+    <a href="https://t.me/CKOPO4" target="_blank" class="glass btn-neon py-6 rounded-2xl text-xl font-semibold flex items-center justify-center gap-3 hover:scale-105 transition-transform">
+      💬 Поддержка 24/7
     </a>
-  </div>
+  </footer>
 
   <script>
+    // Тот же скрипт проверки подписки, что был у тебя (оставил почти без изменений)
     const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
 
     let supabaseClient = null;
-    let currentUser = null;
 
     window.addEventListener('load', async () => {
-      console.log("Страница загружена");
-
-      if (typeof supabase === 'undefined') {
-        console.error("Supabase не загрузился");
-        showNoSubBlock("Ошибка: Supabase не доступен");
-        return;
-      }
-
       supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log("Supabase клиент создан");
-
       await checkUserAndLoadStatus();
     });
 
-    function showNoSubBlock(customText = null) {
-      const block = document.getElementById('no-subscription-block');
-      if (block) {
-        if (customText) {
-          block.querySelector('p:first-of-type').textContent = customText;
-        }
-        block.classList.remove('hidden');
-        document.getElementById('subscription-block')?.classList.add('hidden');
-      }
+    function showNoSubBlock(msg = "Подписка не активна") {
+      document.getElementById('no-subscription-block').classList.remove('hidden');
+      document.getElementById('subscription-block').classList.add('hidden');
+      if (msg) document.querySelector('#no-subscription-block h2').textContent = msg;
     }
 
     function showSubscriptionBlock() {
-      document.getElementById('subscription-block')?.classList.remove('hidden');
-      document.getElementById('no-subscription-block')?.classList.add('hidden');
+      document.getElementById('subscription-block').classList.remove('hidden');
+      document.getElementById('no-subscription-block').classList.add('hidden');
     }
 
     async function checkUserAndLoadStatus() {
       try {
-        const { data: { user }, error } = await supabaseClient.auth.getUser();
-        if (error) throw error;
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) return showNoSubBlock();
 
-        currentUser = user;
-
-        if (!user) {
-          console.log("Пользователь не авторизован");
-          showNoSubBlock();
-          return;
-        }
-
-        console.log("Пользователь авторизован:", user.id);
-
-        // Проверяем подписку
-        const { data: sub, error: subError } = await supabaseClient
+        const { data: sub } = await supabaseClient
           .from('subscriptions')
-          .select('id, expires_at, max_devices, status')
+          .select('expires_at, max_devices, status')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (subError) throw subError;
-
-        if (!sub || !sub.expires_at) {
-          showNoSubBlock("Нет активной подписки");
-          return;
+        if (!sub || !sub.expires_at || sub.status !== 'active') {
+          return showNoSubBlock("Подписка истекла");
         }
 
         const expires = new Date(sub.expires_at);
-        const now = new Date();
+        if (expires <= new Date()) return showNoSubBlock("Подписка истекла");
 
-        if (expires <= now || sub.status !== 'active') {
-          showNoSubBlock("Подписка истекла или неактивна");
-          return;
-        }
-
-        // Подписка активна → проверяем устройство
-        let fingerprint = null;
-        try {
-          const fp = await FingerprintJS.load({ monitoring: false });
-          const result = await fp.get();
-          fingerprint = result.visitorId;
-        } catch (fpErr) {
-          console.error("FingerprintJS ошибка:", fpErr);
-          showNoSubBlock("Ошибка проверки устройства. Попробуйте позже.");
-          return;
-        }
+        // Проверка устройства (fingerprint)
+        const fp = await FingerprintJS.load({ monitoring: false });
+        const { visitorId: fingerprint } = await fp.get();
 
         const { data: device } = await supabaseClient
           .from('subscription_devices')
@@ -204,21 +233,16 @@
           .eq('fingerprint', fingerprint)
           .maybeSingle();
 
-        if (!device) {
-          showNoSubBlock("Подписка активна, но это устройство не привязано. Привяжите его в профиле.");
-          return;
-        }
+        if (!device) return showNoSubBlock("Устройство не привязано");
 
-        // Всё ок — показываем активную подписку
+        // Успех
         showSubscriptionBlock();
         document.getElementById('expires-date').textContent =
-          `до ${expires.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} г.`;
-        document.getElementById('devices-count').textContent =
-          `• ${sub.max_devices || 3}`;
-
+          `до ${expires.toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'})}`;
+        document.getElementById('devices-count').textContent = `• ${sub.max_devices || 5}`;
       } catch (err) {
-        console.error("Ошибка загрузки статуса:", err);
-        showNoSubBlock("Ошибка загрузки статуса подписки");
+        console.error(err);
+        showNoSubBlock("Ошибка • попробуй позже");
       }
     }
   </script>
