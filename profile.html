@@ -4,151 +4,202 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Профиль — KLARK VPN</title>
-  <!-- Tailwind как готовый CSS (без предупреждения в консоли) -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- FingerprintJS UMD-версия (работает без type="module") -->
   <script src="https://openfpcdn.io/fingerprintjs/v4/umd.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Impact:wght@900&family=Inter:wght@400;600;700&display=swap');
+    :root {
+      --bg: #000000;
+      --glass: rgba(18, 18, 18, 0.55);
+      --border: rgba(255, 255, 255, 0.07);
+      --text: #ffffff;
+      --text-muted: #cccccc;
+      --glow: rgba(255, 255, 255, 0.05);
+    }
     body {
-      background: linear-gradient(180deg, #0a1428 0%, #000000 100%);
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      margin: 0;
     }
     .glass {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(64, 196, 255, 0.3);
+      background: var(--glass);
+      backdrop-filter: blur(48px) saturate(140%);
+      -webkit-backdrop-filter: blur(48px) saturate(140%);
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 60px rgba(0,0,0,0.8), 0 0 50px var(--glow);
+      transition: all 0.5s ease;
     }
-    .neon-text {
-      text-shadow: 0 0 10px #40c4ff, 0 0 20px #1b98e0, 0 0 40px #0d47a1, 0 0 60px #7c3aed;
+    .glass:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 90px rgba(0,0,0,0.9), 0 0 70px var(--glow);
+      border-color: rgba(255,255,255,0.15);
     }
-    .glow-button {
-      box-shadow: 0 0 25px rgba(64, 196, 255, 0.6), 0 0 50px rgba(124, 58, 237, 0.4);
-      transition: all 0.3s ease;
+    .btn-modern {
+      background: white;
+      color: black;
+      box-shadow: 0 8px 35px rgba(0,0,0,0.6);
+      transition: all 0.4s ease;
     }
-    .glow-button:hover {
-      box-shadow: 0 0 40px rgba(64, 196, 255, 0.9), 0 0 70px rgba(124, 58, 237, 0.7);
-      transform: scale(1.03);
+    .btn-modern:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 70px rgba(0,0,0,0.8);
     }
-    .avatar-glow {
-      filter: drop-shadow(0 0 30px #40c4ff) drop-shadow(0 0 60px #7c3aed);
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      transition: all 0.4s ease;
     }
-    .pulse-dot {
-      animation: pulse 2s infinite ease-in-out;
+    .btn-outline:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: white;
     }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.6); }
+    .logo {
+      max-height: 140px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 1.5rem;
     }
-    .fade-in-up {
-      animation: fadeInUp 0.9s ease-out forwards;
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(40px); }
-      to { opacity: 1; transform: translateY(0); }
+    @media (max-width: 640px) {
+      .logo {
+        max-height: 100px;
+      }
+      h1 {
+        font-size: 2.5rem;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen text-white">
+<body>
 
-  <div class="flex items-center justify-between px-6 py-6">
-    <a href="index.html" class="flex items-center gap-3 text-cyan-400 hover:text-cyan-300 font-medium text-lg">← Главная</a>
-    <div class="text-2xl font-black tracking-widest neon-text">KLARK VPN</div>
-  </div>
+  <header class="pt-8 pb-8 px-6 text-center border-b border-white/5">
+    <img 
+      src="mogged-full-logo.png" 
+      alt="MOGGED KLARK Logo" 
+      class="logo"
+      onerror="this.src='https://via.placeholder.com/400x140/000/fff?text=Logo+Not+Found';"
+    >
+    <a href="index.html" class="inline-block mt-4 text-gray-400 hover:text-white transition">
+      ← На главную
+    </a>
+  </header>
 
-  <div class="max-w-md mx-auto px-5 pb-12">
-
-    <div id="auth-form" class="max-w-md mx-auto p-8 glass rounded-3xl fade-in-up">
-      <h2 class="text-3xl font-bold neon-text text-center mb-6">Вход / Регистрация</h2>
-      <input id="email" type="email" placeholder="Email" class="w-full p-4 mb-4 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/50">
-      <input id="password" type="password" placeholder="Пароль" class="w-full p-4 mb-4 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/50">
-      <button id="signup-btn" class="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-xl font-bold mb-3 hover:opacity-90 transition">Зарегистрироваться</button>
-      <button id="signin-btn" class="w-full py-4 bg-gradient-to-r from-green-600 to-teal-600 rounded-xl font-bold hover:opacity-90 transition">Войти</button>
-      <p id="auth-message" class="text-center mt-4 text-red-400 min-h-[1.5rem]"></p>
+  <main class="max-w-3xl mx-auto px-5 py-10">
+    <div id="auth-form" class="glass rounded-3xl p-10 mb-10">
+      <h2 class="text-4xl font-bold text-white text-center mb-8">Вход / Регистрация</h2>
+      <input 
+        id="email" 
+        type="email" 
+        placeholder="Email" 
+        class="w-full p-5 mb-5 bg-black/50 border border-white/20 rounded-2xl focus:outline-none focus:border-white/40 text-white placeholder-gray-500"
+      >
+      <input 
+        id="password" 
+        type="password" 
+        placeholder="Пароль" 
+        class="w-full p-5 mb-6 bg-black/50 border border-white/20 rounded-2xl focus:outline-none focus:border-white/40 text-white placeholder-gray-500"
+      >
+      <button id="signin-btn" class="btn-modern w-full py-5 rounded-2xl text-xl font-bold mb-4">
+        Войти
+      </button>
+      <button id="signup-btn" class="btn-outline w-full py-5 rounded-2xl text-xl font-bold">
+        Зарегистрироваться
+      </button>
+      <p id="auth-message" class="text-center mt-6 text-lg min-h-[1.5rem]"></p>
     </div>
 
     <div id="profile-content" style="display: none;">
-      <div class="flex flex-col items-center mb-8">
-        <div class="relative">
-          <div class="w-32 h-32 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-3xl p-2 avatar-glow">
-            <svg width="112" height="112" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M96 16 C40 16 16 56 16 96 C16 136 40 176 96 176 C152 176 176 136 176 96 C176 56 152 16 96 16 Z" fill="#1b98e0" stroke="#0d47a1" stroke-width="12"/>
-              <text x="96" y="135" font-family="Impact" font-size="110" fill="#e3f2fd" text-anchor="middle" dominant-baseline="middle" letter-spacing="-8">K</text>
-            </svg>
-          </div>
-        </div>
-        <h2 id="profile-username" class="mt-4 text-4xl font-black neon-text tracking-tighter">Загрузка...</h2>
-        <p class="text-cyan-300 text-sm">Premium пользователь</p>
+      <div class="glass rounded-3xl p-10 mb-10 text-center">
+        <h2 id="profile-username" class="text-4xl font-bold text-white mb-3">Загрузка...</h2>
+        <p class="text-gray-400 text-lg">Premium пользователь</p>
       </div>
 
-      <div class="glass rounded-3xl p-8 mb-8">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-3">
-            <span class="pulse-dot w-5 h-5 bg-emerald-400 rounded-full"></span>
-            <span class="text-2xl font-bold">Статус подписки</span>
-          </div>
-          <span id="profile-end" class="text-emerald-400 font-semibold text-xl">Загрузка...</span>
+      <div class="glass rounded-3xl p-10 mb-10">
+        <div class="flex justify-between items-center mb-8">
+          <div class="text-2xl font-bold text-white">Статус подписки</div>
+          <div id="profile-end" class="text-2xl font-semibold text-gray-300">Загрузка...</div>
         </div>
 
-        <div class="mb-8">
-          <div class="flex justify-between text-sm mb-2">
-            <span class="text-blue-300">Устройств</span>
-            <span id="devices-text" class="font-mono">0 / 3</span>
+        <div class="mb-10">
+          <div class="flex justify-between text-gray-400 mb-3">
+            <span>Устройств</span>
+            <span id="devices-text">0 / 10</span>
           </div>
-          <div class="h-3 bg-black/50 rounded-3xl overflow-hidden">
-            <div id="devices-bar" class="h-3 bg-gradient-to-r from-cyan-400 to-violet-500 rounded-3xl w-0 transition-all duration-500"></div>
+          <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+            <div id="devices-bar" class="h-full bg-white rounded-full w-0 transition-all duration-700"></div>
           </div>
         </div>
 
-        <div class="glass rounded-3xl p-6 mb-8">
-          <h3 class="text-xl font-bold mb-4 neon-text">Моя личная подписка Happ</h3>
-          <div class="mb-6">
-            <label class="block text-blue-300 mb-2">HWID из Happ (вставь один раз)</label>
-            <input id="hwid-input" type="text" placeholder="123e4567-e89b-12d3-a456-426614174000" class="w-full p-4 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400">
-            <button id="save-hwid-btn" class="mt-3 w-full py-3 bg-cyan-600 hover:bg-cyan-500 rounded-xl font-bold transition">Сохранить HWID</button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <div class="glass rounded-2xl p-6 text-center">
+            <div class="text-6xl mb-4">🔒</div>
+            <div class="text-gray-400">Статус</div>
+            <div id="profile-status" class="text-3xl font-bold text-white mt-2">Загрузка...</div>
           </div>
-          <a id="personal-link" href="#" target="_blank" class="glow-button block text-center py-6 rounded-3xl bg-gradient-to-r from-emerald-500 to-teal-500 text-2xl font-bold tracking-wide hover:opacity-90 transition">
-            📲 МОЯ ЛИЧНАЯ ССЫЛКА HAPP
+          <div class="glass rounded-2xl p-6 text-center">
+            <div class="text-6xl mb-4">📅</div>
+            <div class="text-gray-400">Осталось</div>
+            <div id="days-left" class="text-3xl font-bold text-white mt-2">—</div>
+          </div>
+        </div>
+
+        <div class="glass rounded-2xl p-8 mb-10">
+          <h3 class="text-2xl font-bold text-white mb-6">HWID для Happ</h3>
+          <input 
+            id="hwid-input" 
+            type="text" 
+            placeholder="Вставьте HWID из Happ" 
+            class="w-full p-5 mb-5 bg-black/50 border border-white/20 rounded-2xl focus:outline-none focus:border-white/40 text-white placeholder-gray-500"
+          >
+          <button id="save-hwid-btn" class="btn-modern w-full py-5 rounded-2xl text-xl font-bold">
+            Сохранить HWID
+          </button>
+          <a 
+            id="personal-link" 
+            href="#" 
+            target="_blank" 
+            class="btn-outline block text-center py-6 mt-6 rounded-2xl text-xl font-bold"
+          >
+            МОЯ ЛИЧНАЯ ССЫЛКА HAPP
           </a>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-8">
-          <div class="glass rounded-3xl p-6 text-center">
-            <div class="text-5xl mb-2">🔒</div>
-            <div class="text-sm text-blue-300">Статус</div>
-            <div id="profile-status" class="text-2xl font-bold text-emerald-400">Загрузка...</div>
-          </div>
-          <div class="glass rounded-3xl p-6 text-center">
-            <div class="text-5xl mb-2">📅</div>
-            <div class="text-sm text-blue-300">Осталось</div>
-            <div id="days-left" class="text-2xl font-bold text-cyan-300">—</div>
-          </div>
-        </div>
-
-        <div id="admin-panel" class="glass rounded-3xl p-6 hidden">
-          <h3 class="text-xl font-bold neon-text mb-4">Админ: Выдать подписку</h3>
-          <div class="mb-4">
-            <label class="block text-blue-300 mb-2">Email или User ID</label>
-            <input id="admin-user-identifier" type="text" placeholder="user@example.com или uuid" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl">
-          </div>
-          <div class="mb-4">
-            <label class="block text-blue-300 mb-2">Дата окончания (ДД.ММ.ГГГГ)</label>
-            <input id="admin-sub-end" type="text" placeholder="31.12.2026" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl">
-          </div>
-          <button id="admin-grant-btn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold hover:opacity-90 transition">
-            Выдать / Обновить подписку
-          </button>
-          <p id="admin-message" class="text-center mt-4 text-yellow-300 min-h-[1.5rem]"></p>
-        </div>
-
-        <button id="logout-btn" class="mt-8 w-full py-5 text-red-400 font-medium text-lg border border-red-400/30 rounded-3xl hover:bg-red-400/10 transition-all">
-          Выйти из профиля
+        <button id="logout-btn" class="w-full py-6 text-xl font-bold text-red-400 border border-red-400/30 rounded-2xl hover:bg-red-900/20 transition">
+          Выйти
         </button>
       </div>
+
+      <!-- Админ-панель (скрыта по умолчанию) -->
+      <div id="admin-panel" class="glass rounded-3xl p-10 hidden">
+        <h3 class="text-2xl font-bold text-white mb-6">Админ: Выдать подписку</h3>
+        <input 
+          id="admin-user-identifier" 
+          type="text" 
+          placeholder="Email или User ID" 
+          class="w-full p-5 mb-5 bg-black/50 border border-white/20 rounded-2xl text-white placeholder-gray-500"
+        >
+        <input 
+          id="admin-sub-end" 
+          type="text" 
+          placeholder="Дата окончания: ДД.ММ.ГГГГ" 
+          class="w-full p-5 mb-6 bg-black/50 border border-white/20 rounded-2xl text-white placeholder-gray-500"
+        >
+        <button id="admin-grant-btn" class="btn-modern w-full py-6 rounded-2xl text-xl font-bold">
+          Выдать / Обновить подписку
+        </button>
+        <p id="admin-message" class="text-center mt-6 text-lg min-h-[1.5rem]"></p>
+      </div>
     </div>
-  </div>
+  </main>
 
   <script>
     const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
@@ -157,26 +208,17 @@
     let supabaseClient = null;
     let currentUser = null;
 
-    window.addEventListener('load', initializeApp);
-
-    async function initializeApp() {
-      if (typeof supabase === 'undefined') {
-        console.error('Supabase не загрузился');
-        const msg = document.getElementById('auth-message');
-        if (msg) msg.textContent = 'Ошибка: Supabase недоступен';
-        return;
-      }
-
+    window.addEventListener('load', async () => {
       supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       document.getElementById('signup-btn')?.addEventListener('click', signUp);
       document.getElementById('signin-btn')?.addEventListener('click', signIn);
       document.getElementById('logout-btn')?.addEventListener('click', logout);
-      document.getElementById('admin-grant-btn')?.addEventListener('click', adminGrantSubscription);
       document.getElementById('save-hwid-btn')?.addEventListener('click', saveHwid);
+      document.getElementById('admin-grant-btn')?.addEventListener('click', adminGrantSubscription);
 
       await checkSession();
-    }
+    });
 
     async function checkSession() {
       const { data: { session } } = await supabaseClient.auth.getSession();
@@ -187,28 +229,15 @@
 
       if (currentUser) {
         await loadProfile(currentUser.id);
-        await bindDevice();
+        await loadDevices();
       }
-    }
-
-    async function signUp() {
-      const email = document.getElementById('email')?.value?.trim();
-      const password = document.getElementById('password')?.value;
-      const msg = document.getElementById('auth-message');
-      if (!email || !password) {
-        msg.textContent = 'Введите email и пароль';
-        return;
-      }
-
-      const { error } = await supabaseClient.auth.signUp({ email, password });
-      msg.textContent = error ? error.message : 'Зарегистрирован! Проверь почту.';
-      msg.style.color = error ? 'red' : 'lime';
     }
 
     async function signIn() {
       const email = document.getElementById('email')?.value?.trim();
       const password = document.getElementById('password')?.value;
       const msg = document.getElementById('auth-message');
+
       if (!email || !password) {
         msg.textContent = 'Введите email и пароль';
         return;
@@ -217,13 +246,25 @@
       const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) {
         msg.textContent = error.message;
-        msg.style.color = 'red';
         return;
       }
 
-      msg.textContent = 'Вход выполнен!';
-      msg.style.color = 'lime';
-      setTimeout(checkSession, 800);
+      msg.textContent = 'Вход выполнен';
+      setTimeout(() => location.reload(), 800);
+    }
+
+    async function signUp() {
+      const email = document.getElementById('email')?.value?.trim();
+      const password = document.getElementById('password')?.value;
+      const msg = document.getElementById('auth-message');
+
+      if (!email || !password) {
+        msg.textContent = 'Введите email и пароль';
+        return;
+      }
+
+      const { error } = await supabaseClient.auth.signUp({ email, password });
+      msg.textContent = error ? error.message : 'Зарегистрирован! Проверь почту.';
     }
 
     async function logout() {
@@ -232,9 +273,6 @@
     }
 
     async function loadProfile(userId) {
-      const usernameEl = document.getElementById('profile-username');
-      usernameEl.textContent = 'Загружаем...';
-
       try {
         const { data: profile } = await supabaseClient
           .from('profiles')
@@ -242,170 +280,110 @@
           .eq('id', userId)
           .single();
 
-        usernameEl.textContent = profile?.username || 'Пользователь';
+        document.getElementById('profile-username').textContent = profile?.username || 'Пользователь';
 
         if (profile?.is_admin) {
           document.getElementById('admin-panel')?.classList.remove('hidden');
         }
 
-        document.getElementById('profile-status').textContent = 'Активен';
-        document.getElementById('profile-end').textContent = '∞';
-        document.getElementById('days-left').textContent = '∞';
+        const { data: sub } = await supabaseClient
+          .from('subscriptions')
+          .select('expires_at, status')
+          .eq('user_id', userId)
+          .maybeSingle();
 
-        const { data: prof } = await supabaseClient
-          .from('profiles')
-          .select('hwid')
-          .eq('id', userId)
-          .single();
+        if (sub && sub.status === 'active') {
+          const exp = new Date(sub.expires_at);
+          const now = new Date();
+          const days = Math.max(0, Math.ceil((exp - now) / (1000 * 60 * 60 * 24)));
 
-        const hwid = prof?.hwid || '';
-        const linkEl = document.getElementById('personal-link');
-        linkEl.href = `https://твой-worker.workers.dev/?user=${userId}&hwid=${encodeURIComponent(hwid)}`;
-        linkEl.textContent = hwid ? '📲 МОЯ ЛИЧНАЯ ССЫЛКА HAPP' : 'Сначала сохрани HWID';
-
+          document.getElementById('profile-status').textContent = 'Активна';
+          document.getElementById('profile-end').textContent = exp.toLocaleDateString('ru-RU');
+          document.getElementById('days-left').textContent = days + ' дней';
+        } else {
+          document.getElementById('profile-status').textContent = 'Неактивна';
+          document.getElementById('profile-end').textContent = '—';
+          document.getElementById('days-left').textContent = '—';
+        }
       } catch (err) {
         console.error('Ошибка загрузки профиля:', err);
-        usernameEl.textContent = 'Ошибка загрузки';
       }
     }
 
-    async function bindDevice() {
+    async function loadDevices() {
       if (!currentUser) return;
-
       try {
         const fp = await FingerprintJS.load({ monitoring: false });
-        const result = await fp.get();
-        const fingerprint = result.visitorId;
+        const { visitorId } = await fp.get();
 
         const { data: sub } = await supabaseClient
           .from('subscriptions')
-          .select('id, max_devices, expires_at')
+          .select('id, max_devices')
           .eq('user_id', currentUser.id)
-          .gte('expires_at', new Date().toISOString())
           .maybeSingle();
 
-        if (!sub) {
-          console.log('Нет активной подписки');
-          return;
-        }
+        if (!sub) return;
 
-        // Правильный способ получить количество строк
-        const resp = await supabaseClient
+        const { count: used } = await supabaseClient
           .from('subscription_devices')
           .select('*', { count: 'exact', head: true })
-          .eq('user_id', currentUser.id)
-          .eq('subscription_id', sub.id);
+          .eq('user_id', currentUser.id);
 
-        const used = resp.count ?? 0;
-
-        const { data: exists } = await supabaseClient
-          .from('subscription_devices')
-          .select('id')
-          .eq('user_id', currentUser.id)
-          .eq('fingerprint', fingerprint)
-          .maybeSingle();
-
-        if (!exists) {
-          if (used >= sub.max_devices) {
-            alert(`Лимит устройств (${sub.max_devices}) исчерпан!`);
-            return;
-          }
-          await supabaseClient.from('subscription_devices').insert({
-            subscription_id: sub.id,
-            user_id: currentUser.id,
-            fingerprint
-          });
-        } else {
-          await supabaseClient.from('subscription_devices')
-            .update({ last_seen: new Date().toISOString() })
-            .eq('id', exists.id);
-        }
-
-        const currentDevices = used + (exists ? 0 : 1);
-        document.getElementById('devices-text').textContent = `${currentDevices} / ${sub.max_devices}`;
-        document.getElementById('devices-bar').style.width = `${(currentDevices / sub.max_devices) * 100}%`;
-
+        document.getElementById('devices-text').textContent = `${used || 0} / ${sub.max_devices}`;
+        document.getElementById('devices-bar').style.width = `${(used / sub.max_devices) * 100}%`;
       } catch (err) {
-        console.error('Ошибка привязки устройства:', err);
+        console.error('Ошибка загрузки устройств:', err);
       }
     }
 
     async function saveHwid() {
-      if (!currentUser) return alert('Сначала войди в аккаунт');
-
+      if (!currentUser) return alert('Сначала войдите');
       const hwid = document.getElementById('hwid-input').value.trim();
-      if (!hwid) return alert('Введи HWID');
+      if (!hwid) return alert('Введите HWID');
 
-      try {
-        const { error } = await supabaseClient
-          .from('profiles')
-          .update({ hwid })
-          .eq('id', currentUser.id);
+      const { error } = await supabaseClient
+        .from('profiles')
+        .update({ hwid })
+        .eq('id', currentUser.id);
 
-        if (error) throw error;
-
-        alert('HWID сохранён!');
-        await loadProfile(currentUser.id);
-      } catch (err) {
-        console.error('Ошибка сохранения HWID:', err);
-        alert('Ошибка: ' + (err.message || 'неизвестная'));
+      if (error) {
+        alert('Ошибка: ' + error.message);
+      } else {
+        alert('HWID сохранён');
       }
     }
 
     async function adminGrantSubscription() {
-      const identifierInput = document.getElementById('admin-user-identifier');
-      const endDateInput = document.getElementById('admin-sub-end');
-      const messageEl = document.getElementById('admin-message');
+      const identifier = document.getElementById('admin-user-identifier')?.value.trim();
+      const dateStr = document.getElementById('admin-sub-end')?.value.trim();
+      const msg = document.getElementById('admin-message');
 
-      if (!identifierInput || !endDateInput || !messageEl) {
-        console.error("Не найдены поля админ-панели");
+      if (!identifier || !dateStr) {
+        msg.textContent = 'Заполните все поля';
         return;
       }
 
-      const identifier = identifierInput.value.trim();
-      const endDateStr = endDateInput.value.trim();
-
-      if (!identifier || !endDateStr) {
-        messageEl.textContent = "Заполните email/ID и дату окончания";
-        messageEl.style.color = "red";
-        return;
-      }
-
-      let endsAt;
+      let expiresAt;
       try {
-        const [dd, mm, yyyy] = endDateStr.split('.');
-        endsAt = `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}T23:59:59Z`;
+        const [dd, mm, yyyy] = dateStr.split('.');
+        expiresAt = `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}T23:59:59Z`;
       } catch {
-        messageEl.textContent = "Неверный формат даты (ДД.ММ.ГГГГ)";
-        messageEl.style.color = "red";
+        msg.textContent = 'Неверный формат даты (ДД.ММ.ГГГГ)';
         return;
       }
 
-      messageEl.textContent = "Обработка...";
-      messageEl.style.color = "yellow";
+      msg.textContent = 'Обработка...';
 
-      try {
-        const { error } = await supabaseClient
-          .from('subscriptions')
-          .upsert({
-            user_id: identifier,
-            status: 'active',
-            expires_at: endsAt,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'user_id' });
+      const { error } = await supabaseClient
+        .from('subscriptions')
+        .upsert({
+          user_id: identifier,
+          status: 'active',
+          expires_at: expiresAt,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
 
-        if (error) throw error;
-
-        messageEl.textContent = `Подписка выдана/обновлена до ${endDateStr}`;
-        messageEl.style.color = "lime";
-
-        identifierInput.value = '';
-        endDateInput.value = '';
-      } catch (err) {
-        console.error("Ошибка выдачи подписки:", err);
-        messageEl.textContent = "Ошибка: " + (err.message || "неизвестная ошибка");
-        messageEl.style.color = "red";
-      }
+      msg.textContent = error ? 'Ошибка: ' + error.message : 'Подписка выдана/обновлена';
     }
   </script>
 </body>
