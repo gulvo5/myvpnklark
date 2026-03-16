@@ -428,6 +428,25 @@ async function loadProfile(userId) {
     messageEl.style.color = "red";
   }
 } 
+
+async function saveHwid() {
+  const hwid = document.getElementById('hwid-input').value.trim();
+  if (!hwid) return alert('Введи HWID');
+  
+  // Сохраняем в Supabase (добавь поле hwid в таблицу profiles или отдельную таблицу)
+  await supabaseClient.from('profiles').update({ hwid }).eq('id', currentUserId);
+  alert('HWID сохранён');
+}
+
+async function loadProfile(userId) {
+  // ... твой существующий код ...
+
+  // После загрузки профиля показываем ссылку
+  const linkEl = document.getElementById('personal-link');
+  linkEl.href = `https://твой-worker.workers.dev/?token=${userToken}&hwid=${savedHwid || ''}`;
+  linkEl.textContent = '📲 МОЯ ЛИЧНАЯ ССЫЛКА HAPP (3 устройства)';
+}
+    
   </script>
 </body>
 </html>
