@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Профиль — KLARK VPN</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase CDN (umd версия) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <style>
@@ -51,7 +50,6 @@
 </head>
 <body class="min-h-screen text-white">
 
-  <!-- Шапка -->
   <div class="flex items-center justify-between px-6 py-6">
     <a href="index.html" class="flex items-center gap-3 text-cyan-400 hover:text-cyan-300 font-medium text-lg">
       ← Главная
@@ -75,9 +73,8 @@
       <p id="auth-message" class="text-center mt-4 text-red-400 min-h-[1.5rem]"></p>
     </div>
 
-    <!-- Профиль (скрыт по умолчанию) -->
+    <!-- Профиль -->
     <div id="profile-content" style="display: none;">
-      <!-- Аватар + имя -->
       <div class="flex flex-col items-center mb-8">
         <div class="relative">
           <div class="w-32 h-32 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-3xl p-2 avatar-glow">
@@ -92,7 +89,6 @@
       </div>
 
       <div class="glass rounded-3xl p-8 mb-8">
-        <!-- Статус подписки -->
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-3">
             <span class="pulse-dot w-5 h-5 bg-emerald-400 rounded-full"></span>
@@ -111,14 +107,12 @@
           </div>
         </div>
 
-        <!-- HAPP ссылка -->
         <div id="happ-section" style="display: none;">
           <a id="happ-link" href="#" target="_blank" class="glow-button block text-center py-6 rounded-3xl bg-gradient-to-r from-emerald-500 to-teal-500 text-2xl font-bold tracking-wider hover:opacity-90 transition">
             📲 МОЯ ЛИЧНАЯ ССЫЛКА HAPP
           </a>
         </div>
 
-        <!-- Статистика карточки -->
         <div class="grid grid-cols-2 gap-4 mb-8">
           <div class="glass rounded-3xl p-6 stat-card text-center">
             <div class="text-5xl mb-2">🔒</div>
@@ -132,7 +126,6 @@
           </div>
         </div>
 
-        <!-- Админ-панель -->
         <div id="admin-panel" class="glass rounded-3xl p-6 hidden">
           <h3 class="text-xl font-bold neon-text mb-4">Админ: Выдать подписку</h3>
           <div class="mb-4">
@@ -149,7 +142,6 @@
           <p id="admin-message" class="text-center mt-4 text-yellow-300 min-h-[1.5rem]"></p>
         </div>
 
-        <!-- Кнопка выхода -->
         <button id="logout-btn" class="mt-8 w-full py-5 text-red-400 font-medium text-lg border border-red-400/30 rounded-3xl hover:bg-red-400/10 transition-all">
           Выйти из профиля
         </button>
@@ -157,9 +149,7 @@
     </div>
   </div>
 
-  <!-- JavaScript -->
   <script>
-    // Глобальные переменные
     let supabaseClient = null;
     const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
@@ -167,18 +157,15 @@
     window.addEventListener('load', initializeApp);
 
     async function initializeApp() {
-      const msgEl = document.getElementById('auth-message');
-
       if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
-        console.error('Supabase SDK не загрузился');
-        if (msgEl) msgEl.textContent = 'Ошибка: Supabase не доступен';
+        console.error('Supabase не загрузился');
+        document.getElementById('auth-message')?.textContent = 'Ошибка: Supabase недоступен';
         return;
       }
 
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('Supabase клиент инициализирован');
+      console.log('Supabase инициализирован');
 
-      // Привязка событий
       document.getElementById('signup-btn')?.addEventListener('click', signUp);
       document.getElementById('signin-btn')?.addEventListener('click', signIn);
       document.getElementById('logout-btn')?.addEventListener('click', logout);
@@ -194,17 +181,16 @@
         const { data: { session }, error } = await supabaseClient.auth.getSession();
         if (error) throw error;
 
-        const user = session?.user;
         const authForm = document.getElementById('auth-form');
-        const profile = document.getElementById('profile-content');
+        const profileContent = document.getElementById('profile-content');
 
-        if (user) {
+        if (session?.user) {
           authForm.style.display = 'none';
-          profile.style.display = 'block';
-          await loadProfile(user.id);
+          profileContent.style.display = 'block';
+          await loadProfile(session.user.id);
         } else {
           authForm.style.display = 'block';
-          profile.style.display = 'none';
+          profileContent.style.display = 'none';
         }
       } catch (err) {
         console.error('checkSession ошибка:', err);
@@ -213,7 +199,7 @@
 
     async function signUp() {
       const email = document.getElementById('email')?.value?.trim();
-      const password = document.getElementById('password')?.value;
+      const password = document.getElementById('password')?.value?.trim();
       const msg = document.getElementById('auth-message');
 
       if (!email || !password) {
@@ -233,7 +219,7 @@
 
     async function signIn() {
       const email = document.getElementById('email')?.value?.trim();
-      const password = document.getElementById('password')?.value;
+      const password = document.getElementById('password')?.value?.trim();
       const msg = document.getElementById('auth-message');
 
       if (!email || !password) {
@@ -244,10 +230,9 @@
       try {
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
-
         msg.textContent = 'Вход выполнен!';
         msg.style.color = 'lime';
-        setTimeout(checkSession, 700);
+        setTimeout(checkSession, 800);
       } catch (err) {
         msg.textContent = err.message || 'Ошибка входа';
         msg.style.color = 'red';
@@ -255,25 +240,16 @@
     }
 
     async function logout() {
-      if (!supabaseClient) {
-        location.reload();
-        return;
-      }
-
       try {
-        const { error } = await supabaseClient.auth.signOut();
+        const { error } = await supabaseClient?.auth.signOut();
         if (error) throw error;
-        console.log('Выход успешен');
       } catch (err) {
-        console.error('Ошибка signOut:', err);
-        document.getElementById('auth-message')?.textContent = 'Ошибка выхода: ' + err.message;
+        console.error('signOut ошибка:', err);
       }
-
       location.reload();
     }
 
     async function loadProfile(userId) {
-      console.log("[loadProfile] пользователь:", userId);
       const usernameEl = document.getElementById('profile-username');
       const statusEl   = document.getElementById('profile-status');
       const endEl      = document.getElementById('profile-end');
@@ -282,30 +258,29 @@
 
       if (!usernameEl) return;
 
-      usernameEl.textContent = "Загружаем...";
+      usernameEl.textContent = 'Загружаем...';
 
       try {
-        const { data: profile, error } = await supabaseClient
+        const { data, error } = await supabaseClient
           .from('profiles')
-          .select('is_admin, username')   // можно добавить username, если есть
+          .select('username, is_admin')
           .eq('id', userId)
           .single();
 
         if (error) throw error;
-        if (!profile) throw new Error("Профиль не найден");
+        if (!data) throw new Error('Профиль не найден');
 
-        usernameEl.textContent = profile.username || "Пользователь";
-        statusEl.textContent   = "Активен";
-        endEl.textContent      = "∞";
-        daysEl.textContent     = "∞";
+        usernameEl.textContent = data.username || 'Пользователь';
+        statusEl.textContent   = 'Активен';
+        endEl.textContent      = '∞';
+        daysEl.textContent     = '∞';
 
-        const isAdmin = !!profile.is_admin;
-        if (isAdmin && adminPanel) {
-          adminPanel.classList.remove('hidden');
+        if (data.is_admin) {
+          adminPanel?.classList.remove('hidden');
         }
       } catch (err) {
-        console.error("loadProfile ошибка:", err);
-        usernameEl.textContent = "Ошибка загрузки профиля";
+        console.error('loadProfile ошибка:', err);
+        usernameEl.textContent = 'Ошибка загрузки';
       }
     }
 
@@ -315,7 +290,7 @@
       const messageEl       = document.getElementById('admin-message');
 
       if (!identifierInput || !endDateInput || !messageEl) {
-        console.error("Не найдены элементы админ-панели");
+        console.error('Элементы админ-панели не найдены');
         return;
       }
 
@@ -323,27 +298,28 @@
       const endDateStr = endDateInput.value.trim();
 
       if (!identifier || !endDateStr) {
-        messageEl.textContent = "Заполните email/ID и дату";
-        messageEl.style.color = "red";
+        messageEl.textContent = 'Заполните оба поля';
+        messageEl.style.color = 'red';
         return;
       }
 
       let endsAt;
+
       try {
         const [dd, mm, yyyy] = endDateStr.split('.');
-        if (!dd || !mm || !yyyy) throw new Error("формат");
+        if (!dd || !mm || !yyyy) throw new Error('формат');
 
         endsAt = `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-        const test = new Date(endsAt);
-        if (isNaN(test.getTime())) throw new Error("некорректная дата");
+        const testDate = new Date(endsAt);
+        if (isNaN(testDate.getTime())) throw new Error('некорректная дата');
       } catch {
-        messageEl.textContent = "Неверный формат даты (ДД.ММ.ГГГГ)";
-        messageEl.style.color = "red";
+        messageEl.textContent = 'Неверный формат даты. Пример: 31.12.2026';
+        messageEl.style.color = 'red';
         return;
       }
 
-      messageEl.textContent = "Обработка...";
-      messageEl.style.color = "yellow";
+      messageEl.textContent = 'Обработка...';
+      messageEl.style.color = 'yellow';
 
       try {
         const { error } = await supabaseClient
@@ -358,14 +334,14 @@
         if (error) throw error;
 
         messageEl.textContent = `Подписка обновлена до ${endDateStr}`;
-        messageEl.style.color = "lime";
+        messageEl.style.color = 'lime';
 
         identifierInput.value = '';
         endDateInput.value = '';
       } catch (err) {
-        console.error("Ошибка выдачи подписки:", err);
-        messageEl.textContent = "Ошибка: " + (err.message || "неизвестно");
-        messageEl.style.color = "red";
+        console.error('adminGrantSubscription ошибка:', err);
+        messageEl.textContent = 'Ошибка: ' + (err.message || 'неизвестно');
+        messageEl.style.color = 'red';
       }
     }
   </script>
