@@ -231,6 +231,25 @@
         showNoSubBlock("Ошибка загрузки статуса");
       }
     }
+
+// После if (expires > now && ...)
+const fpPromise = FingerprintJS.load({ monitoring: false });
+const fp = await fpPromise;
+const result = await fp.get();
+const fingerprint = result.visitorId;
+
+const { data: device } = await supabaseClient
+    .from('subscription_devices')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('fingerprint', fingerprint)
+    .maybeSingle();
+
+if (!device) {
+    // устройство не привязано → можно показать предупреждение или кнопку "привязать"
+    showNoSubBlock("Подписка активна, но это устройство не привязано. Привяжите в профиле.");
+    return;
+}   
   </script>
 
 </body>
