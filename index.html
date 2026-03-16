@@ -3,238 +3,200 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>KLARK VPN — Абсолютная Невидимость • Премиум Happ</title>
+  <title>KLARK VPN — Абсолютная приватность • Happ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://openfpcdn.io/fingerprintjs/v4"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --cyan: #00eaff;
-      --purple: #c084fc;
-      --glass: rgba(20, 25, 45, 0.35);
-      --glow-cyan: rgba(0, 234, 255, 0.55);
-      --glow-purple: rgba(192, 132, 252, 0.45);
+      --bg-start: #0a0f1e;
+      --bg-end: #00040f;
+      --glass: rgba(20, 30, 60, 0.28);
+      --border: rgba(100, 150, 255, 0.18);
+      --accent: #6b9eff;
+      --text: #e0f0ff;
+      --glow: rgba(107, 158, 255, 0.15);
     }
     body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(145deg, #050814 0%, #000000 100%);
-      color: #e0faff;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
     }
-    .bg-holo {
+    .bg-gradient-soft {
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at 15% 25%, var(--cyan) 0%, transparent 50%),
-                  radial-gradient(circle at 85% 75%, var(--purple) 0%, transparent 60%);
-      opacity: 0.07;
-      animation: holoPulse 25s infinite ease-in-out;
+      background: radial-gradient(circle at 30% 20%, rgba(107,158,255,0.06) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(139,92,246,0.05) 0%, transparent 60%);
+      opacity: 0.7;
       z-index: -2;
     }
-    @keyframes holoPulse {
-      0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.07; }
-      50% { transform: scale(1.25) rotate(2deg); opacity: 0.13; }
-    }
-    .glass-premium {
+    .glass {
       background: var(--glass);
-      backdrop-filter: blur(40px) saturate(220%);
-      border: 1px solid rgba(0, 234, 255, 0.25);
-      box-shadow: 0 15px 70px rgba(0,0,0,0.8), 0 0 100px var(--glow-cyan), inset 0 0 40px var(--glow-purple);
-      transition: all 0.8s cubic-bezier(0.23,1,0.32,1.2);
+      backdrop-filter: blur(32px) saturate(180%);
+      -webkit-backdrop-filter: blur(32px) saturate(180%);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 30px var(--glow);
+      transition: all 0.5s cubic-bezier(0.23,1,0.32,1);
     }
-    .glass-premium:hover {
-      transform: translateY(-15px) scale(1.02);
-      box-shadow: 0 40px 120px rgba(0,234,255,0.6), 0 0 160px var(--glow-purple);
-      border-color: rgba(192,132,252,0.5);
+    .glass:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 70px rgba(0,0,0,0.6), 0 0 50px var(--glow);
+      border-color: rgba(107,158,255,0.35);
     }
-    .logo-glow {
-      animation: logoBeat 7s infinite ease-in-out;
-      filter: drop-shadow(0 0 50px var(--glow-cyan));
+    .btn-modern {
+      background: linear-gradient(90deg, #4a7bff, #8b5cf6);
+      box-shadow: 0 8px 30px rgba(107,158,255,0.3);
+      transition: all 0.4s ease;
     }
-    @keyframes logoBeat {
-      0%, 100% { filter: drop-shadow(0 0 50px var(--glow-cyan)) drop-shadow(0 0 20px var(--glow-purple)); }
-      50% { filter: drop-shadow(0 0 120px var(--glow-cyan)) drop-shadow(0 0 60px var(--glow-purple)); }
+    .btn-modern:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 15px 50px rgba(107,158,255,0.5);
     }
-    .pulse-ring-outer {
-      position: absolute;
-      inset: -50px;
-      border-radius: 50%;
-      border: 3px solid rgba(0,234,255,0.4);
-      animation: outerRing 9s infinite linear;
+    .status-pulse {
+      animation: subtlePulse 4s infinite ease-in-out;
     }
-    .pulse-ring-inner {
-      position: absolute;
-      inset: -30px;
-      border-radius: 50%;
-      border: 2px solid var(--purple);
-      opacity: 0.6;
-      animation: innerRing 6s infinite ease-out;
+    @keyframes subtlePulse {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.08); }
     }
-    @keyframes outerRing { 0% { transform: scale(0.8) rotate(0deg); opacity: 0.7; } 50% { transform: scale(1.5) rotate(180deg); opacity: 0.2; } 100% { transform: scale(0.8) rotate(360deg); opacity: 0.7; } }
-    @keyframes innerRing { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.6); opacity: 0; } 100% { transform: scale(1); opacity: 0.8; } }
-    .btn-elite {
-      background: linear-gradient(60deg, #00eaff, #c084fc, #00eaff);
-      background-size: 400%;
-      animation: eliteFlow 12s linear infinite;
-      box-shadow: 0 0 80px rgba(0,234,255,0.7);
+    h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; }
+    @media (max-width: 640px) {
+      h1 { font-size: 2.8rem; }
     }
-    @keyframes eliteFlow { 0% { background-position: 0% 50%; } 100% { background-position: 400% 50%; } }
-    .status-beat {
-      animation: beat 2.8s infinite;
-    }
-    @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); } }
   </style>
 </head>
 <body class="relative">
 
-  <div class="bg-holo"></div>
+  <div class="bg-gradient-soft"></div>
 
-  <header class="pt-20 pb-16 px-6 text-center relative">
-    <div class="relative inline-block logo-glow mb-12">
-      <div class="pulse-ring-outer"></div>
-      <div class="pulse-ring-inner"></div>
-      <svg width="200" height="200" viewBox="0 0 220 220" class="mx-auto relative z-10">
-        <circle cx="110" cy="110" r="100" fill="none" stroke="url(#holoGrad)" stroke-width="14" opacity="0.9">
-          <defs>
-            <radialGradient id="holoGrad">
-              <stop offset="0%" stop-color="#00eaff"/>
-              <stop offset="100%" stop-color="#c084fc"/>
-            </radialGradient>
-          </defs>
-          <animate attributeName="r" values="100;108;100" dur="10s" repeatCount="indefinite"/>
-        </circle>
+  <header class="pt-16 pb-12 px-6 text-center">
+    <div class="relative inline-block mb-10">
+      <div class="absolute inset-[-60px] rounded-full bg-gradient-to-r from-blue-900/20 to-purple-900/10 blur-3xl opacity-70 animate-pulse"></div>
+      <svg width="140" height="140" viewBox="0 0 220 220" class="mx-auto">
+        <circle cx="110" cy="110" r="95" fill="none" stroke="#6b9eff" stroke-width="8" opacity="0.4"/>
+        <circle cx="110" cy="110" r="65" fill="none" stroke="#8b5cf6" stroke-width="5" opacity="0.3"/>
       </svg>
     </div>
 
-    <h1 class="text-7xl md:text-9xl font-black tracking-[-0.05em] font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-purple-400 to-cyan-200 drop-shadow-[0_0_60px_rgba(0,234,255,0.9)]">
-      KLARK<span class="text-purple-300">.</span>VPN
+    <h1 class="text-5xl md:text-7xl font-bold text-white tracking-tight drop-shadow-md">
+      KLARK VPN
     </h1>
 
-    <p class="mt-6 text-3xl md:text-4xl text-cyan-200/95 font-light">
-      Абсолютная невидимость в сети • Happ Elite
+    <p class="mt-4 text-2xl md:text-3xl text-gray-300 font-light">
+      Абсолютная приватность • Happ Edition
     </p>
 
-    <p class="mt-6 max-w-3xl mx-auto text-xl md:text-2xl text-cyan-300/85 leading-relaxed">
-      Никаких логов. Никаких следов. Сверхскоростные серверы в 100+ странах. До 10 устройств. Kill Switch. Split Tunneling. Защита от всех утечек. Полная анонимность даже в самых жёстких режимах.
+    <p class="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-gray-400 leading-relaxed">
+      Полная анонимность без логов • Скорость до 1 Гбит/с • 10 устройств одновременно • 
+      Обход любых ограничений • Защита от утечек • Kill Switch • 24/7 поддержка
     </p>
   </header>
 
-  <!-- Активная подписка -->
-  <section id="subscription-block" class="hidden max-w-4xl mx-auto px-6 pb-20">
-    <div class="glass-premium rounded-[3rem] p-12 md:p-16 shadow-[0_0_150px_rgba(0,234,255,0.5)] relative overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-cyan-950/10 via-purple-950/8 to-transparent pointer-events-none"></div>
-
-      <div class="flex flex-col md:flex-row justify-between items-center gap-12 mb-16">
-        <div class="flex items-center gap-8">
-          <span class="relative flex h-10 w-10 status-beat">
-            <span class="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 opacity-80 blur-xl"></span>
-            <span class="relative rounded-full h-10 w-10 bg-gradient-to-br from-cyan-300 to-purple-400 shadow-2xl"></span>
+  <section id="subscription-block" class="hidden max-w-3xl mx-auto px-5 pb-16">
+    <div class="glass rounded-3xl p-10 md:p-12 shadow-2xl">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-8 mb-10">
+        <div class="flex items-center gap-5">
+          <span class="relative flex h-6 w-6 status-pulse">
+            <span class="absolute inset-0 rounded-full bg-blue-500 opacity-60 blur-md"></span>
+            <span class="relative rounded-full h-6 w-6 bg-gradient-to-br from-blue-400 to-purple-500"></span>
           </span>
-          <span class="text-5xl font-extrabold text-cyan-200">НЕВИДИМ</span>
+          <span class="text-3xl font-bold text-white">Активна</span>
         </div>
-        <div id="expires-date" class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-purple-300">
-          ЗАГРУЗКА...
-        </div>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-10">
-        <div class="glass-premium rounded-3xl p-10 text-center">
-          <p class="text-cyan-300 text-xl mb-4">Устройства</p>
-          <p id="devices-count" class="text-6xl font-black text-white">• ?</p>
-          <p class="text-cyan-400 mt-3">из 10</p>
-        </div>
-        <div class="glass-premium rounded-3xl p-10 text-center">
-          <p class="text-purple-300 text-xl mb-4">Статус</p>
-          <p class="text-6xl font-black text-green-400">АКТИВЕН</p>
-          <p class="text-green-300/90 mt-3">Elite уровень</p>
-        </div>
-        <div class="glass-premium rounded-3xl p-10 text-center">
-          <p class="text-cyan-300 text-xl mb-4">Истекает</p>
-          <p id="expires-info" class="text-4xl font-bold text-cyan-200">...</p>
+        <div id="expires-date" class="text-3xl font-semibold text-blue-300">
+          загружается...
         </div>
       </div>
 
-      <div class="mt-16 text-center">
-        <p class="text-2xl text-cyan-200/90">Ты растворился в цифровой пустоте. Никто не найдёт. Никто не увидит.</p>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="glass rounded-2xl p-8 text-center">
+          <p class="text-gray-400 text-base mb-2">Устройства</p>
+          <p id="devices-count" class="text-4xl font-bold text-white">• ?</p>
+        </div>
+        <div class="glass rounded-2xl p-8 text-center">
+          <p class="text-gray-400 text-base mb-2">Статус</p>
+          <p class="text-4xl font-bold text-green-400">АКТИВНА</p>
+        </div>
+        <div class="glass rounded-2xl p-8 text-center">
+          <p class="text-gray-400 text-base mb-2">Истекает</p>
+          <p id="expires-info" class="text-2xl font-semibold text-gray-200">...</p>
+        </div>
       </div>
+
+      <p class="mt-10 text-center text-lg text-gray-300">
+        Вы под надёжной защитой. Ваша активность остаётся полностью конфиденциальной.
+      </p>
     </div>
   </section>
 
-  <!-- Нет подписки + продажа -->
-  <section id="no-subscription-block" class="hidden max-w-4xl mx-auto px-6 pb-20">
-    <div class="glass-premium rounded-[3rem] p-14 md:p-20 text-center">
-      <h2 class="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-purple-500 to-cyan-400 mb-10 drop-shadow-[0_0_50px_rgba(255,100,100,0.7)]">
-        НЕДОСТУПНО
+  <section id="no-subscription-block" class="hidden max-w-3xl mx-auto px-5 pb-16">
+    <div class="glass rounded-3xl p-12 md:p-16 text-center">
+      <h2 class="text-5xl md:text-6xl font-bold text-white mb-6">
+        Подписка не активна
       </h2>
-      <p class="text-3xl md:text-4xl text-cyan-200 mb-12 max-w-3xl mx-auto leading-tight">
-        Подключи KLARK VPN прямо сейчас и исчезни из всех радаров навсегда.
+      <p class="text-xl md:text-2xl text-gray-300 mb-10">
+        Подключите KLARK VPN и получите полную свободу и безопасность в интернете
       </p>
       <a href="https://t.me/CKOPO4" target="_blank"
-         class="btn-elite inline-flex items-center gap-8 px-16 py-8 rounded-[2.5rem] text-4xl md:text-5xl font-black text-black shadow-[0_0_160px_rgba(0,234,255,0.8)] hover:scale-105 transition-all">
-        ПОДКЛЮЧИТЬ ЭЛИТУ → @CKOPO4
+         class="btn-modern inline-flex items-center gap-4 px-12 py-6 rounded-2xl text-2xl font-bold text-white shadow-xl">
+        Подключить сейчас → @CKOPO4
       </a>
-      <div class="mt-12 text-2xl text-cyan-300/90 space-y-4">
-        <p>От 50 ₽ / месяц — дешевле, чем один кофе</p>
-        <p>Мгновенная активация • Безлимит • Возврат денег в любой момент</p>
-      </div>
+      <p class="mt-8 text-lg text-gray-400">
+        От 50 ₽ / месяц • Мгновенная активация • Безлимитный трафик
+      </p>
     </div>
   </section>
 
-  <!-- Главная CTA -->
-  <section class="max-w-4xl mx-auto px-6 pb-20 text-center">
+  <section class="max-w-3xl mx-auto px-5 pb-16 text-center">
     <a href="https://t.me/CKOPO4" target="_blank"
-       class="btn-elite inline-flex justify-center items-center gap-8 w-full max-w-2xl mx-auto py-12 px-16 rounded-[3rem] text-5xl font-black shadow-[0_0_200px_rgba(0,234,255,0.9)] hover:shadow-[0_0_300px_rgba(192,132,252,0.9)] transition-all">
-      ПРОДЛИТЬ / КУПИТЬ
-      <span class="text-3xl bg-black/50 px-10 py-5 rounded-3xl">от 50 ₽</span>
+       class="btn-modern inline-flex justify-center items-center gap-5 w-full max-w-lg mx-auto py-8 px-10 rounded-3xl text-3xl font-bold shadow-2xl">
+      Продлить / Купить
+      <span class="text-xl bg-black/30 px-6 py-3 rounded-2xl">от 50 ₽</span>
     </a>
-    <p class="mt-8 text-2xl text-cyan-300/90">@CKOPO4 — активация за секунды</p>
+    <p class="mt-6 text-lg text-gray-400">
+      Напишите @CKOPO4 — активация за 1 минуту
+    </p>
   </section>
 
-  <!-- Преимущества -->
-  <section class="max-w-5xl mx-auto px-6 pb-24 grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-    <div class="glass-premium rounded-3xl p-12">
-      <h3 class="text-3xl font-bold text-cyan-300 mb-8">Абсолютная приватность</h3>
-      <ul class="space-y-6 text-xl text-cyan-200/90">
-        <li>✓ 0 логов навсегда</li>
-        <li>✓ Нет утечек DNS/WebRTC</li>
-        <li>✓ Kill Switch + Always-on</li>
+  <section class="max-w-4xl mx-auto px-6 pb-20 grid md:grid-cols-2 gap-10">
+    <div class="glass rounded-3xl p-10">
+      <h3 class="text-2xl font-bold text-white mb-6">Почему KLARK?</h3>
+      <ul class="space-y-4 text-gray-300 text-lg">
+        <li>✓ Полная анонимность — без логов</li>
+        <li>✓ До 10 устройств одновременно</li>
+        <li>✓ Высочайшая скорость</li>
+        <li>✓ Обход любых блокировок</li>
+        <li>✓ Защита от утечек DNS / WebRTC</li>
+        <li>✓ Kill Switch и Always-on</li>
       </ul>
     </div>
-    <div class="glass-premium rounded-3xl p-12">
-      <h3 class="text-3xl font-bold text-purple-300 mb-8">Максимальная скорость</h3>
-      <ul class="space-y-6 text-xl text-cyan-200/90">
-        <li>✓ До 2 Гбит/с</li>
-        <li>✓ 100+ стран, 5000+ серверов</li>
-        <li>✓ WireGuard + Lightway</li>
-      </ul>
-    </div>
-    <div class="glass-premium rounded-3xl p-12 lg:col-span-1 md:col-span-2">
-      <h3 class="text-3xl font-bold text-cyan-300 mb-8">Для любого сценария</h3>
-      <ul class="space-y-6 text-xl text-cyan-200/90">
-        <li>✓ Обход блокировок любой сложности</li>
-        <li>✓ 10 устройств одновременно</li>
-        <li>✓ 24/7 элитная поддержка</li>
+    <div class="glass rounded-3xl p-10">
+      <h3 class="text-2xl font-bold text-white mb-6">Для кого</h3>
+      <ul class="space-y-4 text-gray-300 text-lg">
+        <li>Те, кто ценит конфиденциальность</li>
+        <li>Фрилансеры и бизнес</li>
+        <li>Геймеры и стримеры</li>
+        <li>Жители стран с цензурой</li>
       </ul>
     </div>
   </section>
 
-  <!-- Футер -->
-  <footer class="grid grid-cols-2 gap-10 px-6 pb-24 max-w-4xl mx-auto">
-    <a href="profile.html" class="glass-premium py-12 rounded-3xl text-4xl font-bold flex items-center justify-center hover:border-purple-400 transition-colors">
-      ЛИЧНЫЙ КАБИНЕТ
+  <footer class="grid grid-cols-2 gap-8 px-6 pb-20 max-w-3xl mx-auto">
+    <a href="profile.html" class="glass py-10 rounded-2xl text-2xl font-bold flex items-center justify-center hover:bg-blue-900/20 transition-colors">
+      Личный кабинет
     </a>
-    <a href="https://t.me/CKOPO4" target="_blank" class="glass-premium py-12 rounded-3xl text-4xl font-bold flex items-center justify-center hover:border-cyan-400 transition-colors">
-      ПОДДЕРЖКА 24/7
+    <a href="https://t.me/CKOPO4" target="_blank" class="glass py-10 rounded-2xl text-2xl font-bold flex items-center justify-center hover:bg-blue-900/20 transition-colors">
+      Поддержка
     </a>
   </footer>
 
   <script>
-    // Твой скрипт (без изменений, только подчистил)
     const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
 
@@ -260,14 +222,25 @@
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (!user) return showNoSubBlock();
 
-        const { data: sub } = await supabaseClient.from('subscriptions').select('expires_at, max_devices, status').eq('user_id', user.id).maybeSingle();
+        const { data: sub } = await supabaseClient
+          .from('subscriptions')
+          .select('expires_at, max_devices, status')
+          .eq('user_id', user.id)
+          .maybeSingle();
 
-        if (!sub || sub.status !== 'active' || new Date(sub.expires_at) <= new Date()) return showNoSubBlock();
+        if (!sub || sub.status !== 'active' || new Date(sub.expires_at) <= new Date()) {
+          return showNoSubBlock();
+        }
 
         const fp = await FingerprintJS.load({ monitoring: false });
         const { visitorId } = await fp.get();
 
-        const { data: device } = await supabaseClient.from('subscription_devices').select('id').eq('user_id', user.id).eq('fingerprint', visitorId).maybeSingle();
+        const { data: device } = await supabaseClient
+          .from('subscription_devices')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('fingerprint', visitorId)
+          .maybeSingle();
 
         if (!device) return showNoSubBlock();
 
@@ -277,7 +250,8 @@
         document.getElementById('expires-date').textContent = formatted;
         document.getElementById('expires-info').textContent = formatted;
         document.getElementById('devices-count').textContent = `• ${sub.max_devices || 10}`;
-      } catch (e) {
+      } catch (err) {
+        console.error(err);
         showNoSubBlock();
       }
     }
