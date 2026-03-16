@@ -3,186 +3,195 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>KLARK VPN — Элитная защита • Подписка Happ</title>
+  <title>KLARK VPN — NEON SHADOW • Happ Access</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://openfpcdn.io/fingerprintjs/v4"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --neon-cyan: #00f0ff;
-      --neon-blue: #40c4ff;
-      --neon-purple: #a78bfa;
-      --bg-start: #0f172a;
-      --bg-end: #000000;
+      --neon-cyan: #00ffff;
+      --neon-magenta: #ff00ff;
+      --neon-purple: #9d00ff;
+      --grid: rgba(0, 255, 255, 0.08);
+      --glitch: #ff0055;
     }
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      font-family: 'Roboto Mono', monospace;
+      background: #0a0015 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%230a0015"/><g opacity="0.07"><line x1="0" y1="0" x2="100" y2="100" stroke="%2300ffff" stroke-width="1"/><line x1="100" y1="0" x2="0" y2="100" stroke="%23ff00ff" stroke-width="1"/></g></svg>') repeat;
+      color: #e0f7ff;
       overflow-x: hidden;
-    }
-    h1, .font-orbitron {
-      font-family: 'Orbitron', monospace;
-    }
-    .glass {
-      background: rgba(30, 41, 59, 0.45);
-      backdrop-filter: blur(16px) saturate(180%);
-      -webkit-backdrop-filter: blur(16px) saturate(180%);
-      border: 1px solid rgba(96, 165, 250, 0.25);
-      box-shadow: 0 8px 32px rgba(0, 240, 255, 0.12);
-    }
-    .neon-glow {
-      text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-blue);
-    }
-    .neon-glow-purple {
-      text-shadow: 0 0 15px var(--neon-purple), 0 0 30px var(--neon-purple);
-    }
-    .pulse-slow {
-      animation: pulse 8s infinite ease-in-out;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.6; transform: scale(1); }
-      50%      { opacity: 1;   transform: scale(1.08); }
-    }
-    .btn-neon {
       position: relative;
-      overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .btn-neon::before {
-      content: '';
-      position: absolute;
-      top: -50%; left: -50%; right: -50%; bottom: -50%;
-      background: conic-gradient(from 0deg, transparent, var(--neon-cyan), transparent 30%);
-      opacity: 0;
-      transition: opacity 0.6s;
-    }
-    .btn-neon:hover::before { opacity: 0.7; }
-    .btn-neon:hover {
-      transform: translateY(-4px) scale(1.04);
-      box-shadow: 0 20px 40px rgba(0, 240, 255, 0.4);
-    }
-    /* Фоновая анимация */
-    .bg-particles {
+    .cyber-bg {
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background: radial-gradient(circle at 20% 30%, rgba(64, 196, 255, 0.08) 0%, transparent 40%),
-                  radial-gradient(circle at 80% 70%, rgba(167, 139, 250, 0.06) 0%, transparent 50%);
-      animation: floatBg 25s infinite linear;
+      background: linear-gradient(to bottom, rgba(10,0,21,0.9), rgba(0,0,0,1));
+      z-index: -2;
     }
-    @keyframes floatBg {
-      0%   { transform: translate(0, 0); }
-      50%  { transform: translate(40px, -30px); }
-      100% { transform: translate(0, 0); }
+    .grid-lines {
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 40px, var(--grid) 40px, var(--grid) 41px),
+                  repeating-linear-gradient(90deg, transparent, transparent 40px, var(--grid) 40px, var(--grid) 41px);
+      opacity: 0.4;
+      animation: scan 12s linear infinite;
+      z-index: -1;
+    }
+    @keyframes scan {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+    .glitch-text {
+      position: relative;
+      animation: glitch 4s infinite;
+    }
+    @keyframes glitch {
+      0%, 100% { text-shadow: 0 0 10px var(--neon-cyan); }
+      2%, 64% { text-shadow: 2px 0 0 var(--glitch), -2px 0 0 var(--neon-cyan); }
+      4%, 60% { text-shadow: -2px 0 0 var(--glitch), 2px 0 0 var(--neon-magenta); }
+    }
+    .holo-card {
+      background: rgba(20, 0, 40, 0.45);
+      backdrop-filter: blur(12px) saturate(160%);
+      border: 1px solid rgba(0, 255, 255, 0.25);
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.18), inset 0 0 20px rgba(157, 0, 255, 0.12);
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .holo-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 0 60px rgba(0, 255, 255, 0.35), 0 0 100px rgba(255, 0, 255, 0.2);
+      border-color: var(--neon-magenta);
+    }
+    .btn-cyber {
+      background: linear-gradient(45deg, #00ffff, #ff00ff, #9d00ff);
+      background-size: 300%;
+      animation: gradient 8s ease infinite;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    }
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .status-dot {
+      animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    @keyframes ping {
+      75%, 100% { transform: scale(2); opacity: 0; }
     }
     @media (max-width: 640px) {
-      h1 { font-size: 3.5rem; }
-      .text-5xl { font-size: 3rem; }
+      h1 { font-size: 3.2rem; line-height: 1; }
     }
   </style>
 </head>
-<body class="text-white min-h-screen relative">
+<body class="min-h-screen relative">
 
-  <div class="bg-particles"></div>
+  <div class="cyber-bg"></div>
+  <div class="grid-lines"></div>
 
-  <!-- Логотип + заголовок -->
-  <header class="relative pt-12 pb-10 px-6 text-center">
-    <div class="inline-block relative">
-      <div class="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 blur-3xl pulse-slow"></div>
-      <svg width="140" height="140" viewBox="0 0 220 220" class="mx-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="grad1" cx="50%" cy="50%">
-            <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.7"/>
-            <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <circle cx="110" cy="110" r="95" stroke="url(#grad1)" stroke-width="14" stroke-opacity="0.8"/>
-        <circle cx="110" cy="110" r="65" stroke="#40c4ff" stroke-width="8" stroke-dasharray="12 8" opacity="0.6">
-          <animate attributeName="stroke-dashoffset" from="0" to="100" dur="12s" repeatCount="indefinite"/>
+  <!-- Header / Logo -->
+  <header class="pt-10 pb-8 px-6 text-center relative">
+    <div class="inline-block relative mb-6">
+      <div class="absolute inset-[-40px] bg-gradient-radial from-cyan-500/20 via-purple-600/10 to-transparent blur-3xl animate-pulse"></div>
+      <svg width="120" height="120" viewBox="0 0 220 220" class="mx-auto drop-shadow-[0_0_40px_#00ffff]">
+        <circle cx="110" cy="110" r="100" fill="none" stroke="#00ffff" stroke-width="6" stroke-dasharray="12 6" opacity="0.7">
+          <animate attributeName="stroke-dashoffset" from="0" to="100" dur="20s" repeatCount="indefinite"/>
         </circle>
+        <circle cx="110" cy="110" r="60" fill="none" stroke="#ff00ff" stroke-width="10" opacity="0.5"/>
       </svg>
     </div>
 
-    <h1 class="mt-6 text-5xl md:text-7xl font-black tracking-tighter neon-glow font-orbitron">
-      KLARK<span class="text-cyan-400">.</span>VPN
+    <h1 class="text-6xl md:text-8xl font-black tracking-tighter glitch-text font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-500 to-magenta-500">
+      KLARK<span class="text-cyan-300">.</span>VPN
     </h1>
-    <p class="mt-3 text-xl md:text-2xl text-blue-300/90 font-light neon-glow-purple">
-      Элитная защита • Happ Edition
+    <p class="mt-4 text-2xl md:text-3xl text-cyan-300/90 font-light">
+      NEON SHADOW • Happ Protocol
     </p>
   </header>
 
-  <!-- Активная подписка -->
-  <section id="subscription-block" class="hidden max-w-2xl mx-auto px-5 pb-12">
-    <div class="glass rounded-3xl p-8 md:p-10 shadow-2xl fade-in-up">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
-        <div class="flex items-center gap-4">
-          <span class="relative flex h-5 w-5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-5 w-5 bg-cyan-500"></span>
+  <!-- Active Subscription -->
+  <section id="subscription-block" class="hidden max-w-3xl mx-auto px-5 pb-12">
+    <div class="holo-card rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-br from-cyan-900/10 via-purple-900/5 to-transparent pointer-events-none"></div>
+      
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-10">
+        <div class="flex items-center gap-5">
+          <span class="relative flex h-6 w-6">
+            <span class="status-dot absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-6 w-6 bg-cyan-500 shadow-lg shadow-cyan-500/60"></span>
           </span>
-          <span class="text-2xl font-bold neon-glow">KLARK VPN</span>
+          <span class="text-3xl font-bold text-cyan-300 glitch-text">CONNECTED</span>
         </div>
-        <div id="expires-date" class="text-2xl font-semibold text-cyan-300 neon-glow">
-          загружается...
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-6 text-lg opacity-90">
-        <div>
-          <span class="block text-blue-300 text-sm mb-1">Устройств</span>
-          <span id="devices-count" class="font-mono text-3xl font-bold text-white">• ?</span>
-        </div>
-        <div class="text-right">
-          <span class="block text-green-400 font-semibold text-xl">АКТИВНА</span>
-          <span class="text-sm text-green-300/80">премиум-доступ</span>
+        <div id="expires-date" class="text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
+          LOADING...
         </div>
       </div>
 
-      <div class="mt-10 pt-6 border-t border-cyan-500/20 text-center">
-        <p class="text-lg text-blue-200">Ты под защитой неона. Никто не увидит.</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+        <div class="holo-card p-6 rounded-2xl">
+          <div class="text-cyan-400 text-sm mb-2">DEVICES</div>
+          <div id="devices-count" class="text-4xl font-bold text-white">• ?</div>
+        </div>
+        <div class="holo-card p-6 rounded-2xl">
+          <div class="text-purple-400 text-sm mb-2">STATUS</div>
+          <div class="text-4xl font-bold text-green-400">ACTIVE</div>
+        </div>
+        <div class="holo-card p-6 rounded-2xl">
+          <div class="text-magenta-400 text-sm mb-2">PROTECTION</div>
+          <div class="text-4xl font-bold text-cyan-300">MAX</div>
+        </div>
       </div>
+
+      <p class="mt-10 text-center text-xl text-cyan-200/80 italic">
+        You are hidden in the neon rain. No traces. No logs.
+      </p>
     </div>
   </section>
 
-  <!-- Нет подписки -->
-  <section id="no-subscription-block" class="hidden max-w-2xl mx-auto px-5 pb-12">
-    <div class="glass rounded-3xl p-10 text-center shadow-2xl border border-red-500/20">
-      <h2 class="text-4xl font-bold text-red-300 neon-glow mb-4">ПОДПИСКА НЕАКТИВНА</h2>
-      <p class="text-xl text-blue-200 mb-8">Активируй элитный доступ и исчезни из чужих радаров</p>
+  <!-- No Subscription -->
+  <section id="no-subscription-block" class="hidden max-w-3xl mx-auto px-5 pb-12">
+    <div class="holo-card rounded-3xl p-10 md:p-14 text-center border border-magenta-500/40 shadow-[0_0_60px_rgba(255,0,255,0.3)]">
+      <h2 class="text-5xl md:text-7xl font-black glitch-text text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-magenta-500 to-purple-600 mb-6">
+        ACCESS DENIED
+      </h2>
+      <p class="text-2xl text-cyan-300/90 mb-10">
+        Plug into the shadow net. Unlock full anonymity.
+      </p>
       <a href="https://t.me/CKOPO4" target="_blank"
-         class="btn-neon inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-700 rounded-2xl text-2xl font-bold shadow-2xl">
-        🚀 ОФОРМИТЬ ПОДПИСКУ
+         class="btn-cyber inline-flex items-center gap-4 px-12 py-6 rounded-2xl text-3xl font-bold text-black shadow-2xl hover:scale-105 transition-transform">
+        ENTER THE GRID → @CKOPO4
       </a>
     </div>
   </section>
 
-  <!-- Кнопка продления / основная CTA -->
-  <section class="max-w-2xl mx-auto px-5 pb-12 text-center">
+  <!-- Main CTA -->
+  <section class="max-w-3xl mx-auto px-5 pb-12 text-center">
     <a href="https://t.me/CKOPO4" target="_blank"
-       class="btn-neon inline-flex items-center justify-center gap-4 w-full max-w-md mx-auto py-7 px-10 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 rounded-3xl text-2xl md:text-3xl font-bold shadow-2xl transition-all">
-      💳 ПРОДЛИТЬ • от 50 ₽
-      <span class="text-base bg-white/20 px-5 py-2 rounded-2xl">самый дешёвый премиум</span>
+       class="btn-cyber inline-flex justify-center items-center gap-5 w-full max-w-lg mx-auto py-8 px-10 rounded-3xl text-3xl md:text-4xl font-bold shadow-[0_0_80px_rgba(0,255,255,0.6)] hover:shadow-[0_0_120px_rgba(255,0,255,0.7)] transition-all">
+      UPGRADE TO SHADOW
+      <span class="text-xl bg-black/40 px-6 py-3 rounded-2xl">от 50 ₽</span>
     </a>
-    <p class="mt-4 text-blue-300/80">Пиши @CKOPO4 → мгновенная активация</p>
+    <p class="mt-5 text-cyan-400/80 text-lg">Instant activation • Write @CKOPO4</p>
   </section>
 
-  <!-- Нижние кнопки -->
-  <footer class="grid grid-cols-2 gap-5 px-6 pb-16 max-w-md mx-auto">
-    <a href="profile.html" class="glass btn-neon py-6 rounded-2xl text-xl font-semibold flex items-center justify-center gap-3 hover:scale-105 transition-transform">
-      👤 Профиль
+  <!-- Footer buttons -->
+  <footer class="grid grid-cols-2 gap-6 px-6 pb-16 max-w-2xl mx-auto">
+    <a href="profile.html" class="holo-card py-8 rounded-2xl text-2xl font-bold flex items-center justify-center gap-4 hover:border-cyan-400 transition-colors">
+      👤 PROFILE
     </a>
-    <a href="https://t.me/CKOPO4" target="_blank" class="glass btn-neon py-6 rounded-2xl text-xl font-semibold flex items-center justify-center gap-3 hover:scale-105 transition-transform">
-      💬 Поддержка 24/7
+    <a href="https://t.me/CKOPO4" target="_blank" class="holo-card py-8 rounded-2xl text-2xl font-bold flex items-center justify-center gap-4 hover:border-magenta-400 transition-colors">
+      💬 HELP NET
     </a>
   </footer>
 
   <script>
-    // Тот же скрипт проверки подписки, что был у тебя (оставил почти без изменений)
+    // Твой оригинальный скрипт проверки (немного подчистил)
     const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
 
@@ -193,10 +202,11 @@
       await checkUserAndLoadStatus();
     });
 
-    function showNoSubBlock(msg = "Подписка не активна") {
-      document.getElementById('no-subscription-block').classList.remove('hidden');
+    function showNoSubBlock(msg = "ACCESS DENIED") {
+      const block = document.getElementById('no-subscription-block');
+      block.classList.remove('hidden');
       document.getElementById('subscription-block').classList.add('hidden');
-      if (msg) document.querySelector('#no-subscription-block h2').textContent = msg;
+      if (msg) block.querySelector('h2').textContent = msg;
     }
 
     function showSubscriptionBlock() {
@@ -215,34 +225,29 @@
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (!sub || !sub.expires_at || sub.status !== 'active') {
-          return showNoSubBlock("Подписка истекла");
+        if (!sub || sub.status !== 'active' || new Date(sub.expires_at) <= new Date()) {
+          return showNoSubBlock("SUBSCRIPTION EXPIRED");
         }
 
-        const expires = new Date(sub.expires_at);
-        if (expires <= new Date()) return showNoSubBlock("Подписка истекла");
-
-        // Проверка устройства (fingerprint)
         const fp = await FingerprintJS.load({ monitoring: false });
-        const { visitorId: fingerprint } = await fp.get();
+        const { visitorId } = await fp.get();
 
         const { data: device } = await supabaseClient
           .from('subscription_devices')
           .select('id')
           .eq('user_id', user.id)
-          .eq('fingerprint', fingerprint)
+          .eq('fingerprint', visitorId)
           .maybeSingle();
 
-        if (!device) return showNoSubBlock("Устройство не привязано");
+        if (!device) return showNoSubBlock("DEVICE NOT LINKED");
 
-        // Успех
         showSubscriptionBlock();
-        document.getElementById('expires-date').textContent =
-          `до ${expires.toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'})}`;
+        document.getElementById('expires-date').textContent = 
+          `EXPIRES ${new Date(sub.expires_at).toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', year: 'numeric'})}`;
         document.getElementById('devices-count').textContent = `• ${sub.max_devices || 5}`;
       } catch (err) {
         console.error(err);
-        showNoSubBlock("Ошибка • попробуй позже");
+        showNoSubBlock("NETWORK GLITCH");
       }
     }
   </script>
