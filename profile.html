@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Профиль — KLARK VPN</title>
-  <!-- Tailwind CSS как CSS-файл (рекомендуется вместо JS-CDN) -->
+  <!-- Tailwind как готовый CSS (без предупреждения в консоли) -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- FingerprintJS UMD (без export и без ошибок) -->
+  <!-- FingerprintJS UMD-версия (работает без type="module") -->
   <script src="https://openfpcdn.io/fingerprintjs/v4/umd.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Impact:wght@900&family=Inter:wght@400;600;700&display=swap');
@@ -129,13 +129,23 @@
 
         <div id="admin-panel" class="glass rounded-3xl p-6 hidden">
           <h3 class="text-xl font-bold neon-text mb-4">Админ: Выдать подписку</h3>
-          <div class="mb-4"><label class="block text-blue-300 mb-2">Email или User ID</label><input id="admin-user-identifier" type="text" placeholder="user@example.com или uuid" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl"></div>
-          <div class="mb-4"><label class="block text-blue-300 mb-2">Дата окончания (ДД.ММ.ГГГГ)</label><input id="admin-sub-end" type="text" placeholder="31.12.2026" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl"></div>
-          <button id="admin-grant-btn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold hover:opacity-90 transition">Выдать / Обновить подписку</button>
+          <div class="mb-4">
+            <label class="block text-blue-300 mb-2">Email или User ID</label>
+            <input id="admin-user-identifier" type="text" placeholder="user@example.com или uuid" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl">
+          </div>
+          <div class="mb-4">
+            <label class="block text-blue-300 mb-2">Дата окончания (ДД.ММ.ГГГГ)</label>
+            <input id="admin-sub-end" type="text" placeholder="31.12.2026" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl">
+          </div>
+          <button id="admin-grant-btn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold hover:opacity-90 transition">
+            Выдать / Обновить подписку
+          </button>
           <p id="admin-message" class="text-center mt-4 text-yellow-300 min-h-[1.5rem]"></p>
         </div>
 
-        <button id="logout-btn" class="mt-8 w-full py-5 text-red-400 font-medium text-lg border border-red-400/30 rounded-3xl hover:bg-red-400/10 transition-all">Выйти из профиля</button>
+        <button id="logout-btn" class="mt-8 w-full py-5 text-red-400 font-medium text-lg border border-red-400/30 rounded-3xl hover:bg-red-400/10 transition-all">
+          Выйти из профиля
+        </button>
       </div>
     </div>
   </div>
@@ -152,7 +162,8 @@
     async function initializeApp() {
       if (typeof supabase === 'undefined') {
         console.error('Supabase не загрузился');
-        document.getElementById('auth-message')?.textContent = 'Ошибка: Supabase недоступен';
+        const msg = document.getElementById('auth-message');
+        if (msg) msg.textContent = 'Ошибка: Supabase недоступен';
         return;
       }
 
@@ -184,7 +195,10 @@
       const email = document.getElementById('email')?.value?.trim();
       const password = document.getElementById('password')?.value;
       const msg = document.getElementById('auth-message');
-      if (!email || !password) return msg.textContent = 'Введите email и пароль';
+      if (!email || !password) {
+        msg.textContent = 'Введите email и пароль';
+        return;
+      }
 
       const { error } = await supabaseClient.auth.signUp({ email, password });
       msg.textContent = error ? error.message : 'Зарегистрирован! Проверь почту.';
@@ -195,7 +209,10 @@
       const email = document.getElementById('email')?.value?.trim();
       const password = document.getElementById('password')?.value;
       const msg = document.getElementById('auth-message');
-      if (!email || !password) return msg.textContent = 'Введите email и пароль';
+      if (!email || !password) {
+        msg.textContent = 'Введите email и пароль';
+        return;
+      }
 
       const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) {
@@ -203,6 +220,7 @@
         msg.style.color = 'red';
         return;
       }
+
       msg.textContent = 'Вход выполнен!';
       msg.style.color = 'lime';
       setTimeout(checkSession, 800);
@@ -218,23 +236,35 @@
       usernameEl.textContent = 'Загружаем...';
 
       try {
-        const { data: profile } = await supabaseClient.from('profiles').select('username, is_admin').eq('id', userId).single() || {};
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('username, is_admin')
+          .eq('id', userId)
+          .single();
+
         usernameEl.textContent = profile?.username || 'Пользователь';
 
-        if (profile?.is_admin) document.getElementById('admin-panel')?.classList.remove('hidden');
+        if (profile?.is_admin) {
+          document.getElementById('admin-panel')?.classList.remove('hidden');
+        }
 
         document.getElementById('profile-status').textContent = 'Активен';
         document.getElementById('profile-end').textContent = '∞';
         document.getElementById('days-left').textContent = '∞';
 
-        const { data: prof } = await supabaseClient.from('profiles').select('hwid').eq('id', userId).single() || {};
+        const { data: prof } = await supabaseClient
+          .from('profiles')
+          .select('hwid')
+          .eq('id', userId)
+          .single();
+
         const hwid = prof?.hwid || '';
         const linkEl = document.getElementById('personal-link');
         linkEl.href = `https://твой-worker.workers.dev/?user=${userId}&hwid=${encodeURIComponent(hwid)}`;
         linkEl.textContent = hwid ? '📲 МОЯ ЛИЧНАЯ ССЫЛКА HAPP' : 'Сначала сохрани HWID';
 
       } catch (err) {
-        console.error('Ошибка в loadProfile:', err);
+        console.error('Ошибка загрузки профиля:', err);
         usernameEl.textContent = 'Ошибка загрузки';
       }
     }
@@ -259,7 +289,7 @@
           return;
         }
 
-        // Получаем количество устройств БЕЗ ошибочной деструктуризации
+        // Правильный способ получить количество строк
         const resp = await supabaseClient
           .from('subscription_devices')
           .select('*', { count: 'exact', head: true })
@@ -307,8 +337,13 @@
       if (!hwid) return alert('Введи HWID');
 
       try {
-        const { error } = await supabaseClient.from('profiles').update({ hwid }).eq('id', currentUser.id);
+        const { error } = await supabaseClient
+          .from('profiles')
+          .update({ hwid })
+          .eq('id', currentUser.id);
+
         if (error) throw error;
+
         alert('HWID сохранён!');
         await loadProfile(currentUser.id);
       } catch (err) {
@@ -318,28 +353,36 @@
     }
 
     async function adminGrantSubscription() {
-      const identifier = document.getElementById('admin-user-identifier')?.value.trim();
-      const endDateStr = document.getElementById('admin-sub-end')?.value.trim();
-      const msg = document.getElementById('admin-message');
+      const identifierInput = document.getElementById('admin-user-identifier');
+      const endDateInput = document.getElementById('admin-sub-end');
+      const messageEl = document.getElementById('admin-message');
+
+      if (!identifierInput || !endDateInput || !messageEl) {
+        console.error("Не найдены поля админ-панели");
+        return;
+      }
+
+      const identifier = identifierInput.value.trim();
+      const endDateStr = endDateInput.value.trim();
 
       if (!identifier || !endDateStr) {
-        msg.textContent = 'Заполните поля';
-        msg.style.color = 'red';
+        messageEl.textContent = "Заполните email/ID и дату окончания";
+        messageEl.style.color = "red";
         return;
       }
 
       let endsAt;
       try {
         const [dd, mm, yyyy] = endDateStr.split('.');
-        endsAt = `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}T23:59:59Z`;
+        endsAt = `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}T23:59:59Z`;
       } catch {
-        msg.textContent = 'Неверный формат даты';
-        msg.style.color = 'red';
+        messageEl.textContent = "Неверный формат даты (ДД.ММ.ГГГГ)";
+        messageEl.style.color = "red";
         return;
       }
 
-      msg.textContent = 'Обработка...';
-      msg.style.color = 'yellow';
+      messageEl.textContent = "Обработка...";
+      messageEl.style.color = "yellow";
 
       try {
         const { error } = await supabaseClient
@@ -353,11 +396,15 @@
 
         if (error) throw error;
 
-        msg.textContent = `Подписка обновлена до ${endDateStr}`;
-        msg.style.color = 'lime';
+        messageEl.textContent = `Подписка выдана/обновлена до ${endDateStr}`;
+        messageEl.style.color = "lime";
+
+        identifierInput.value = '';
+        endDateInput.value = '';
       } catch (err) {
-        msg.textContent = 'Ошибка: ' + (err.message || '?');
-        msg.style.color = 'red';
+        console.error("Ошибка выдачи подписки:", err);
+        messageEl.textContent = "Ошибка: " + (err.message || "неизвестная ошибка");
+        messageEl.style.color = "red";
       }
     }
   </script>
