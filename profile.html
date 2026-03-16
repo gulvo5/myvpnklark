@@ -160,6 +160,7 @@
         document.getElementById('auth-message')?.textContent = 'Ошибка: Supabase недоступен';
         return;
       }
+
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('Supabase клиент создан');
 
@@ -286,7 +287,10 @@
         return;
       }
 
-      let endsAt;  // ← это ключевая строка, без неё и возникает ошибка
+      // ───────────────────────────────────────────────────────
+      // САМОЕ ВАЖНОЕ — ОБЪЯВЛЕНИЕ ПЕРЕМЕННОЙ ДО ПЕРВОГО ПРИСВАИВАНИЯ
+      let endsAt;
+      // ───────────────────────────────────────────────────────
 
       try {
         const [dd, mm, yyyy] = endDateStr.split('.').map(p => p.trim());
