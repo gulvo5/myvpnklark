@@ -4,14 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>KLARK VPN — Подписка Happ</title>
-
-  <!-- Tailwind CSS (для разработки нормально, в продакшене лучше установить локально) -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Supabase клиент — актуальный CDN на 2026 год -->
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
-  <!-- Кастомные стили -->
+  <!-- FingerprintJS v4 -->
+  <script src="https://openfpcdn.io/fingerprintjs/v4"></script>
   <style>
     .neon-text {
       text-shadow: 0 0 10px #40c4ff, 0 0 20px #1b98e0, 0 0 30px #0d47a1;
@@ -36,29 +33,7 @@
     .btn-glow:hover {
       box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
     }
-    .neon-k {
-      filter: drop-shadow(0 0 8px #00f0ff) drop-shadow(0 0 20px #00f0ff);
-    }
-    .glitch {
-      animation: glitch 2s infinite;
-    }
-    @keyframes glitch {
-      0% { transform: translate(0); }
-      20% { transform: translate(-2px, 2px); }
-      40% { transform: translate(2px, -2px); }
-      60% { transform: translate(-1px, 1px); }
-      80% { transform: translate(1px, -1px); }
-      100% { transform: translate(0); }
-    }
-    .animate-flicker {
-      animation: flicker 3s infinite alternate;
-    }
-    @keyframes flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
-      20%, 24%, 55% { opacity: 0.4; }
-    }
     .animate-pulse-slow { animation: pulse 6s infinite ease-in-out; }
-    .animate-pulse-fast { animation: pulse 1.8s infinite ease-in-out; }
   </style>
 </head>
 <body class="bg-gradient-to-b from-blue-950 to-black text-white min-h-screen font-sans">
@@ -68,15 +43,14 @@
     KLARK VPN
   </div>
 
-  <!-- SVG-ЛОГО -->
+  <!-- SVG-ЛОГО (оставил как есть, можно дополнить) -->
   <div class="flex justify-center mt-10 mb-8 relative">
     <div class="logo-shield relative">
       <div class="absolute inset-0 rounded-full bg-cyan-500/20 blur-3xl animate-pulse-slow"></div>
       <svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- ... (твой SVG логотип без изменений) ... -->
         <path d="M110 20 C50 20 20 70 20 110 C20 150 50 200 110 200 C170 200 200 150 200 110 C200 70 170 20 110 20 Z"
-              fill="none" stroke="#00f0ff" stroke-width="12" stroke-opacity="0.6" filter="url(#glow)"/>
-        <!-- ... остальной SVG ... -->
+              fill="none" stroke="#00f0ff" stroke-width="12" stroke-opacity="0.6"/>
+        <!-- Здесь можно добавить остальные элементы логотипа -->
       </svg>
     </div>
   </div>
@@ -106,7 +80,7 @@
     </div>
   </div>
 
-  <!-- Блок НЕ активной подписки / не авторизован -->
+  <!-- Блок НЕ активной подписки -->
   <div id="no-subscription-block" class="hidden mx-6 mb-10 bg-red-950/30 rounded-2xl p-6 border border-red-500/30 text-center fade-in-up" style="animation-delay: 0.6s;">
     <p class="text-xl font-semibold text-red-300 mb-3">Подписка не активна</p>
     <p class="text-blue-200 mb-4">Оформите подписку, чтобы пользоваться KLARK VPN без ограничений</p>
@@ -136,18 +110,18 @@
     </a>
   </div>
 
-  <!-- Логика Supabase -->
   <script>
     const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
 
     let supabaseClient = null;
+    let currentUser = null;
 
-    window.addEventListener('load', () => {
-      console.log("Страница загружена полностью");
+    window.addEventListener('load', async () => {
+      console.log("Страница загружена");
 
       if (typeof supabase === 'undefined') {
-        console.error("Supabase библиотека НЕ загрузилась");
+        console.error("Supabase не загрузился");
         showNoSubBlock("Ошибка: Supabase не доступен");
         return;
       }
@@ -155,7 +129,7 @@
       supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log("Supabase клиент создан");
 
-      loadSubscriptionStatus();
+      await checkUserAndLoadStatus();
     });
 
     function showNoSubBlock(customText = null) {
@@ -165,92 +139,88 @@
           block.querySelector('p:first-of-type').textContent = customText;
         }
         block.classList.remove('hidden');
+        document.getElementById('subscription-block')?.classList.add('hidden');
       }
     }
 
-    async function loadSubscriptionStatus() {
-      const subBlock   = document.getElementById('subscription-block');
-      const noSubBlock = document.getElementById('no-subscription-block');
+    function showSubscriptionBlock() {
+      document.getElementById('subscription-block')?.classList.remove('hidden');
+      document.getElementById('no-subscription-block')?.classList.add('hidden');
+    }
 
-      if (!subBlock || !noSubBlock) {
-        console.error("Один из блоков не найден в DOM");
-        return;
-      }
-
-      // По умолчанию показываем "не активна" — на случай любой ошибки
-      showNoSubBlock();
-
-      if (!supabaseClient) {
-        console.warn("Клиент Supabase не инициализирован");
-        return;
-      }
-
+    async function checkUserAndLoadStatus() {
       try {
-        const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-        console.log("Проверка авторизации →", user ? "залогинен" : "не залогинен", authError);
-
-        if (!user) {
-          console.log("Нет пользователя → показываем блок без подписки");
-          return; // уже показан по умолчанию
-        }
-
-        const { data, error } = await supabaseClient
-          .from('subscriptions')                    // ← поменяй таблицу, если называется иначе
-          .select('expires_at, max_devices, status')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        console.log("Результат запроса подписки:", { data, error });
-
+        const { data: { user }, error } = await supabaseClient.auth.getUser();
         if (error) throw error;
 
-        if (!data || !data.expires_at) {
-          console.log("Нет данных о подписке");
+        currentUser = user;
+
+        if (!user) {
+          console.log("Пользователь не авторизован");
+          showNoSubBlock();
           return;
         }
 
-        const expires = new Date(data.expires_at);
-        const now = new Date();
+        console.log("Пользователь авторизован:", user.id);
 
-        if (expires > now && (data.status === 'active' || data.status == null)) {
-          console.log("Подписка активна → показываем синий блок");
-          noSubBlock.classList.add('hidden');
-          subBlock.classList.remove('hidden');
+        // Проверяем подписку
+        const { data: sub, error: subError } = await supabaseClient
+          .from('subscriptions')
+          .select('id, expires_at, max_devices, status')
+          .eq('user_id', user.id)
+          .maybeSingle();
 
-          document.getElementById('expires-date').textContent =
-            `до ${expires.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} г.`;
+        if (subError) throw subError;
 
-          document.getElementById('devices-count').textContent =
-            `• ${data.max_devices || 1}`;
-        } else {
-          console.log("Подписка просрочена или неактивна");
+        if (!sub || !sub.expires_at) {
+          showNoSubBlock("Нет активной подписки");
+          return;
         }
 
+        const expires = new Date(sub.expires_at);
+        const now = new Date();
+
+        if (expires <= now || sub.status !== 'active') {
+          showNoSubBlock("Подписка истекла или неактивна");
+          return;
+        }
+
+        // Подписка активна → проверяем устройство
+        let fingerprint = null;
+        try {
+          const fp = await FingerprintJS.load({ monitoring: false });
+          const result = await fp.get();
+          fingerprint = result.visitorId;
+        } catch (fpErr) {
+          console.error("FingerprintJS ошибка:", fpErr);
+          showNoSubBlock("Ошибка проверки устройства. Попробуйте позже.");
+          return;
+        }
+
+        const { data: device } = await supabaseClient
+          .from('subscription_devices')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('fingerprint', fingerprint)
+          .maybeSingle();
+
+        if (!device) {
+          showNoSubBlock("Подписка активна, но это устройство не привязано. Привяжите его в профиле.");
+          return;
+        }
+
+        // Всё ок — показываем активную подписку
+        showSubscriptionBlock();
+        document.getElementById('expires-date').textContent =
+          `до ${expires.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} г.`;
+        document.getElementById('devices-count').textContent =
+          `• ${sub.max_devices || 3}`;
+
       } catch (err) {
-        console.error('Ошибка при проверке подписки:', err);
-        showNoSubBlock("Ошибка загрузки статуса");
+        console.error("Ошибка загрузки статуса:", err);
+        showNoSubBlock("Ошибка загрузки статуса подписки");
       }
     }
-
-// После if (expires > now && ...)
-const fpPromise = FingerprintJS.load({ monitoring: false });
-const fp = await fpPromise;
-const result = await fp.get();
-const fingerprint = result.visitorId;
-
-const { data: device } = await supabaseClient
-    .from('subscription_devices')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('fingerprint', fingerprint)
-    .maybeSingle();
-
-if (!device) {
-    // устройство не привязано → можно показать предупреждение или кнопку "привязать"
-    showNoSubBlock("Подписка активна, но это устройство не привязано. Привяжите в профиле.");
-    return;
-}   
   </script>
-
 </body>
 </html>
