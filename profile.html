@@ -145,6 +145,7 @@
         </button>
       </div>
     </div>
+
   </div>
 
   <script>
@@ -156,13 +157,13 @@
 
     async function initializeApp() {
       if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
-        console.error('Supabase SDK не загрузился');
+        console.error('Supabase не загрузился');
         document.getElementById('auth-message')?.textContent = 'Ошибка: Supabase недоступен';
         return;
       }
 
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('Supabase клиент создан');
+      console.log('Supabase готов');
 
       document.getElementById('signup-btn')?.addEventListener('click', signUp);
       document.getElementById('signin-btn')?.addEventListener('click', signIn);
@@ -174,63 +175,62 @@
 
     async function checkSession() {
       if (!supabaseClient) return;
-
       try {
         const { data: { session }, error } = await supabaseClient.auth.getSession();
         if (error) throw error;
 
-        const authForm = document.getElementById('auth-form');
-        const profile = document.getElementById('profile-content');
+        const auth = document.getElementById('auth-form');
+        const prof = document.getElementById('profile-content');
 
         if (session?.user) {
-          authForm.style.display = 'none';
-          profile.style.display = 'block';
+          auth.style.display = 'none';
+          prof.style.display = 'block';
           await loadProfile(session.user.id);
         } else {
-          authForm.style.display = 'block';
-          profile.style.display = 'none';
+          auth.style.display = 'block';
+          prof.style.display = 'none';
         }
       } catch (err) {
-        console.error('checkSession ошибка:', err);
+        console.error('checkSession →', err);
       }
     }
 
     async function signUp() {
       const email = document.getElementById('email')?.value?.trim();
-      const password = document.getElementById('password')?.value?.trim();
-      const msg = document.getElementById('auth-message');
+      const pass  = document.getElementById('password')?.value?.trim();
+      const msg   = document.getElementById('auth-message');
 
-      if (!email || !password) {
-        msg.textContent = 'Введите email и пароль';
+      if (!email || !pass) {
+        msg.textContent = 'Email и пароль обязательны';
         return;
       }
 
       try {
-        const { error } = await supabaseClient.auth.signUp({ email, password });
-        msg.textContent = error ? error.message : 'Зарегистрирован! Проверьте почту.';
+        const { error } = await supabaseClient.auth.signUp({ email, password: pass });
+        msg.textContent = error ? error.message : 'Зарегистрирован! Проверь почту';
         msg.style.color = error ? 'red' : 'lime';
       } catch (err) {
-        msg.textContent = 'Ошибка регистрации: ' + err.message;
+        msg.textContent = 'Ошибка signUp: ' + err.message;
         msg.style.color = 'red';
       }
     }
 
     async function signIn() {
       const email = document.getElementById('email')?.value?.trim();
-      const password = document.getElementById('password')?.value?.trim();
-      const msg = document.getElementById('auth-message');
+      const pass  = document.getElementById('password')?.value?.trim();
+      const msg   = document.getElementById('auth-message');
 
-      if (!email || !password) {
-        msg.textContent = 'Введите email и пароль';
+      if (!email || !pass) {
+        msg.textContent = 'Email и пароль обязательны';
         return;
       }
 
       try {
-        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
         if (error) throw error;
-        msg.textContent = 'Вход выполнен!';
+        msg.textContent = 'Вход успешен';
         msg.style.color = 'lime';
-        setTimeout(checkSession, 700);
+        setTimeout(checkSession, 600);
       } catch (err) {
         msg.textContent = err.message || 'Ошибка входа';
         msg.style.color = 'red';
@@ -241,23 +241,16 @@
       try {
         await supabaseClient?.auth.signOut();
       } catch (err) {
-        console.error('signOut ошибка:', err);
+        console.warn('signOut не удался', err);
       }
       location.reload();
     }
 
     async function loadProfile(userId) {
-      const els = {
-        username: document.getElementById('profile-username'),
-        status:   document.getElementById('profile-status'),
-        end:      document.getElementById('profile-end'),
-        days:     document.getElementById('days-left'),
-        admin:    document.getElementById('admin-panel')
-      };
+      const usernameEl = document.getElementById('profile-username');
+      if (!usernameEl) return;
 
-      if (!els.username) return;
-
-      els.username.textContent = 'Загружаем...';
+      usernameEl.textContent = 'Загрузка...';
 
       try {
         const { data, error } = await supabaseClient
@@ -267,71 +260,68 @@
           .single();
 
         if (error) throw error;
-        if (!data) throw new Error('Профиль не найден');
+        if (!data) throw new Error('профиль не найден');
 
-        els.username.textContent = data.username || 'Пользователь';
-        els.status.textContent   = 'Активен';
-        els.end.textContent      = '∞';
-        els.days.textContent     = '∞';
+        usernameEl.textContent = data.username || 'Пользователь';
+        document.getElementById('profile-status').textContent   = 'Активен';
+        document.getElementById('profile-end').textContent      = '∞';
+        document.getElementById('days-left').textContent        = '∞';
 
-        if (data.is_admin === true || data.is_admin === 1) {
-          els.admin?.classList.remove('hidden');
+        if (data.is_admin) {
+          document.getElementById('admin-panel')?.classList.remove('hidden');
         }
       } catch (err) {
-        console.error('Ошибка загрузки профиля:', err);
-        els.username.textContent = 'Ошибка загрузки';
+        console.error('loadProfile ошибка:', err);
+        usernameEl.textContent = 'Ошибка загрузки профиля';
       }
     }
 
     async function adminGrantSubscription() {
-      const idInput    = document.getElementById('admin-user-identifier');
-      const dateInput  = document.getElementById('admin-sub-end');
-      const msgEl      = document.getElementById('admin-message');
+      const idEl   = document.getElementById('admin-user-identifier');
+      const dateEl = document.getElementById('admin-sub-end');
+      const msgEl  = document.getElementById('admin-message');
 
-      if (!idInput || !dateInput || !msgEl) {
-        console.error('Не найдены элементы админ-панели');
+      if (!idEl || !dateEl || !msgEl) {
+        console.error('админ элементы не найдены');
         return;
       }
 
-      const identifier = idInput.value.trim();
-      const dateStr    = dateInput.value.trim();
+      const userIdOrEmail = idEl.value.trim();
+      const dateInput     = dateEl.value.trim();
 
-      if (!identifier || !dateStr) {
-        msgEl.textContent = 'Заполните оба поля';
+      if (!userIdOrEmail || !dateInput) {
+        msgEl.textContent = 'Заполни оба поля';
         msgEl.style.color = 'red';
         return;
       }
 
-      let endsAt;   // ← ОБЯЗАТЕЛЬНО объявили переменную
+      let endsAt;  // ← вот здесь была главная проблема — без let
 
       try {
-        const parts = dateStr.split('.');
-        if (parts.length !== 3) throw new Error('неверный формат');
-
-        const [dd, mm, yyyy] = parts.map(p => p.trim());
+        const [dd, mm, yyyy] = dateInput.split('.').map(s => s.trim());
 
         if (!dd || !mm || !yyyy || yyyy.length !== 4) {
-          throw new Error('неверные части даты');
+          throw new Error('неверный формат даты');
         }
 
         endsAt = `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
 
-        const test = new Date(endsAt);
-        if (Number.isNaN(test.getTime())) throw new Error('некорректная дата');
-      } catch {
-        msgEl.textContent = 'Неверный формат. Используйте ДД.ММ.ГГГГ (пример: 31.12.2026)';
+        const d = new Date(endsAt);
+        if (Number.isNaN(d.getTime())) throw new Error('дата некорректна');
+      } catch (e) {
+        msgEl.textContent = 'Формат даты: ДД.ММ.ГГГГ (пример 25.12.2026)';
         msgEl.style.color = 'red';
         return;
       }
 
-      msgEl.textContent = 'Обработка...';
+      msgEl.textContent = 'Сохраняем...';
       msgEl.style.color = 'yellow';
 
       try {
         const { error } = await supabaseClient
           .from('subscriptions')
           .upsert({
-            user_id: identifier,
+            user_id: userIdOrEmail,
             status: 'active',
             ends_at: endsAt + 'T23:59:59Z',
             updated_at: new Date().toISOString()
@@ -339,14 +329,14 @@
 
         if (error) throw error;
 
-        msgEl.textContent = `Подписка обновлена до ${dateStr}`;
+        msgEl.textContent = `Подписка выдана до ${dateInput}`;
         msgEl.style.color = 'lime';
 
-        idInput.value = '';
-        dateInput.value = '';
+        idEl.value = '';
+        dateEl.value = '';
       } catch (err) {
         console.error('Ошибка выдачи подписки:', err);
-        msgEl.textContent = 'Ошибка: ' + (err.message || 'неизвестная');
+        msgEl.textContent = 'Ошибка: ' + (err.message || '?');
         msgEl.style.color = 'red';
       }
     }
