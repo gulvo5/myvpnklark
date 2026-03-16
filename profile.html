@@ -443,6 +443,86 @@ async function loadProfile(userId) {
   }
 }
 
+    // ... существующий код ...
+
+async function bindCurrentDevice(user) {
+    if (!user) return;
+
+    try {
+        const fpPromise = FingerprintJS.load({ monitoring: false });
+        const fp = await fpPromise;
+        const result = await fp.get();
+        const fingerprint = result.visitorId;  // ~32 символа, уникальный отпечаток
+
+        // Получаем активную подписку
+        const { data: sub, error: subErr } = await supabaseClient
+            .from('subscriptions')
+            .select('id, max_devices, expires_at')
+            .eq('user_id', user.id)
+            .gte('expires_at', new Date().toISOString())
+            .eq('status', 'active')
+            .maybeSingle();
+
+        if (subErr) throw subErr;
+        if (!sub) {
+            console.log("Нет активной подписки");
+            // можно показать сообщение в UI
+            return;
+        }
+
+        // Сколько уже привязано
+        const { count } = await supabaseClient
+            .from('subscription_devices')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('subscription_id', sub.id);
+
+        const used = count || 0;
+
+        // Проверяем — это устройство уже есть?
+        const { data: existing } = await supabaseClient
+            .from('subscription_devices')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('fingerprint', fingerprint)
+            .maybeSingle();
+
+        if (existing) {
+            // уже привязано → просто обновляем время
+            await supabaseClient
+                .from('subscription_devices')
+                .update({ last_seen: new Date().toISOString() })
+                .eq('id', existing.id);
+        } else {
+            // новое устройство
+            if (used >= sub.max_devices) {
+                alert(`Лимит устройств (${sub.max_devices}) исчерпан! Свяжитесь с поддержкой.`);
+                return;
+            }
+
+            await supabaseClient
+                .from('subscription_devices')
+                .insert({
+                    subscription_id: sub.id,
+                    user_id: user.id,
+                    fingerprint: fingerprint
+                });
+
+            console.log("Новое устройство привязано:", fingerprint);
+        }
+
+        // Обнови UI (пример)
+        document.getElementById('devices-text').textContent = `${used + (existing ? 0 : 1)} / ${sub.max_devices}`;
+
+    } catch (err) {
+        console.error("Ошибка привязки устройства:", err);
+    }
+}
+
+// В loadProfile или checkSession после if (user) { ... }
+await loadProfile(user.id);
+await bindCurrentDevice(user);  // ← добавь это
+
     async function adminGrantSubscription() {
   const identifierInput = document.getElementById('admin-user-identifier');
   const endDateInput    = document.getElementById('admin-sub-end');
