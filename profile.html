@@ -4,9 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Профиль — KLARK VPN</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS как CSS-файл (рекомендуется вместо JS-CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- FingerprintJS — версия UMD, без export -->
+  <!-- FingerprintJS UMD (без export и без ошибок) -->
   <script src="https://openfpcdn.io/fingerprintjs/v4/umd.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Impact:wght@900&family=Inter:wght@400;600;700&display=swap');
@@ -51,33 +53,23 @@
 </head>
 <body class="min-h-screen text-white">
 
-  <!-- Шапка -->
   <div class="flex items-center justify-between px-6 py-6">
-    <a href="index.html" class="flex items-center gap-3 text-cyan-400 hover:text-cyan-300 font-medium text-lg">
-      ← Главная
-    </a>
+    <a href="index.html" class="flex items-center gap-3 text-cyan-400 hover:text-cyan-300 font-medium text-lg">← Главная</a>
     <div class="text-2xl font-black tracking-widest neon-text">KLARK VPN</div>
   </div>
 
   <div class="max-w-md mx-auto px-5 pb-12">
 
-    <!-- Форма авторизации -->
     <div id="auth-form" class="max-w-md mx-auto p-8 glass rounded-3xl fade-in-up">
       <h2 class="text-3xl font-bold neon-text text-center mb-6">Вход / Регистрация</h2>
       <input id="email" type="email" placeholder="Email" class="w-full p-4 mb-4 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/50">
       <input id="password" type="password" placeholder="Пароль" class="w-full p-4 mb-4 bg-black/40 border border-cyan-500/40 rounded-xl focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/50">
-      <button id="signup-btn" class="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-xl font-bold mb-3 hover:opacity-90 transition">
-        Зарегистрироваться
-      </button>
-      <button id="signin-btn" class="w-full py-4 bg-gradient-to-r from-green-600 to-teal-600 rounded-xl font-bold hover:opacity-90 transition">
-        Войти
-      </button>
+      <button id="signup-btn" class="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-xl font-bold mb-3 hover:opacity-90 transition">Зарегистрироваться</button>
+      <button id="signin-btn" class="w-full py-4 bg-gradient-to-r from-green-600 to-teal-600 rounded-xl font-bold hover:opacity-90 transition">Войти</button>
       <p id="auth-message" class="text-center mt-4 text-red-400 min-h-[1.5rem]"></p>
     </div>
 
-    <!-- Профиль -->
     <div id="profile-content" style="display: none;">
-      <!-- Аватар + имя -->
       <div class="flex flex-col items-center mb-8">
         <div class="relative">
           <div class="w-32 h-32 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-3xl p-2 avatar-glow">
@@ -92,7 +84,6 @@
       </div>
 
       <div class="glass rounded-3xl p-8 mb-8">
-        <!-- Статус подписки -->
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-3">
             <span class="pulse-dot w-5 h-5 bg-emerald-400 rounded-full"></span>
@@ -111,7 +102,6 @@
           </div>
         </div>
 
-        <!-- Блок Happ-подписки -->
         <div class="glass rounded-3xl p-6 mb-8">
           <h3 class="text-xl font-bold mb-4 neon-text">Моя личная подписка Happ</h3>
           <div class="mb-6">
@@ -124,7 +114,6 @@
           </a>
         </div>
 
-        <!-- Статистика -->
         <div class="grid grid-cols-2 gap-4 mb-8">
           <div class="glass rounded-3xl p-6 text-center">
             <div class="text-5xl mb-2">🔒</div>
@@ -138,27 +127,15 @@
           </div>
         </div>
 
-        <!-- Админ-панель -->
         <div id="admin-panel" class="glass rounded-3xl p-6 hidden">
           <h3 class="text-xl font-bold neon-text mb-4">Админ: Выдать подписку</h3>
-          <div class="mb-4">
-            <label class="block text-blue-300 mb-2">Email или User ID</label>
-            <input id="admin-user-identifier" type="text" placeholder="user@example.com или uuid" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl">
-          </div>
-          <div class="mb-4">
-            <label class="block text-blue-300 mb-2">Дата окончания (ДД.ММ.ГГГГ)</label>
-            <input id="admin-sub-end" type="text" placeholder="31.12.2026" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl">
-          </div>
-          <button id="admin-grant-btn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold hover:opacity-90 transition">
-            Выдать / Обновить подписку
-          </button>
+          <div class="mb-4"><label class="block text-blue-300 mb-2">Email или User ID</label><input id="admin-user-identifier" type="text" placeholder="user@example.com или uuid" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl"></div>
+          <div class="mb-4"><label class="block text-blue-300 mb-2">Дата окончания (ДД.ММ.ГГГГ)</label><input id="admin-sub-end" type="text" placeholder="31.12.2026" class="w-full p-3 bg-black/40 border border-cyan-500/40 rounded-xl"></div>
+          <button id="admin-grant-btn" class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold hover:opacity-90 transition">Выдать / Обновить подписку</button>
           <p id="admin-message" class="text-center mt-4 text-yellow-300 min-h-[1.5rem]"></p>
         </div>
 
-        <!-- Выход -->
-        <button id="logout-btn" class="mt-8 w-full py-5 text-red-400 font-medium text-lg border border-red-400/30 rounded-3xl hover:bg-red-400/10 transition-all">
-          Выйти из профиля
-        </button>
+        <button id="logout-btn" class="mt-8 w-full py-5 text-red-400 font-medium text-lg border border-red-400/30 rounded-3xl hover:bg-red-400/10 transition-all">Выйти из профиля</button>
       </div>
     </div>
   </div>
@@ -282,7 +259,7 @@
           return;
         }
 
-        // Получаем количество привязанных устройств правильно
+        // Получаем количество устройств БЕЗ ошибочной деструктуризации
         const resp = await supabaseClient
           .from('subscription_devices')
           .select('*', { count: 'exact', head: true })
@@ -357,3 +334,32 @@
         endsAt = `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}T23:59:59Z`;
       } catch {
         msg.textContent = 'Неверный формат даты';
+        msg.style.color = 'red';
+        return;
+      }
+
+      msg.textContent = 'Обработка...';
+      msg.style.color = 'yellow';
+
+      try {
+        const { error } = await supabaseClient
+          .from('subscriptions')
+          .upsert({
+            user_id: identifier,
+            status: 'active',
+            expires_at: endsAt,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
+
+        if (error) throw error;
+
+        msg.textContent = `Подписка обновлена до ${endDateStr}`;
+        msg.style.color = 'lime';
+      } catch (err) {
+        msg.textContent = 'Ошибка: ' + (err.message || '?');
+        msg.style.color = 'red';
+      }
+    }
+  </script>
+</body>
+</html>
