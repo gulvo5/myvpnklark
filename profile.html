@@ -162,7 +162,7 @@
       }
 
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('Supabase готов');
+      console.log('Supabase клиент создан');
 
       document.getElementById('signup-btn')?.addEventListener('click', signUp);
       document.getElementById('signin-btn')?.addEventListener('click', signIn);
@@ -180,15 +180,15 @@
         if (error) throw error;
 
         const authForm = document.getElementById('auth-form');
-        const profile = document.getElementById('profile-content');
+        const profileContent = document.getElementById('profile-content');
 
         if (session?.user) {
           authForm.style.display = 'none';
-          profile.style.display = 'block';
+          profileContent.style.display = 'block';
           await loadProfile(session.user.id);
         } else {
           authForm.style.display = 'block';
-          profile.style.display = 'none';
+          profileContent.style.display = 'none';
         }
       } catch (err) {
         console.error('checkSession ошибка:', err);
@@ -282,44 +282,48 @@
     }
 
     async function adminGrantSubscription() {
-      const idInput    = document.getElementById('admin-user-identifier');
-      const dateInput  = document.getElementById('admin-sub-end');
-      const msgEl      = document.getElementById('admin-message');
+      const identifierInput = document.getElementById('admin-user-identifier');
+      const endDateInput    = document.getElementById('admin-sub-end');
+      const messageEl       = document.getElementById('admin-message');
 
-      if (!idInput || !dateInput || !msgEl) {
+      if (!identifierInput || !endDateInput || !messageEl) {
         console.error('Не найдены элементы админ-панели');
         return;
       }
 
-      const identifier = idInput.value.trim();
-      const dateStr    = dateInput.value.trim();
+      const identifier = identifierInput.value.trim();
+      const endDateStr = endDateInput.value.trim();
 
-      if (!identifier || !dateStr) {
-        msgEl.textContent = 'Заполните оба поля';
-        msgEl.style.color = 'red';
+      if (!identifier || !endDateStr) {
+        messageEl.textContent = 'Заполните оба поля';
+        messageEl.style.color = 'red';
         return;
       }
 
-      let endsAt;  // ← ЭТО ИСПРАВЛЕНИЕ: переменная объявлена ДО присваивания
+      // ─── ИСПРАВЛЕНИЕ: переменная ОБЯЗАТЕЛЬНО объявлена ДО try ───
+      let endsAt;
 
       try {
-        const parts = dateStr.split('.');
-        if (parts.length !== 3) throw new Error('неверный формат');
+        const [dd, mm, yyyy] = endDateStr.split('.').map(p => p.trim());
 
-        const [dd, mm, yyyy] = parts;
+        if (!dd || !mm || !yyyy || yyyy.length !== 4) {
+          throw new Error('неверный формат даты');
+        }
 
-        endsAt = `${yyyy.trim()}-${mm.trim().padStart(2, '0')}-${dd.trim().padStart(2, '0')}`;
+        endsAt = `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
 
         const testDate = new Date(endsAt);
-        if (Number.isNaN(testDate.getTime())) throw new Error('некорректная дата');
-      } catch (e) {
-        msgEl.textContent = 'Неверный формат даты. Пример: 31.12.2026';
-        msgEl.style.color = 'red';
+        if (Number.isNaN(testDate.getTime())) {
+          throw new Error('некорректная дата');
+        }
+      } catch (err) {
+        messageEl.textContent = 'Неверный формат. Пример: 31.12.2026';
+        messageEl.style.color = 'red';
         return;
       }
 
-      msgEl.textContent = 'Обработка...';
-      msgEl.style.color = 'yellow';
+      messageEl.textContent = 'Обработка...';
+      messageEl.style.color = 'yellow';
 
       try {
         const { error } = await supabaseClient
@@ -333,15 +337,15 @@
 
         if (error) throw error;
 
-        msgEl.textContent = `Подписка обновлена до ${dateStr}`;
-        msgEl.style.color = 'lime';
+        messageEl.textContent = `Подписка обновлена до ${endDateStr}`;
+        messageEl.style.color = 'lime';
 
-        idInput.value = '';
-        dateInput.value = '';
+        identifierInput.value = '';
+        endDateInput.value = '';
       } catch (err) {
         console.error('Ошибка выдачи подписки:', err);
-        msgEl.textContent = 'Ошибка: ' + (err.message || 'неизвестно');
-        msgEl.style.color = 'red';
+        messageEl.textContent = 'Ошибка: ' + (err.message || 'неизвестно');
+        messageEl.style.color = 'red';
       }
     }
   </script>
