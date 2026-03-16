@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Профиль — KLARK VPN</title>
   <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // Скрываем предупреждение Tailwind (костыль, но работает)
+  console.warn = (function(originalWarn) {
+    return function(...args) {
+      if (typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) {
+        return;
+      }
+      originalWarn.apply(console, args);
+    };
+  })(console.warn);
+</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <style>
