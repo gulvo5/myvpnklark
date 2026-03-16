@@ -4,304 +4,387 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Профиль — KLARK VPN</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://openfpcdn.io/fingerprintjs/v4/umd.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    @import url('https://fonts.googleapis.com/css2?family=Impact:wght@900&family=Inter:wght@400;600;700&display=swap');
-
+    :root {
+      --bg: #000000;
+      --glass: rgba(18, 18, 18, 0.55);
+      --border: rgba(255, 255, 255, 0.07);
+      --text: #ffffff;
+      --text-muted: #cccccc;
+      --glow: rgba(255, 255, 255, 0.05);
+    }
     body {
-      background: linear-gradient(180deg, #0a1428 0%, #000000 100%);
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      margin: 0;
     }
-
     .glass {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(64, 196, 255, 0.3);
+      background: var(--glass);
+      backdrop-filter: blur(48px) saturate(140%);
+      -webkit-backdrop-filter: blur(48px) saturate(140%);
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 60px rgba(0,0,0,0.8), 0 0 50px var(--glow);
+      transition: all 0.5s ease;
     }
-
-    .neon-text {
-      text-shadow: 
-        0 0 10px #40c4ff,
-        0 0 20px #1b98e0,
-        0 0 40px #0d47a1,
-        0 0 60px #7c3aed;
+    .glass:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 90px rgba(0,0,0,0.9), 0 0 70px var(--glow);
+      border-color: rgba(255,255,255,0.15);
     }
-
-    .glow-button {
-      box-shadow: 0 0 25px rgba(64, 196, 255, 0.6),
-                  0 0 50px rgba(124, 58, 237, 0.4);
-      transition: all 0.3s ease;
+    .btn-modern {
+      background: white;
+      color: black;
+      box-shadow: 0 8px 35px rgba(0,0,0,0.6);
+      transition: all 0.4s ease;
     }
-    .glow-button:hover {
-      box-shadow: 0 0 40px rgba(64, 196, 255, 0.9),
-                  0 0 70px rgba(124, 58, 237, 0.7);
-      transform: scale(1.03);
-    }
-
-    .avatar-glow {
-      filter: drop-shadow(0 0 30px #40c4ff) drop-shadow(0 0 60px #7c3aed);
-    }
-
-    .pulse-dot {
-      animation: pulse 2s infinite ease-in-out;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.6); }
-    }
-
-    .fade-in-up {
-      animation: fadeInUp 0.9s ease-out forwards;
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(40px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .stat-card {
-      transition: all 0.3s ease;
-    }
-    .stat-card:hover {
+    .btn-modern:hover {
       transform: translateY(-4px);
-      box-shadow: 0 0 25px rgba(64, 196, 255, 0.3);
+      box-shadow: 0 16px 70px rgba(0,0,0,0.8);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      transition: all 0.4s ease;
+    }
+    .btn-outline:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: white;
+    }
+    .logo {
+      max-height: 140px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 1.5rem;
+    }
+    @media (max-width: 640px) {
+      .logo {
+        max-height: 100px;
+      }
+      h1 {
+        font-size: 2.5rem;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen text-white font-sans">
+<body>
 
-  <!-- ШАПКА С НАЗАДОМ -->
-  <div class="flex items-center justify-between px-6 py-6">
-    <a href="index.html" class="flex items-center gap-3 text-cyan-400 hover:text-cyan-300 font-medium text-lg">
-      ← Главная
+  <header class="pt-8 pb-8 px-6 text-center border-b border-white/5">
+    <img 
+      src="mogged-full-logo.png" 
+      alt="MOGGED KLARK Logo" 
+      class="logo"
+      onerror="this.src='https://via.placeholder.com/400x140/000/fff?text=Logo+Not+Found';"
+    >
+    <a href="index.html" class="inline-block mt-4 text-gray-400 hover:text-white transition">
+      ← На главную
     </a>
-    <div class="text-2xl font-black tracking-widest neon-text">KLARK VPN</div>
-  </div>
+  </header>
 
-  <div class="max-w-md mx-auto px-5 pb-12">
-
-<!-- Форма регистрации / входа -->
-<div id="auth-form" class="max-w-md mx-auto p-8 glass rounded-3xl fade-in-up">
-  <h2 class="text-3xl font-bold neon-text text-center mb-6">Вход / Регистрация</h2>
-
-  <input id="email"    type="email"    placeholder="Email"    class="w-full p-4 mb-4 bg-black/40 border border-cyan-500/40 rounded-xl">
-  <input id="password" type="password" placeholder="Пароль"   class="w-full p-4 mb-4 bg-black/40 border border-cyan-500/40 rounded-xl">
-
-  <button onclick="signUp()" class="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-xl font-bold mb-3">Зарегистрироваться</button>
-  <button onclick="signIn()" class="w-full py-4 bg-gradient-to-r from-green-600 to-teal-600 rounded-xl font-bold">Войти</button>
-
-  <p id="auth-message" class="text-center mt-4 text-red-400"></p>
-</div>
-
-<script>
-// Регистрация
-async function signUp() {
-  const email    = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-
-  const { data, error } = await supabase.auth.signUp({ email, password });
-
-  if (error) {
-    document.getElementById('auth-message').textContent = error.message;
-  } else {
-    document.getElementById('auth-message').textContent = 'Зарегистрирован! Теперь войди.';
-  }
-}
-
-// Вход
-async function signIn() {
-  const email    = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    document.getElementById('auth-message').textContent = error.message;
-  } else {
-    loadProfile();  // загружаем профиль после входа
-  }
-}
-</script>
-
-<script>
-async function loadProfile() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    // не вошёл → показываем форму
-    document.getElementById('auth-form').style.display = 'block';
-    document.getElementById('profile-content').style.display = 'none';
-    return;
-  }
-
-  const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
-
-  if (error || !profile) {
-    alert('Профиль не найден');
-    return;
-  }
-
-  // Заполняем поля (добавь id в html-элементы)
-  document.getElementById('profile-username').textContent = profile.username || user.email;
-  document.getElementById('profile-end').textContent     = profile.subscription_end || 'Не установлено';
-  document.getElementById('devices-text').textContent    = `${profile.used_devices} / ${profile.max_devices}`;
-  document.getElementById('happ-link').href              = profile.happ_link || '#';
-  // ... остальные поля
-}
-</script>
-
-      <!-- Аватар + имя -->
-      <div class="flex flex-col items-center mb-8">
-        <div class="relative">
-          <div class="w-32 h-32 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-3xl p-2 avatar-glow">
-            <!-- Маленький щит K (твой оригинальный стиль) -->
-            <svg width="112" height="112" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M96 16 C40 16 16 56 16 96 C16 136 40 176 96 176 C152 176 176 136 176 96 C176 56 152 16 96 16 Z" fill="#1b98e0" stroke="#0d47a1" stroke-width="12"/>
-              <text x="96" y="135" font-family="Impact" font-size="110" fill="#e3f2fd" text-anchor="middle" dominant-baseline="middle" letter-spacing="-8">K</text>
-            </svg>
-          </div>
-        </div>
-        <h2 id="profile-username" class="mt-4 text-4xl font-black neon-text tracking-tighter">gulvo5</h2>
-        <p class="text-cyan-300 text-sm">Premium пользователь</p>
-      </div>
-
-      <!-- Главная карточка статуса -->
-      <div class="glass rounded-3xl p-8 mb-8">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-3">
-            <span class="pulse-dot w-5 h-5 bg-emerald-400 rounded-full"></span>
-            <span class="text-2xl font-bold">Подписка активна</span>
-          </div>
-          <span id="profile-end" class="text-emerald-400 font-semibold text-xl">9 июля 2026</span>
-        </div>
-
-        <!-- Устройства с прогресс-баром -->
-        <div class="mb-8">
-          <div class="flex justify-between text-sm mb-2">
-            <span class="text-blue-300">Устройств</span>
-            <span id="devices-text" class="font-mono">1 / 3</span>
-          </div>
-          <div class="h-3 bg-black/50 rounded-3xl overflow-hidden">
-            <div id="devices-bar" class="h-3 bg-gradient-to-r from-cyan-400 to-violet-500 rounded-3xl w-1/3 transition-all"></div>
-          </div>
-        </div>
-
-        <!-- Персональная ссылка -->
-        <a id="happ-link" href="#" target="_blank"
-           class="glow-button block text-center py-6 rounded-3xl bg-gradient-to-r from-emerald-500 to-teal-500 text-2xl font-bold tracking-wider">
-          📲 МОЯ ЛИЧНАЯ ССЫЛКА HAPP
-        </a>
-      </div>
-
-      <!-- Мини-карточки статов -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="glass rounded-3xl p-6 stat-card text-center">
-          <div class="text-5xl mb-2">🔒</div>
-          <div class="text-sm text-blue-300">Статус</div>
-          <div id="profile-status" class="text-2xl font-bold text-emerald-400">Активна</div>
-        </div>
-        <div class="glass rounded-3xl p-6 stat-card text-center">
-          <div class="text-5xl mb-2">📅</div>
-          <div class="text-sm text-blue-300">Осталось</div>
-          <div id="days-left" class="text-2xl font-bold text-cyan-300">112 дней</div>
-        </div>
-      </div>
-
-      <!-- Кнопка выхода -->
-      <button onclick="logout()" 
-              class="mt-10 w-full py-5 text-red-400 font-medium text-lg border border-red-400/30 rounded-3xl hover:bg-red-400/10 transition-all">
-        Выйти из профиля
+  <main class="max-w-3xl mx-auto px-5 py-10">
+    <div id="auth-form" class="glass rounded-3xl p-10 mb-10">
+      <h2 class="text-4xl font-bold text-white text-center mb-8">Вход / Регистрация</h2>
+      <input 
+        id="email" 
+        type="email" 
+        placeholder="Email" 
+        class="w-full p-5 mb-5 bg-black/50 border border-white/20 rounded-2xl focus:outline-none focus:border-white/40 text-white placeholder-gray-500"
+      >
+      <input 
+        id="password" 
+        type="password" 
+        placeholder="Пароль" 
+        class="w-full p-5 mb-6 bg-black/50 border border-white/20 rounded-2xl focus:outline-none focus:border-white/40 text-white placeholder-gray-500"
+      >
+      <button id="signin-btn" class="btn-modern w-full py-5 rounded-2xl text-xl font-bold mb-4">
+        Войти
       </button>
+      <button id="signup-btn" class="btn-outline w-full py-5 rounded-2xl text-xl font-bold">
+        Зарегистрироваться
+      </button>
+      <p id="auth-message" class="text-center mt-6 text-lg min-h-[1.5rem]"></p>
     </div>
-  </div>
+
+    <div id="profile-content" style="display: none;">
+      <div class="glass rounded-3xl p-10 mb-10 text-center">
+        <h2 id="profile-username" class="text-4xl font-bold text-white mb-3">Загрузка...</h2>
+        <p class="text-gray-400 text-lg">Premium пользователь</p>
+      </div>
+
+      <div class="glass rounded-3xl p-10 mb-10">
+        <div class="flex justify-between items-center mb-8">
+          <div class="text-2xl font-bold text-white">Статус подписки</div>
+          <div id="profile-end" class="text-2xl font-semibold text-gray-300">Загрузка...</div>
+        </div>
+
+        <div class="mb-10">
+          <div class="flex justify-between text-gray-400 mb-3">
+            <span>Устройств</span>
+            <span id="devices-text">0 / 10</span>
+          </div>
+          <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+            <div id="devices-bar" class="h-full bg-white rounded-full w-0 transition-all duration-700"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <div class="glass rounded-2xl p-6 text-center">
+            <div class="text-6xl mb-4">🔒</div>
+            <div class="text-gray-400">Статус</div>
+            <div id="profile-status" class="text-3xl font-bold text-white mt-2">Загрузка...</div>
+          </div>
+          <div class="glass rounded-2xl p-6 text-center">
+            <div class="text-6xl mb-4">📅</div>
+            <div class="text-gray-400">Осталось</div>
+            <div id="days-left" class="text-3xl font-bold text-white mt-2">—</div>
+          </div>
+        </div>
+
+        <div class="glass rounded-2xl p-8 mb-10">
+          <h3 class="text-2xl font-bold text-white mb-6">HWID для Happ</h3>
+          <input 
+            id="hwid-input" 
+            type="text" 
+            placeholder="Вставьте HWID из Happ" 
+            class="w-full p-5 mb-5 bg-black/50 border border-white/20 rounded-2xl focus:outline-none focus:border-white/40 text-white placeholder-gray-500"
+          >
+          <button id="save-hwid-btn" class="btn-modern w-full py-5 rounded-2xl text-xl font-bold">
+            Сохранить HWID
+          </button>
+          <a 
+            id="personal-link" 
+            href="#" 
+            target="_blank" 
+            class="btn-outline block text-center py-6 mt-6 rounded-2xl text-xl font-bold"
+          >
+            МОЯ ЛИЧНАЯ ССЫЛКА HAPP
+          </a>
+        </div>
+
+        <button id="logout-btn" class="w-full py-6 text-xl font-bold text-red-400 border border-red-400/30 rounded-2xl hover:bg-red-900/20 transition">
+          Выйти
+        </button>
+      </div>
+
+      <!-- Админ-панель (скрыта по умолчанию) -->
+      <div id="admin-panel" class="glass rounded-3xl p-10 hidden">
+        <h3 class="text-2xl font-bold text-white mb-6">Админ: Выдать подписку</h3>
+        <input 
+          id="admin-user-identifier" 
+          type="text" 
+          placeholder="Email или User ID" 
+          class="w-full p-5 mb-5 bg-black/50 border border-white/20 rounded-2xl text-white placeholder-gray-500"
+        >
+        <input 
+          id="admin-sub-end" 
+          type="text" 
+          placeholder="Дата окончания: ДД.ММ.ГГГГ" 
+          class="w-full p-5 mb-6 bg-black/50 border border-white/20 rounded-2xl text-white placeholder-gray-500"
+        >
+        <button id="admin-grant-btn" class="btn-modern w-full py-6 rounded-2xl text-xl font-bold">
+          Выдать / Обновить подписку
+        </button>
+        <p id="admin-message" class="text-center mt-6 text-lg min-h-[1.5rem]"></p>
+      </div>
+    </div>
+  </main>
 
   <script>
-    // === ТЕСТОВЫЕ ДАННЫЕ ПОЛЬЗОВАТЕЛЕЙ (можно добавлять сколько угодно) ===
-    const usersDB = {
-      "gulvo5": {
-        endDate: "9 июля 2026 г.",
-        devicesUsed: 1,
-        devicesMax: 3,
-        happLink: "happ://crypt5/тут_твоя_персональная_длинная_строка_для_gulvo5?installid=ABC123",
-        daysLeft: "112"
-      },
-      "testuser": {
-        endDate: "15 августа 2026 г.",
-        devicesUsed: 2,
-        devicesMax: 5,
-        happLink: "happ://crypt5/тут_другая_строка_для_testuser?installid=XYZ789",
-        daysLeft: "78"
+    const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
+
+    let supabaseClient = null;
+    let currentUser = null;
+
+    window.addEventListener('load', async () => {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      document.getElementById('signup-btn')?.addEventListener('click', signUp);
+      document.getElementById('signin-btn')?.addEventListener('click', signIn);
+      document.getElementById('logout-btn')?.addEventListener('click', logout);
+      document.getElementById('save-hwid-btn')?.addEventListener('click', saveHwid);
+      document.getElementById('admin-grant-btn')?.addEventListener('click', adminGrantSubscription);
+
+      await checkSession();
+    });
+
+    async function checkSession() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      currentUser = session?.user ?? null;
+
+      document.getElementById('auth-form').style.display = currentUser ? 'none' : 'block';
+      document.getElementById('profile-content').style.display = currentUser ? 'block' : 'none';
+
+      if (currentUser) {
+        await loadProfile(currentUser.id);
+        await loadDevices();
       }
-      // Добавь сюда новых пользователей по мере надобности
-    };
+    }
 
-    function login() {
-      const username = document.getElementById('username').value.trim().toLowerCase();
-      const password = document.getElementById('password').value;
+    async function signIn() {
+      const email = document.getElementById('email')?.value?.trim();
+      const password = document.getElementById('password')?.value;
+      const msg = document.getElementById('auth-message');
 
-      if (!username || password !== "klark123") {
-        alert("Неверный пароль! Для теста используй: klark123");
+      if (!email || !password) {
+        msg.textContent = 'Введите email и пароль';
         return;
       }
 
-      if (!usersDB[username]) {
-        alert("Пользователь не найден. Попробуй gulvo5 или testuser");
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        msg.textContent = error.message;
         return;
       }
 
-      // Сохраняем в браузере (данные не пропадут пока не очистишь кэш)
-      localStorage.setItem('klarkLoggedIn', 'true');
-      localStorage.setItem('klarkUsername', username);
-
-      showProfile(username);
+      msg.textContent = 'Вход выполнен';
+      setTimeout(() => location.reload(), 800);
     }
 
-    function showProfile(username) {
-      const data = usersDB[username];
+    async function signUp() {
+      const email = document.getElementById('email')?.value?.trim();
+      const password = document.getElementById('password')?.value;
+      const msg = document.getElementById('auth-message');
 
-      document.getElementById('login-screen').classList.add('hidden');
-      const profileScreen = document.getElementById('profile-screen');
-      profileScreen.classList.remove('hidden');
+      if (!email || !password) {
+        msg.textContent = 'Введите email и пароль';
+        return;
+      }
 
-      // Заполняем данные
-      document.getElementById('profile-username').textContent = username;
-      document.getElementById('profile-end').textContent = data.endDate;
-      document.getElementById('happ-link').href = data.happLink;
-      document.getElementById('devices-text').textContent = `${data.devicesUsed} / ${data.devicesMax}`;
-      document.getElementById('devices-bar').style.width = `${(data.devicesUsed / data.devicesMax) * 100}%`;
-      document.getElementById('days-left').textContent = `${data.daysLeft} дней`;
+      const { error } = await supabaseClient.auth.signUp({ email, password });
+      msg.textContent = error ? error.message : 'Зарегистрирован! Проверь почту.';
     }
 
-    function logout() {
-      localStorage.clear();
+    async function logout() {
+      await supabaseClient.auth.signOut();
       location.reload();
     }
 
-    // При загрузке страницы проверяем, вошёл ли уже
-    window.onload = () => {
-      const isLogged = localStorage.getItem('klarkLoggedIn');
-      const savedUser = localStorage.getItem('klarkUsername');
+    async function loadProfile(userId) {
+      try {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('username, is_admin')
+          .eq('id', userId)
+          .single();
 
-      if (isLogged === 'true' && savedUser && usersDB[savedUser]) {
-        document.getElementById('login-screen').classList.add('hidden');
-        showProfile(savedUser);
-      } else {
-        // Показываем форму входа
-        document.getElementById('login-screen').classList.remove('hidden');
+        document.getElementById('profile-username').textContent = profile?.username || 'Пользователь';
+
+        if (profile?.is_admin) {
+          document.getElementById('admin-panel')?.classList.remove('hidden');
+        }
+
+        const { data: sub } = await supabaseClient
+          .from('subscriptions')
+          .select('expires_at, status')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (sub && sub.status === 'active') {
+          const exp = new Date(sub.expires_at);
+          const now = new Date();
+          const days = Math.max(0, Math.ceil((exp - now) / (1000 * 60 * 60 * 24)));
+
+          document.getElementById('profile-status').textContent = 'Активна';
+          document.getElementById('profile-end').textContent = exp.toLocaleDateString('ru-RU');
+          document.getElementById('days-left').textContent = days + ' дней';
+        } else {
+          document.getElementById('profile-status').textContent = 'Неактивна';
+          document.getElementById('profile-end').textContent = '—';
+          document.getElementById('days-left').textContent = '—';
+        }
+      } catch (err) {
+        console.error('Ошибка загрузки профиля:', err);
       }
-    };
+    }
+
+    async function loadDevices() {
+      if (!currentUser) return;
+      try {
+        const fp = await FingerprintJS.load({ monitoring: false });
+        const { visitorId } = await fp.get();
+
+        const { data: sub } = await supabaseClient
+          .from('subscriptions')
+          .select('id, max_devices')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+
+        if (!sub) return;
+
+        const { count: used } = await supabaseClient
+          .from('subscription_devices')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', currentUser.id);
+
+        document.getElementById('devices-text').textContent = `${used || 0} / ${sub.max_devices}`;
+        document.getElementById('devices-bar').style.width = `${(used / sub.max_devices) * 100}%`;
+      } catch (err) {
+        console.error('Ошибка загрузки устройств:', err);
+      }
+    }
+
+    async function saveHwid() {
+      if (!currentUser) return alert('Сначала войдите');
+      const hwid = document.getElementById('hwid-input').value.trim();
+      if (!hwid) return alert('Введите HWID');
+
+      const { error } = await supabaseClient
+        .from('profiles')
+        .update({ hwid })
+        .eq('id', currentUser.id);
+
+      if (error) {
+        alert('Ошибка: ' + error.message);
+      } else {
+        alert('HWID сохранён');
+      }
+    }
+
+    async function adminGrantSubscription() {
+      const identifier = document.getElementById('admin-user-identifier')?.value.trim();
+      const dateStr = document.getElementById('admin-sub-end')?.value.trim();
+      const msg = document.getElementById('admin-message');
+
+      if (!identifier || !dateStr) {
+        msg.textContent = 'Заполните все поля';
+        return;
+      }
+
+      let expiresAt;
+      try {
+        const [dd, mm, yyyy] = dateStr.split('.');
+        expiresAt = `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}T23:59:59Z`;
+      } catch {
+        msg.textContent = 'Неверный формат даты (ДД.ММ.ГГГГ)';
+        return;
+      }
+
+      msg.textContent = 'Обработка...';
+
+      const { error } = await supabaseClient
+        .from('subscriptions')
+        .upsert({
+          user_id: identifier,
+          status: 'active',
+          expires_at: expiresAt,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+
+      msg.textContent = error ? 'Ошибка: ' + error.message : 'Подписка выдана/обновлена';
+    }
   </script>
-
-<script>
-  // Замени на свои реальные значения из Supabase дашборда!
-  const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';  // например https://abcde123.supabase.co
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';  // твой anon public key
-
-  // Создаём клиент Supabase (теперь supabase доступен везде)
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
-  
 </body>
 </html>
