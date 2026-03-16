@@ -6,7 +6,7 @@
   <title>Профиль — KLARK VPN</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- FingerprintJS UMD версия — без export -->
+  <!-- FingerprintJS — UMD версия (без export) -->
   <script src="https://openfpcdn.io/fingerprintjs/v4/umd.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Impact:wght@900&family=Inter:wght@400;600;700&display=swap');
@@ -194,12 +194,10 @@
 
         if (profile?.is_admin) document.getElementById('admin-panel')?.classList.remove('hidden');
 
-        // Заглушка подписки (можно расширить)
         document.getElementById('profile-status').textContent = 'Активен';
         document.getElementById('profile-end').textContent = '∞';
         document.getElementById('days-left').textContent = '∞';
 
-        // HWID и ссылка
         const { data: prof } = await supabaseClient.from('profiles').select('hwid').eq('id', userId).single() || {};
         const hwid = prof?.hwid || '';
         const linkEl = document.getElementById('personal-link');
@@ -227,8 +225,12 @@
           .gte('expires_at', new Date().toISOString())
           .maybeSingle();
 
-        if (!sub) return console.log('Нет активной подписки');
+        if (!sub) {
+          console.log('Нет активной подписки');
+          return;
+        }
 
+        // Вот исправленная часть — без ошибочной деструктуризации
         const resp = await supabaseClient
           .from('subscription_devices')
           .select('*', { count: 'exact', head: true })
@@ -260,8 +262,9 @@
             .eq('id', exists.id);
         }
 
-        document.getElementById('devices-text').textContent = `${used + (exists ? 0 : 1)} / ${sub.max_devices}`;
-        document.getElementById('devices-bar').style.width = `${((used + (exists ? 0 : 1)) / sub.max_devices) * 100}%`;
+        const currentDevices = used + (exists ? 0 : 1);
+        document.getElementById('devices-text').textContent = `${currentDevices} / ${sub.max_devices}`;
+        document.getElementById('devices-bar').style.width = `${(currentDevices / sub.max_devices) * 100}%`;
 
       } catch (err) {
         console.error('Ошибка привязки устройства:', err);
