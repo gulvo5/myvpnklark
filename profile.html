@@ -282,6 +282,82 @@ async function checkSession() {
       }
     }
 
+    // ... после успешного входа / в loadProfile()
+
+async function bindDevice() {
+    if (!supabaseClient) return;
+
+    try {
+        const fp = await FingerprintJS.load({ monitoring: false });
+        const result = await fp.get();
+        const visitorId = result.visitorId;           // строка ~32 символа
+
+        // 1. Получаем подписку пользователя
+        const { data: sub } = await supabaseClient
+            .from('subscriptions')
+            .select('id, max_devices, expires_at')
+            .eq('user_id', user.id)
+            .gte('expires_at', new Date().toISOString())
+            .maybeSingle();
+
+        if (!sub) {
+            console.log("Нет активной подписки");
+            return;
+        }
+
+        // 2. Считаем, сколько устройств уже привязано
+        const { count } = await supabaseClient
+            .from('subscription_devices')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('subscription_id', sub.id);
+
+        const currentCount = count || 0;
+
+        if (currentCount >= sub.max_devices) {
+            alert(`Лимит устройств (${sub.max_devices}) исчерпан!`);
+            // можно показать красивый блок "добавить устройство невозможно"
+            return;
+        }
+
+        // 3. Проверяем — это устройство уже привязано?
+        const { data: exists } = await supabaseClient
+            .from('subscription_devices')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('fingerprint', visitorId)
+            .maybeSingle();
+
+        if (!exists) {
+            // Привязываем новое устройство
+            await supabaseClient
+                .from('subscription_devices')
+                .insert({
+                    user_id: user.id,
+                    subscription_id: sub.id,
+                    fingerprint: visitorId
+                });
+            console.log("Устройство привязано:", visitorId);
+        } else {
+            // просто обновляем last_seen
+            await supabaseClient
+                .from('subscription_devices')
+                .update({ last_seen: new Date().toISOString() })
+                .eq('id', exists.id);
+        }
+
+        // Обновляем UI — показываем сколько устройств использовано
+        document.getElementById('devices-text').textContent = `${currentCount + (exists ? 0 : 1)} / ${sub.max_devices}`;
+
+    } catch (err) {
+        console.error("Ошибка fingerprint / привязки:", err);
+    }
+}
+
+// Вызывай эту функцию после загрузки профиля, если пользователь авторизован
+// Например в конце loadProfile():
+// if (user) bindDevice();
+
     async function logout() {
   if (!supabaseClient) {
     console.warn("supabaseClient не инициализирован");
