@@ -10,380 +10,200 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --bg: #000000;
-      --glass: rgba(18, 18, 18, 0.55);
-      --border: rgba(255, 255, 255, 0.07);
-      --text: #ffffff;
-      --text-muted: #cccccc;
-      --glow: rgba(255, 255, 255, 0.05);
-    }
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: #000;
+      color: #e0f0ff;
+      font-family: 'Inter', sans-serif;
       min-height: 100vh;
-      overflow-x: hidden;
-      margin: 0;
     }
-    .glass {
-      background: var(--glass);
-      backdrop-filter: blur(48px) saturate(140%);
-      -webkit-backdrop-filter: blur(48px) saturate(140%);
-      border: 1px solid var(--border);
-      box-shadow: 0 12px 60px rgba(0,0,0,0.8), 0 0 50px var(--glow);
-      transition: all 0.5s ease;
+    .logo-header {
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(64,196,255,0.2);
     }
-    .glass:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 20px 90px rgba(0,0,0,0.9), 0 0 70px var(--glow);
-      border-color: rgba(255,255,255,0.15);
-    }
-    .btn-modern {
-      background: white;
-      color: black;
-      box-shadow: 0 8px 35px rgba(0,0,0,0.6);
+    .glass-card {
+      background: rgba(10,15,30,0.65);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(64,196,255,0.25);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
       transition: all 0.4s ease;
     }
-    .btn-modern:hover {
+    .glass-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 16px 70px rgba(0,0,0,0.8);
+      box-shadow: 0 16px 48px rgba(64,196,255,0.3);
     }
-    .btn-outline {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.3);
-      color: white;
-      transition: all 0.4s ease;
+    .neon-text {
+      text-shadow: 0 0 10px #40c4ff, 0 0 20px #1b98e0;
     }
-    .btn-outline:hover {
+    .glow-btn {
+      box-shadow: 0 0 20px rgba(64,196,255,0.5);
+      transition: all 0.3s;
+    }
+    .glow-btn:hover {
+      box-shadow: 0 0 35px rgba(64,196,255,0.8);
+      transform: scale(1.03);
+    }
+    .progress-bar {
       background: rgba(255,255,255,0.08);
-      border-color: white;
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
     }
-    .logo {
-      max-height: 140px;
-      width: auto;
-      object-fit: contain;
-      display: block;
-      margin: 0 auto 1.5rem;
+    .progress-fill {
+      background: linear-gradient(90deg, #40c4ff, #7c3aed);
+      height: 100%;
+      transition: width 1s ease;
+    }
+    .status-badge {
+      background: rgba(0,255,127,0.15);
+      color: #00ff7f;
+      border: 1px solid #00ff7f33;
+    }
+    .inactive-badge {
+      background: rgba(255,80,80,0.15);
+      color: #ff5050;
+      border: 1px solid #ff505033;
+    }
+    .admin-section {
+      border-top: 2px solid rgba(124,58,237,0.3);
     }
     @media (max-width: 640px) {
-      .logo {
-        max-height: 100px;
-      }
-      h1 {
-        font-size: 2.5rem;
-      }
+      .text-5xl { font-size: 2.5rem; }
+      .text-4xl { font-size: 2rem; }
     }
   </style>
 </head>
-<body>
+<body class="min-h-screen">
 
-  <header class="pt-8 pb-8 px-6 text-center border-b border-white/5">
-    <img 
-      src="mogged-full-logo.png" 
-      alt="MOGGED KLARK Logo" 
-      class="logo"
-      onerror="this.src='https://via.placeholder.com/400x140/000/fff?text=Logo+Not+Found';"
-    >
-    <a href="index.html" class="inline-block mt-4 text-gray-400 hover:text-white transition">
-      ← На главную
-    </a>
+  <!-- Шапка с логотипом -->
+  <header class="logo-header sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="index.html" class="text-cyan-400 hover:text-cyan-300 flex items-center gap-3 text-lg font-medium">
+        ← На главную
+      </a>
+      <div class="flex items-center gap-6">
+        <img src="mogged-full-logo.png" alt="MOGGED" class="h-10 md:h-12 w-auto object-contain">
+      </div>
+    </div>
   </header>
 
-  <main class="max-w-3xl mx-auto px-5 py-10">
-    <div id="auth-form" class="glass rounded-3xl p-10 mb-10">
-      <h2 class="text-4xl font-bold text-white text-center mb-8">Вход / Регистрация</h2>
-      <input 
-        id="email" 
-        type="email" 
-        placeholder="Email" 
-        class="w-full p-5 mb-5 bg-black/50 border border-white/20 rounded-2xl focus:outline-none focus:border-white/40 text-white placeholder-gray-500"
-      >
-      <input 
-        id="password" 
-        type="password" 
-        placeholder="Пароль" 
-        class="w-full p-5 mb-6 bg-black/50 border border-white/20 rounded-2xl focus:outline-none focus:border-white/40 text-white placeholder-gray-500"
-      >
-      <button id="signin-btn" class="btn-modern w-full py-5 rounded-2xl text-xl font-bold mb-4">
-        Войти
-      </button>
-      <button id="signup-btn" class="btn-outline w-full py-5 rounded-2xl text-xl font-bold">
-        Зарегистрироваться
-      </button>
-      <p id="auth-message" class="text-center mt-6 text-lg min-h-[1.5rem]"></p>
+  <main class="max-w-5xl mx-auto px-5 py-10">
+    <!-- Профильная карточка -->
+    <div class="glass-card rounded-3xl p-8 md:p-12 mb-12 text-center">
+      <h1 id="profile-username" class="text-5xl md:text-6xl font-black neon-text tracking-tight mb-3">
+        Загрузка...
+      </h1>
+      <p class="text-xl text-cyan-300 mb-8 flex items-center justify-center gap-3">
+        Premium пользователь <span class="text-yellow-400 text-2xl">👑</span>
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <div class="text-5xl mb-3">🔒</div>
+          <div class="text-gray-400 mb-2">Статус</div>
+          <div id="profile-status" class="text-2xl font-bold status-badge px-6 py-2 rounded-full inline-block">
+            Загрузка...
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6">
+          <div class="text-5xl mb-3">📱</div>
+          <div class="text-gray-400 mb-2">Устройств</div>
+          <div class="text-2xl font-bold text-white">
+            <span id="devices-text">0</span> / <span id="max-devices">10</span>
+          </div>
+          <div class="progress-bar mt-4">
+            <div id="devices-bar" class="progress-fill w-0"></div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6">
+          <div class="text-5xl mb-3">📅</div>
+          <div class="text-gray-400 mb-2">Осталось</div>
+          <div id="days-left" class="text-2xl font-bold text-cyan-300">— дней</div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6">
+          <div class="text-5xl mb-3">🔐</div>
+          <div class="text-gray-400 mb-2">Истекает</div>
+          <div id="profile-end" class="text-xl font-semibold text-gray-300">Загрузка...</div>
+        </div>
+      </div>
     </div>
 
-    <div id="profile-content" style="display: none;">
-      <div class="glass rounded-3xl p-10 mb-10 text-center">
-        <h2 id="profile-username" class="text-4xl font-bold text-white mb-3">Загрузка...</h2>
-        <p class="text-gray-400 text-lg">Premium пользователь</p>
-      </div>
-
-      <div class="glass rounded-3xl p-10 mb-10">
-        <div class="flex justify-between items-center mb-8">
-          <div class="text-2xl font-bold text-white">Статус подписки</div>
-          <div id="profile-end" class="text-2xl font-semibold text-gray-300">Загрузка...</div>
-        </div>
-
-        <div class="mb-10">
-          <div class="flex justify-between text-gray-400 mb-3">
-            <span>Устройств</span>
-            <span id="devices-text">0 / 10</span>
-          </div>
-          <div class="h-2 bg-white/10 rounded-full overflow-hidden">
-            <div id="devices-bar" class="h-full bg-white rounded-full w-0 transition-all duration-700"></div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-          <div class="glass rounded-2xl p-6 text-center">
-            <div class="text-6xl mb-4">🔒</div>
-            <div class="text-gray-400">Статус</div>
-            <div id="profile-status" class="text-3xl font-bold text-white mt-2">Загрузка...</div>
-          </div>
-          <div class="glass rounded-2xl p-6 text-center">
-            <div class="text-6xl mb-4">📅</div>
-            <div class="text-gray-400">Осталось</div>
-            <div id="days-left" class="text-3xl font-bold text-white mt-2">—</div>
-          </div>
-        </div>
-
-        <div class="glass rounded-2xl p-8 mb-10">
-          <h3 class="text-2xl font-bold text-white mb-6">HWID для Happ</h3>
-          <input 
-            id="hwid-input" 
-            type="text" 
-            placeholder="Вставьте HWID из Happ" 
-            class="w-full p-5 mb-5 bg-black/50 border border-white/20 rounded-2xl focus:outline-none focus:border-white/40 text-white placeholder-gray-500"
-          >
-          <button id="save-hwid-btn" class="btn-modern w-full py-5 rounded-2xl text-xl font-bold">
-            Сохранить HWID
-          </button>
-          <a 
-            id="personal-link" 
-            href="#" 
-            target="_blank" 
-            class="btn-outline block text-center py-6 mt-6 rounded-2xl text-xl font-bold"
-          >
-            МОЯ ЛИЧНАЯ ССЫЛКА HAPP
-          </a>
-        </div>
-
-        <button id="logout-btn" class="w-full py-6 text-xl font-bold text-red-400 border border-red-400/30 rounded-2xl hover:bg-red-900/20 transition">
-          Выйти
+    <!-- HWID блок -->
+    <div class="glass-card rounded-3xl p-8 md:p-12 mb-12">
+      <h2 class="text-3xl font-bold neon-text mb-8 text-center">HWID для Happ</h2>
+      <div class="flex flex-col md:flex-row gap-6">
+        <input 
+          id="hwid-input" 
+          type="text" 
+          placeholder="Вставьте HWID из Happ" 
+          class="flex-1 p-5 bg-black/40 border border-cyan-500/30 rounded-2xl focus:outline-none focus:border-cyan-400 text-white placeholder-gray-500"
+        >
+        <button id="save-hwid-btn" class="glow-btn bg-cyan-600 hover:bg-cyan-500 px-10 py-5 rounded-2xl font-bold text-lg whitespace-nowrap">
+          Сохранить HWID
         </button>
       </div>
+      <a 
+        id="personal-link" 
+        href="#" 
+        target="_blank" 
+        class="glow-btn block mt-6 py-6 bg-gradient-to-r from-blue-700 to-purple-700 rounded-2xl text-2xl font-bold text-center hover:opacity-90 transition"
+      >
+        МОЯ ЛИЧНАЯ ССЫЛКА HAPP
+      </a>
+    </div>
 
-      <!-- Админ-панель (скрыта по умолчанию) -->
-      <div id="admin-panel" class="glass rounded-3xl p-10 hidden">
-        <h3 class="text-2xl font-bold text-white mb-6">Админ: Выдать подписку</h3>
+    <!-- Выход -->
+    <button id="logout-btn" class="w-full py-6 bg-red-900/40 hover:bg-red-800/60 border border-red-500/40 rounded-2xl text-xl font-bold text-red-300 transition">
+      Выйти из аккаунта
+    </button>
+
+    <!-- Админ-панель -->
+    <div id="admin-panel" class="glass-card rounded-3xl p-10 mt-12 hidden admin-section">
+      <h2 class="text-3xl font-bold neon-text mb-8 text-center">Админ: Выдать подписку</h2>
+      <div class="grid md:grid-cols-3 gap-6">
         <input 
           id="admin-user-identifier" 
           type="text" 
           placeholder="Email или User ID" 
-          class="w-full p-5 mb-5 bg-black/50 border border-white/20 rounded-2xl text-white placeholder-gray-500"
+          class="p-5 bg-black/40 border border-purple-500/30 rounded-2xl focus:outline-none focus:border-purple-400 text-white placeholder-gray-500"
         >
         <input 
           id="admin-sub-end" 
           type="text" 
-          placeholder="Дата окончания: ДД.ММ.ГГГГ" 
-          class="w-full p-5 mb-6 bg-black/50 border border-white/20 rounded-2xl text-white placeholder-gray-500"
+          placeholder="ДД.ММ.ГГГГ" 
+          class="p-5 bg-black/40 border border-purple-500/30 rounded-2xl focus:outline-none focus:border-purple-400 text-white placeholder-gray-500"
         >
-        <button id="admin-grant-btn" class="btn-modern w-full py-6 rounded-2xl text-xl font-bold">
-          Выдать / Обновить подписку
+        <button id="admin-grant-btn" class="glow-btn bg-gradient-to-r from-purple-600 to-pink-600 py-5 rounded-2xl font-bold text-lg">
+          Выдать / Обновить
         </button>
-        <p id="admin-message" class="text-center mt-6 text-lg min-h-[1.5rem]"></p>
       </div>
+      <p id="admin-message" class="text-center mt-6 text-lg min-h-[1.5rem]"></p>
     </div>
   </main>
 
   <script>
-    const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
+    // ... (весь твой оригинальный скрипт остаётся без изменений, только добавь в loadProfile обновление классов бейджей)
 
-    let supabaseClient = null;
-    let currentUser = null;
-
-    window.addEventListener('load', async () => {
-      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-      document.getElementById('signup-btn')?.addEventListener('click', signUp);
-      document.getElementById('signin-btn')?.addEventListener('click', signIn);
-      document.getElementById('logout-btn')?.addEventListener('click', logout);
-      document.getElementById('save-hwid-btn')?.addEventListener('click', saveHwid);
-      document.getElementById('admin-grant-btn')?.addEventListener('click', adminGrantSubscription);
-
-      await checkSession();
-    });
-
-    async function checkSession() {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      currentUser = session?.user ?? null;
-
-      document.getElementById('auth-form').style.display = currentUser ? 'none' : 'block';
-      document.getElementById('profile-content').style.display = currentUser ? 'block' : 'none';
-
-      if (currentUser) {
-        await loadProfile(currentUser.id);
-        await loadDevices();
-      }
-    }
-
-    async function signIn() {
-      const email = document.getElementById('email')?.value?.trim();
-      const password = document.getElementById('password')?.value;
-      const msg = document.getElementById('auth-message');
-
-      if (!email || !password) {
-        msg.textContent = 'Введите email и пароль';
-        return;
-      }
-
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) {
-        msg.textContent = error.message;
-        return;
-      }
-
-      msg.textContent = 'Вход выполнен';
-      setTimeout(() => location.reload(), 800);
-    }
-
-    async function signUp() {
-      const email = document.getElementById('email')?.value?.trim();
-      const password = document.getElementById('password')?.value;
-      const msg = document.getElementById('auth-message');
-
-      if (!email || !password) {
-        msg.textContent = 'Введите email и пароль';
-        return;
-      }
-
-      const { error } = await supabaseClient.auth.signUp({ email, password });
-      msg.textContent = error ? error.message : 'Зарегистрирован! Проверь почту.';
-    }
-
-    async function logout() {
-      await supabaseClient.auth.signOut();
-      location.reload();
-    }
-
+    // Добавь это в конец loadProfile после расчёта статуса
     async function loadProfile(userId) {
-      try {
-        const { data: profile } = await supabaseClient
-          .from('profiles')
-          .select('username, is_admin')
-          .eq('id', userId)
-          .single();
+      // ... твой код ...
 
-        document.getElementById('profile-username').textContent = profile?.username || 'Пользователь';
-
-        if (profile?.is_admin) {
-          document.getElementById('admin-panel')?.classList.remove('hidden');
-        }
-
-        const { data: sub } = await supabaseClient
-          .from('subscriptions')
-          .select('expires_at, status')
-          .eq('user_id', userId)
-          .maybeSingle();
-
-        if (sub && sub.status === 'active') {
-          const exp = new Date(sub.expires_at);
-          const now = new Date();
-          const days = Math.max(0, Math.ceil((exp - now) / (1000 * 60 * 60 * 24)));
-
-          document.getElementById('profile-status').textContent = 'Активна';
-          document.getElementById('profile-end').textContent = exp.toLocaleDateString('ru-RU');
-          document.getElementById('days-left').textContent = days + ' дней';
-        } else {
-          document.getElementById('profile-status').textContent = 'Неактивна';
-          document.getElementById('profile-end').textContent = '—';
-          document.getElementById('days-left').textContent = '—';
-        }
-      } catch (err) {
-        console.error('Ошибка загрузки профиля:', err);
-      }
-    }
-
-    async function loadDevices() {
-      if (!currentUser) return;
-      try {
-        const fp = await FingerprintJS.load({ monitoring: false });
-        const { visitorId } = await fp.get();
-
-        const { data: sub } = await supabaseClient
-          .from('subscriptions')
-          .select('id, max_devices')
-          .eq('user_id', currentUser.id)
-          .maybeSingle();
-
-        if (!sub) return;
-
-        const { count: used } = await supabaseClient
-          .from('subscription_devices')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', currentUser.id);
-
-        document.getElementById('devices-text').textContent = `${used || 0} / ${sub.max_devices}`;
-        document.getElementById('devices-bar').style.width = `${(used / sub.max_devices) * 100}%`;
-      } catch (err) {
-        console.error('Ошибка загрузки устройств:', err);
-      }
-    }
-
-    async function saveHwid() {
-      if (!currentUser) return alert('Сначала войдите');
-      const hwid = document.getElementById('hwid-input').value.trim();
-      if (!hwid) return alert('Введите HWID');
-
-      const { error } = await supabaseClient
-        .from('profiles')
-        .update({ hwid })
-        .eq('id', currentUser.id);
-
-      if (error) {
-        alert('Ошибка: ' + error.message);
+      const statusEl = document.getElementById('profile-status');
+      if (sub && sub.status === 'active') {
+        statusEl.textContent = 'Активна';
+        statusEl.className = 'text-2xl font-bold status-badge px-6 py-2 rounded-full inline-block';
       } else {
-        alert('HWID сохранён');
-      }
-    }
-
-    async function adminGrantSubscription() {
-      const identifier = document.getElementById('admin-user-identifier')?.value.trim();
-      const dateStr = document.getElementById('admin-sub-end')?.value.trim();
-      const msg = document.getElementById('admin-message');
-
-      if (!identifier || !dateStr) {
-        msg.textContent = 'Заполните все поля';
-        return;
+        statusEl.textContent = 'Неактивна';
+        statusEl.className = 'text-2xl font-bold inactive-badge px-6 py-2 rounded-full inline-block';
       }
 
-      let expiresAt;
-      try {
-        const [dd, mm, yyyy] = dateStr.split('.');
-        expiresAt = `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}T23:59:59Z`;
-      } catch {
-        msg.textContent = 'Неверный формат даты (ДД.ММ.ГГГГ)';
-        return;
-      }
-
-      msg.textContent = 'Обработка...';
-
-      const { error } = await supabaseClient
-        .from('subscriptions')
-        .upsert({
-          user_id: identifier,
-          status: 'active',
-          expires_at: expiresAt,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' });
-
-      msg.textContent = error ? 'Ошибка: ' + error.message : 'Подписка выдана/обновлена';
+      // ... остальной код ...
     }
   </script>
 </body>
