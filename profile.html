@@ -87,6 +87,16 @@
       border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.1);
     }
+    .sql-box {
+      font-size: 12px;
+      color: #ffaa00;
+      word-break: break-word;
+      background: rgba(255,200,0,0.1);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,200,0,0.3);
+      font-family: monospace;
+    }
     @media (max-width: 640px) {
       img.logo {
         max-height: 120px;
@@ -192,7 +202,38 @@
       </div>
     </div>
 
-    <!-- Админ панель (скрыта по умолчанию) -->
+    <!-- Инструкция по созданию таблицы (для админов) -->
+    <div id="setup-section" class="hidden glass rounded-3xl p-8 mb-8 border border-green-500/30">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="bg-green-600 text-white text-xs px-3 py-1 rounded-full">SETUP</span>
+        <span class="text-xl font-bold text-white">Создание таблицы subscriptions</span>
+      </div>
+      
+      <div class="sql-box">
+        <p class="text-green-400 mb-2">📋 Выполните этот SQL в редакторе Supabase:</p>
+        <pre class="text-xs text-white bg-black/50 p-4 rounded-lg overflow-x-auto">
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id SERIAL PRIMARY KEY,
+  user_id UUID NOT NULL UNIQUE,
+  status TEXT DEFAULT 'active',
+  ends_at TIMESTAMP WITH TIME ZONE,
+  max_devices INTEGER DEFAULT 10,
+  used_devices INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Создаем индекс для быстрого поиска
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
+        </pre>
+      </div>
+      
+      <button id="test-connection-btn" class="w-full mt-4 py-3 bg-green-600/30 border border-green-500/50 rounded-xl text-green-300 font-medium hover:bg-green-600/50 transition">
+        🔄 Проверить подключение к таблице
+      </button>
+    </div>
+
+    <!-- Админ панель -->
     <div id="admin-panel" class="hidden glass rounded-3xl p-8 md:p-10 mb-8 border border-yellow-500/30">
       <div class="flex items-center gap-3 mb-6">
         <span class="admin-badge">ADMIN PANEL</span>
@@ -200,13 +241,14 @@
       </div>
       
       <div class="mb-4 text-sm text-yellow-400 bg-yellow-500/10 p-3 rounded-xl">
-        ⚠️ Поиск пользователя по <span class="font-bold">username</span> в таблице <span class="font-bold">profiles</span>
+        ⚠️ Поиск пользователя по <span class="font-bold">username</span> или <span class="font-bold">ID (uuid)</span> в таблице <span class="font-bold">profiles</span>
       </div>
       
       <div class="mb-6">
-        <label class="block text-gray-400 mb-2">Username пользователя</label>
-        <input id="admin-username" type="text" placeholder="maxsimpiska" 
+        <label class="block text-gray-400 mb-2">Username или UUID пользователя</label>
+        <input id="admin-identifier" type="text" placeholder="maxsimpiska или 25d9e60f-865b-4798-b43b-7d3115f37042" 
                class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
+        <p class="text-xs text-gray-500 mt-1">Можно ввести username или полный UUID</p>
       </div>
       
       <div class="mb-6">
@@ -267,7 +309,7 @@
       let currentUser = null;
 
       // Список администраторов (username)
-      const ADMIN_USERNAMES = ['maxsimpiska', 'admin', 'ваш_username']; // Добавьте свои username
+      const ADMIN_USERNAMES = ['maxsimpiska', 'admin']; // Добавьте свои username
 
       async function initializeApp() {
         if (typeof window.supabase === 'undefined') {
@@ -288,6 +330,7 @@
         document.getElementById('signin-btn')?.addEventListener('click', signIn);
         document.getElementById('logout-btn')?.addEventListener('click', logout);
         document.getElementById('admin-grant-btn')?.addEventListener('click', adminGrantSubscription);
+        document.getElementById('test-connection-btn')?.addEventListener('click', testConnection);
 
         await checkSession();
       }
@@ -302,6 +345,51 @@
       function checkIsAdmin(email) {
         const username = getUsernameFromEmail(email);
         return ADMIN_USERNAMES.includes(username);
+      }
+
+      // Функция для проверки, является ли строка UUID
+      function isUUID(str) {
+        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        return uuidPattern.test(str);
+      }
+
+      async function testConnection() {
+        const infoEl = document.getElementById('admin-info');
+        if (!infoEl) return;
+        
+        infoEl.classList.remove('hidden');
+        infoEl.innerHTML = '⏳ Проверка подключения к таблице subscriptions...';
+        
+        try {
+          // Пробуем создать тестовую запись
+          const testData = {
+            user_id: '00000000-0000-0000-0000-000000000000',
+            status: 'test',
+            ends_at: new Date().toISOString(),
+            max_devices: 1,
+            used_devices: 0
+          };
+          
+          const { error } = await supabaseClient
+            .from('subscriptions')
+            .insert(testData);
+            
+          if (error) {
+            infoEl.innerHTML = `❌ Ошибка: ${error.message}`;
+          } else {
+            infoEl.innerHTML = '✅ Таблица subscriptions доступна! Удаляю тестовую запись...';
+            
+            // Удаляем тестовую запись
+            await supabaseClient
+              .from('subscriptions')
+              .delete()
+              .eq('user_id', '00000000-0000-0000-0000-000000000000');
+              
+            infoEl.innerHTML = '✅ Таблица subscriptions готова к работе!';
+          }
+        } catch (err) {
+          infoEl.innerHTML = `❌ Ошибка: ${err.message}`;
+        }
       }
 
       async function checkSession() {
@@ -321,6 +409,7 @@
             // Проверяем, является ли пользователь админом (по username)
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
+              document.getElementById('setup-section').classList.remove('hidden');
               document.getElementById('admin-badge-container').classList.remove('hidden');
             }
             
@@ -389,6 +478,7 @@
             // Проверяем, является ли пользователь админом (по username)
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
+              document.getElementById('setup-section').classList.remove('hidden');
               document.getElementById('admin-badge-container').classList.remove('hidden');
             }
             
@@ -410,6 +500,7 @@
           document.getElementById('auth-section').style.display = 'block';
           document.getElementById('profile-section').style.display = 'none';
           document.getElementById('admin-panel').classList.add('hidden');
+          document.getElementById('setup-section').classList.add('hidden');
           document.getElementById('admin-badge-container').classList.add('hidden');
           document.getElementById('email').value = '';
           document.getElementById('password').value = '';
@@ -426,90 +517,29 @@
           if (emailEl && user.email) {
             emailEl.textContent = user.email;
           }
-
-          // Загружаем подписку
-          const { data: subscription, error } = await supabaseClient
-            .from('subscriptions')
-            .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle();
-
-          if (error && error.code !== 'PGRST116') throw error;
-
-          const expiresEl = document.getElementById('expires-date');
-          const statusEl = document.getElementById('profile-status');
-          const daysLeftEl = document.getElementById('days-left');
-          const devicesBar = document.getElementById('devices-bar');
-          const devicesText = document.getElementById('devices-text');
-
-          if (subscription && subscription.ends_at) {
-            const endDate = new Date(subscription.ends_at);
-            const today = new Date();
-            const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-            
-            // Форматируем дату
-            const formattedDate = endDate.toLocaleDateString('ru-RU', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric'
-            });
-            
-            if (expiresEl) expiresEl.textContent = formattedDate;
-            
-            if (daysLeft > 0) {
-              if (statusEl) {
-                statusEl.textContent = 'АКТИВНА';
-                statusEl.className = 'text-3xl font-bold text-green-400';
-              }
-              if (daysLeftEl) daysLeftEl.textContent = daysLeft;
-            } else {
-              if (statusEl) {
-                statusEl.textContent = 'ИСТЕКЛА';
-                statusEl.className = 'text-3xl font-bold text-red-400';
-              }
-              if (daysLeftEl) daysLeftEl.textContent = '0';
-            }
-
-            // Количество устройств
-            const maxDevices = subscription.max_devices || 10;
-            const usedDevices = subscription.used_devices || Math.floor(Math.random() * (maxDevices + 1));
-            
-            if (devicesBar) devicesBar.style.width = `${(usedDevices / maxDevices) * 100}%`;
-            if (devicesText) devicesText.textContent = `${usedDevices} / ${maxDevices}`;
-          } else {
-            // Если нет активной подписки
-            if (expiresEl) expiresEl.textContent = 'Нет активной подписки';
-            if (statusEl) {
-              statusEl.textContent = 'НЕТ';
-              statusEl.className = 'text-3xl font-bold text-gray-500';
-            }
-            if (daysLeftEl) daysLeftEl.textContent = '—';
-            if (devicesBar) devicesBar.style.width = '0%';
-            if (devicesText) devicesText.textContent = '0 / 10';
-          }
         } catch (err) {
           console.error('Ошибка загрузки профиля:', err);
         }
       }
 
       async function adminGrantSubscription() {
-        const usernameInput = document.getElementById('admin-username');
+        const identifierInput = document.getElementById('admin-identifier');
         const dateInput = document.getElementById('admin-end-date');
         const devicesInput = document.getElementById('admin-max-devices');
         const messageEl = document.getElementById('admin-message');
         const infoEl = document.getElementById('admin-info');
 
-        if (!usernameInput || !dateInput || !devicesInput || !messageEl) {
+        if (!identifierInput || !dateInput || !devicesInput || !messageEl) {
           console.error('Не найдены элементы админ-панели');
           return;
         }
 
-        const username = usernameInput.value.trim().toLowerCase();
+        const identifier = identifierInput.value.trim();
         const endDateStr = dateInput.value.trim();
         const maxDevices = parseInt(devicesInput.value) || 10;
 
-        if (!username || !endDateStr) {
-          messageEl.textContent = 'Заполните username и дату';
+        if (!identifier || !endDateStr) {
+          messageEl.textContent = 'Заполните идентификатор и дату';
           messageEl.style.color = 'red';
           return;
         }
@@ -540,24 +570,39 @@
         
         if (infoEl) {
           infoEl.classList.remove('hidden');
-          infoEl.innerHTML = `🔍 Поиск username: <b>"${username}"</b> в таблице <b>profiles</b> (поле username)...`;
+          infoEl.innerHTML = `🔍 Поиск: <b>"${identifier}"</b> в таблице <b>profiles</b>...`;
         }
 
         try {
-          // Ищем пользователя в таблице profiles по полю username
-          const { data: profile, error: profileError } = await supabaseClient
-            .from('profiles')
-            .select('id, username')
-            .eq('username', username)
-            .maybeSingle();
+          let profile = null;
+          const isUuid = isUUID(identifier);
 
-          if (profileError) {
-            if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка запроса: ${profileError.message}`;
-            throw profileError;
+          if (isUuid) {
+            // Поиск по UUID
+            if (infoEl) infoEl.innerHTML += `<br>🔍 Определен как UUID`;
+            const { data, error } = await supabaseClient
+              .from('profiles')
+              .select('id, username')
+              .eq('id', identifier)
+              .maybeSingle();
+            
+            if (error) throw error;
+            profile = data;
+          } else {
+            // Поиск по username (в нижнем регистре)
+            if (infoEl) infoEl.innerHTML += `<br>🔍 Определен как username`;
+            const { data, error } = await supabaseClient
+              .from('profiles')
+              .select('id, username')
+              .eq('username', identifier.toLowerCase())
+              .maybeSingle();
+            
+            if (error) throw error;
+            profile = data;
           }
 
           if (!profile) {
-            messageEl.textContent = `❌ Пользователь с username "${username}" не найден в таблице profiles`;
+            messageEl.textContent = `❌ Пользователь с ${isUuid ? 'UUID' : 'username'} "${identifier}" не найден в таблице profiles`;
             messageEl.style.color = 'red';
             if (infoEl) infoEl.innerHTML += `<br>❌ Пользователь не найден`;
             return;
@@ -566,27 +611,52 @@
           if (infoEl) infoEl.innerHTML += `<br>✅ Найден пользователь: ID = <b>${profile.id}</b>, username = <b>${profile.username}</b>`;
           messageEl.textContent = `Пользователь найден! Выдача подписки...`;
 
-          // Обновляем или создаём подписку
+          // Создаём подписку
+          const subscriptionData = {
+            user_id: profile.id,
+            status: 'active',
+            ends_at: endsAt + 'T23:59:59Z',
+            max_devices: maxDevices,
+            used_devices: 0,
+            updated_at: new Date().toISOString()
+          };
+
+          if (infoEl) infoEl.innerHTML += `<br>📝 Данные для вставки: ${JSON.stringify(subscriptionData)}`;
+
           const { error: subError } = await supabaseClient
             .from('subscriptions')
-            .upsert({
-              user_id: profile.id,
-              status: 'active',
-              ends_at: endsAt + 'T23:59:59Z',
-              max_devices: maxDevices,
-              used_devices: 0,
-              updated_at: new Date().toISOString()
-            }, { onConflict: 'user_id' });
+            .insert(subscriptionData);
 
-          if (subError) throw subError;
-
-          messageEl.textContent = `✅ Подписка выдана пользователю "${username}" до ${endDateStr} (макс. ${maxDevices} устройств)`;
-          messageEl.style.color = 'lime';
+          if (subError) {
+            if (subError.code === '23505') { // unique violation
+              // Если запись уже существует, обновляем её
+              if (infoEl) infoEl.innerHTML += `<br>🔄 Запись уже существует, обновляем...`;
+              
+              const { error: updateError } = await supabaseClient
+                .from('subscriptions')
+                .update({
+                  status: 'active',
+                  ends_at: endsAt + 'T23:59:59Z',
+                  max_devices: maxDevices,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', profile.id);
+              
+              if (updateError) throw updateError;
+              
+              messageEl.textContent = `✅ Подписка обновлена для пользователя "${profile.username || identifier}" до ${endDateStr}`;
+            } else {
+              throw subError;
+            }
+          } else {
+            messageEl.textContent = `✅ Подписка выдана пользователю "${profile.username || identifier}" до ${endDateStr} (макс. ${maxDevices} устройств)`;
+          }
           
-          if (infoEl) infoEl.innerHTML += `<br>✅ Подписка успешно выдана!`;
+          messageEl.style.color = 'lime';
+          if (infoEl) infoEl.innerHTML += `<br>✅ Подписка успешно оформлена!`;
 
           // Очищаем поля
-          usernameInput.value = '';
+          identifierInput.value = '';
           dateInput.value = '';
           devicesInput.value = '10';
         } catch (err) {
