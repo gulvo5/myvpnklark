@@ -246,7 +246,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
       
       <div class="mb-6">
         <label class="block text-gray-400 mb-2">Username или UUID пользователя</label>
-        <input id="admin-identifier" type="text" placeholder="maxsimpiska или 25d9e60f-865b-4798-b43b-7d3115f37042" 
+        <input id="admin-identifier" type="text" placeholder="leongera2013 или 25d9e60f-865b-4798-b43b-7d3115f37042" 
                class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
         <p class="text-xs text-gray-500 mt-1">Можно ввести username или полный UUID</p>
       </div>
@@ -309,7 +309,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
       let currentUser = null;
 
       // Список администраторов (username)
-      const ADMIN_USERNAMES = ['maxsimpiska', 'admin']; // Добавьте свои username
+      const ADMIN_USERNAMES = ['maxsimpiska', 'admin', 'leongera2013']; // Добавьте свои username
 
       async function initializeApp() {
         if (typeof window.supabase === 'undefined') {
@@ -517,6 +517,66 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
           if (emailEl && user.email) {
             emailEl.textContent = user.email;
           }
+
+          // Загружаем подписку
+          const { data: subscription, error } = await supabaseClient
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (error && error.code !== 'PGRST116') throw error;
+
+          const expiresEl = document.getElementById('expires-date');
+          const statusEl = document.getElementById('profile-status');
+          const daysLeftEl = document.getElementById('days-left');
+          const devicesBar = document.getElementById('devices-bar');
+          const devicesText = document.getElementById('devices-text');
+
+          if (subscription) {
+            if (subscription.ends_at) {
+              const endDate = new Date(subscription.ends_at);
+              const today = new Date();
+              const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+              
+              const formattedDate = endDate.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              });
+              
+              if (expiresEl) expiresEl.textContent = formattedDate;
+              
+              if (daysLeft > 0) {
+                if (statusEl) {
+                  statusEl.textContent = 'АКТИВНА';
+                  statusEl.className = 'text-3xl font-bold text-green-400';
+                }
+                if (daysLeftEl) daysLeftEl.textContent = daysLeft;
+              } else {
+                if (statusEl) {
+                  statusEl.textContent = 'ИСТЕКЛА';
+                  statusEl.className = 'text-3xl font-bold text-red-400';
+                }
+                if (daysLeftEl) daysLeftEl.textContent = '0';
+              }
+            }
+
+            const maxDevices = subscription.max_devices || 10;
+            const usedDevices = subscription.used_devices || 0;
+            
+            if (devicesBar) devicesBar.style.width = `${(usedDevices / maxDevices) * 100}%`;
+            if (devicesText) devicesText.textContent = `${usedDevices} / ${maxDevices}`;
+          } else {
+            if (expiresEl) expiresEl.textContent = 'Нет активной подписки';
+            if (statusEl) {
+              statusEl.textContent = 'НЕТ';
+              statusEl.className = 'text-3xl font-bold text-gray-500';
+            }
+            if (daysLeftEl) daysLeftEl.textContent = '—';
+            if (devicesBar) devicesBar.style.width = '0%';
+            if (devicesText) devicesText.textContent = '0 / 10';
+          }
         } catch (err) {
           console.error('Ошибка загрузки профиля:', err);
         }
@@ -589,16 +649,65 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
             if (error) throw error;
             profile = data;
           } else {
-            // Поиск по username (в нижнем регистре)
+            // Поиск по username - несколько вариантов
             if (infoEl) infoEl.innerHTML += `<br>🔍 Определен как username`;
-            const { data, error } = await supabaseClient
+            
+            // Вариант 1: точное совпадение (как ввели)
+            if (infoEl) infoEl.innerHTML += `<br>📌 Пробуем точное совпадение: "${identifier}"`;
+            let { data, error } = await supabaseClient
               .from('profiles')
               .select('id, username')
-              .eq('username', identifier.toLowerCase())
+              .eq('username', identifier)
               .maybeSingle();
             
             if (error) throw error;
             profile = data;
+            
+            // Вариант 2: если не нашли, пробуем в нижнем регистре
+            if (!profile) {
+              const lowerIdentifier = identifier.toLowerCase();
+              if (infoEl) infoEl.innerHTML += `<br>📌 Пробуем нижний регистр: "${lowerIdentifier}"`;
+              const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('id, username')
+                .eq('username', lowerIdentifier)
+                .maybeSingle();
+              
+              if (error) throw error;
+              profile = data;
+            }
+            
+            // Вариант 3: если не нашли, пробуем ilike (регистронезависимый поиск)
+            if (!profile) {
+              if (infoEl) infoEl.innerHTML += `<br>📌 Пробуем регистронезависимый поиск: "${identifier}"`;
+              const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('id, username')
+                .ilike('username', identifier)
+                .maybeSingle();
+              
+              if (error) throw error;
+              profile = data;
+            }
+            
+            // Вариант 4: если все еще не нашли, покажем все похожие username для отладки
+            if (!profile) {
+              if (infoEl) infoEl.innerHTML += `<br>🔍 Ищем похожие username...`;
+              const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('username')
+                .ilike('username', `%${identifier}%`)
+                .limit(5);
+              
+              if (error) throw error;
+              
+              if (data && data.length > 0) {
+                const similarUsernames = data.map(p => p.username).join(', ');
+                if (infoEl) infoEl.innerHTML += `<br>📋 Похожие username: ${similarUsernames}`;
+              } else {
+                if (infoEl) infoEl.innerHTML += `<br>📋 Похожих username не найдено`;
+              }
+            }
           }
 
           if (!profile) {
@@ -611,7 +720,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
           if (infoEl) infoEl.innerHTML += `<br>✅ Найден пользователь: ID = <b>${profile.id}</b>, username = <b>${profile.username}</b>`;
           messageEl.textContent = `Пользователь найден! Выдача подписки...`;
 
-          // Создаём подписку
+          // Данные для подписки
           const subscriptionData = {
             user_id: profile.id,
             status: 'active',
@@ -621,38 +730,21 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
             updated_at: new Date().toISOString()
           };
 
-          if (infoEl) infoEl.innerHTML += `<br>📝 Данные для вставки: ${JSON.stringify(subscriptionData)}`;
+          if (infoEl) infoEl.innerHTML += `<br>📝 Данные: ${JSON.stringify(subscriptionData)}`;
 
+          // Используем upsert вместо insert
           const { error: subError } = await supabaseClient
             .from('subscriptions')
-            .insert(subscriptionData);
+            .upsert(subscriptionData, { 
+              onConflict: 'user_id',
+              ignoreDuplicates: false
+            });
 
-          if (subError) {
-            if (subError.code === '23505') { // unique violation
-              // Если запись уже существует, обновляем её
-              if (infoEl) infoEl.innerHTML += `<br>🔄 Запись уже существует, обновляем...`;
-              
-              const { error: updateError } = await supabaseClient
-                .from('subscriptions')
-                .update({
-                  status: 'active',
-                  ends_at: endsAt + 'T23:59:59Z',
-                  max_devices: maxDevices,
-                  updated_at: new Date().toISOString()
-                })
-                .eq('user_id', profile.id);
-              
-              if (updateError) throw updateError;
-              
-              messageEl.textContent = `✅ Подписка обновлена для пользователя "${profile.username || identifier}" до ${endDateStr}`;
-            } else {
-              throw subError;
-            }
-          } else {
-            messageEl.textContent = `✅ Подписка выдана пользователю "${profile.username || identifier}" до ${endDateStr} (макс. ${maxDevices} устройств)`;
-          }
-          
+          if (subError) throw subError;
+
+          messageEl.textContent = `✅ Подписка оформлена для пользователя "${profile.username || identifier}" до ${endDateStr} (макс. ${maxDevices} устройств)`;
           messageEl.style.color = 'lime';
+          
           if (infoEl) infoEl.innerHTML += `<br>✅ Подписка успешно оформлена!`;
 
           // Очищаем поля
