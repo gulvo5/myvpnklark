@@ -89,7 +89,7 @@
       padding: 8px;
       border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.1);
-      max-height: 300px;
+      max-height: 400px;
       overflow-y: auto;
       font-family: monospace;
     }
@@ -452,10 +452,31 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
 
   <script>
     (function() {
+      // Проверяем, загрузился ли Supabase
+      if (typeof window.supabase === 'undefined') {
+        console.error('Supabase не загрузился');
+        document.addEventListener('DOMContentLoaded', function() {
+          const authMsg = document.getElementById('auth-message');
+          if (authMsg) {
+            authMsg.textContent = 'Ошибка: Supabase не загрузился. Обновите страницу.';
+            authMsg.style.color = 'red';
+          }
+        });
+        return;
+      }
+
       const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
 
-      let supabaseClient = null;
+      // Создаем клиент Supabase с правильной конфигурацией
+      const { createClient } = window.supabase;
+      const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+        }
+      });
+
       let currentUser = null;
       let statsChart = null;
 
@@ -484,17 +505,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
       }
 
       async function initializeApp() {
-        if (typeof window.supabase === 'undefined') {
-          console.error('Supabase не загрузился');
-          const authMsg = document.getElementById('auth-message');
-          if (authMsg) {
-            authMsg.textContent = 'Ошибка: Supabase недоступен';
-            authMsg.style.color = 'red';
-          }
-          return;
-        }
-
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         console.log('Supabase клиент создан');
 
         // Назначаем обработчики
@@ -595,6 +605,9 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
         infoEl.innerHTML = '⏳ Проверка подключения к таблице subscriptions...';
         
         try {
+          // Сначала проверим само подключение
+          infoEl.innerHTML += `<br>🔍 Проверяем подключение к Supabase...`;
+          
           const testData = {
             user_id: '00000000-0000-0000-0000-000000000000',
             status: 'test',
@@ -608,21 +621,21 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
             .insert(testData);
             
           if (error) {
-            infoEl.innerHTML = `❌ Ошибка: ${error.message}`;
+            infoEl.innerHTML += `<br>❌ Ошибка: ${error.message}`;
             showToast('Ошибка подключения', 'error');
           } else {
-            infoEl.innerHTML = '✅ Таблица subscriptions доступна! Удаляю тестовую запись...';
+            infoEl.innerHTML += `<br>✅ Таблица subscriptions доступна! Удаляю тестовую запись...`;
             
             await supabaseClient
               .from('subscriptions')
               .delete()
               .eq('user_id', '00000000-0000-0000-0000-000000000000');
               
-            infoEl.innerHTML = '✅ Таблица subscriptions готова к работе!';
+            infoEl.innerHTML += `<br>✅ Таблица subscriptions готова к работе!`;
             showToast('Подключение успешно', 'success');
           }
         } catch (err) {
-          infoEl.innerHTML = `❌ Ошибка: ${err.message}`;
+          infoEl.innerHTML += `<br>❌ Ошибка: ${err.message}`;
           showToast('Ошибка подключения', 'error');
         }
       }
@@ -680,8 +693,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
       }
 
       async function checkSession() {
-        if (!supabaseClient) return;
-        
         try {
           const { data: { session }, error } = await supabaseClient.auth.getSession();
           if (error) throw error;
@@ -919,154 +930,103 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
         }
 
         try {
-          // Проверяем структуру таблицы profiles
-          if (infoEl) infoEl.innerHTML += `<br>🔍 Проверяем структуру таблицы profiles...`;
+          // 1. Проверяем, существует ли таблица
+          if (infoEl) infoEl.innerHTML += `<br>🔍 Проверяем доступ к таблице profiles...`;
           
-          // Пробуем получить список всех колонок
-          const { data: columns, error: columnsError } = await supabaseClient
-            .from('information_schema.columns')
-            .select('column_name, data_type')
-            .eq('table_name', 'profiles')
-            .eq('table_schema', 'public');
+          const { data: testData, error: testError } = await supabaseClient
+            .from('profiles')
+            .select('count', { count: 'exact', head: true });
           
-          if (columnsError) {
-            if (infoEl) infoEl.innerHTML += `<br>❌ Не удалось получить структуру: ${columnsError.message}`;
-          } else if (columns && columns.length > 0) {
-            const columnList = columns.map(c => `${c.column_name} (${c.data_type})`).join(', ');
-            if (infoEl) infoEl.innerHTML += `<br>📋 Колонки в таблице profiles: ${columnList}`;
-          } else {
-            if (infoEl) infoEl.innerHTML += `<br>❌ Таблица profiles не найдена или не имеет колонок`;
+          if (testError) {
+            if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка доступа: ${testError.message}`;
+            throw testError;
           }
+          
+          if (infoEl) infoEl.innerHTML += `<br>✅ Таблица profiles доступна`;
 
-          // Получаем все записи из таблицы profiles
-          if (infoEl) infoEl.innerHTML += `<br>🔍 Загружаем все записи из profiles...`;
+          // 2. Получаем все записи
+          if (infoEl) infoEl.innerHTML += `<br>🔍 Загружаем ВСЕ записи...`;
           
           const { data: allProfiles, error: allError } = await supabaseClient
             .from('profiles')
-            .select('*')
-            .limit(50);
+            .select('*');
           
           if (allError) {
-            if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка доступа к таблице profiles: ${allError.message}`;
+            if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка загрузки: ${allError.message}`;
             throw allError;
           }
           
           if (infoEl) {
-            infoEl.innerHTML += `<br>📊 Всего записей в таблице profiles: ${allProfiles?.length || 0}`;
+            infoEl.innerHTML += `<br>📊 Всего записей: ${allProfiles?.length || 0}`;
             
             if (allProfiles && allProfiles.length > 0) {
-              infoEl.innerHTML += `<br>📋 Первые 5 записей:`;
-              allProfiles.slice(0, 5).forEach((profile, index) => {
-                infoEl.innerHTML += `<br>  ${index + 1}. ${JSON.stringify(profile)}`;
+              infoEl.innerHTML += `<br>📋 Все записи:`;
+              allProfiles.forEach((profile, index) => {
+                infoEl.innerHTML += `<br>${index + 1}. ID: ${profile.id}, username: "${profile.username || 'нет'}"`;
               });
+            } else {
+              infoEl.innerHTML += `<br>❌ Таблица profiles ПУСТАЯ!`;
+              messageEl.textContent = '❌ Таблица profiles пуста';
+              messageEl.style.color = 'red';
+              return;
             }
           }
 
+          // 3. Ищем пользователя
           let profile = null;
           const isUuid = isUUID(identifier);
 
           if (isUuid) {
-            if (infoEl) infoEl.innerHTML += `<br>🔍 Определен как UUID, ищем по полю id...`;
+            if (infoEl) infoEl.innerHTML += `<br>🔍 Ищем UUID в поле id: "${identifier}"`;
             
-            // Ищем по полю id
             const { data, error } = await supabaseClient
               .from('profiles')
               .select('*')
               .eq('id', identifier)
               .maybeSingle();
             
-            if (error && error.code !== 'PGRST116') {
-              if (infoEl) infoEl.innerHTML += `<br>⚠️ Ошибка при поиске: ${error.message}`;
+            if (error) {
+              if (infoEl) infoEl.innerHTML += `<br>⚠️ Ошибка: ${error.message}`;
             }
             
             if (data) {
               profile = data;
-              if (infoEl) infoEl.innerHTML += `<br>✅ Найдено по полю id!`;
-            }
-            
-            // Если не нашли, пробуем другие поля на всякий случай
-            if (!profile) {
-              if (infoEl) infoEl.innerHTML += `<br>📌 Пробуем другие поля...`;
-              
-              const otherFields = ['user_id', 'uuid', 'auth_id'];
-              for (const field of otherFields) {
-                const { data, error } = await supabaseClient
-                  .from('profiles')
-                  .select('*')
-                  .eq(field, identifier)
-                  .maybeSingle();
-                
-                if (error) continue;
-                if (data) {
-                  profile = data;
-                  if (infoEl) infoEl.innerHTML += `<br>✅ Найдено по полю "${field}"!`;
-                  break;
-                }
-              }
+              if (infoEl) infoEl.innerHTML += `<br>✅ Найдено!`;
+            } else {
+              if (infoEl) infoEl.innerHTML += `<br>⛔ Не найдено`;
             }
           } else {
-            if (infoEl) infoEl.innerHTML += `<br>🔍 Определен как username, начинаем поиск...`;
+            if (infoEl) infoEl.innerHTML += `<br>🔍 Ищем username: "${identifier}"`;
             
-            // Вариант 1: точное совпадение
-            if (infoEl) infoEl.innerHTML += `<br>📌 1. Точное совпадение в username: "${identifier}"`;
-            let { data, error } = await supabaseClient
+            const { data, error } = await supabaseClient
               .from('profiles')
               .select('*')
               .eq('username', identifier)
               .maybeSingle();
             
-            if (error && error.code !== 'PGRST116') throw error;
-            profile = data;
-            
-            // Вариант 2: нижний регистр
-            if (!profile) {
-              const lowerIdentifier = identifier.toLowerCase();
-              if (infoEl) infoEl.innerHTML += `<br>📌 2. Нижний регистр: "${lowerIdentifier}"`;
-              const { data, error } = await supabaseClient
-                .from('profiles')
-                .select('*')
-                .eq('username', lowerIdentifier)
-                .maybeSingle();
-              
-              if (error && error.code !== 'PGRST116') throw error;
-              profile = data;
+            if (error) {
+              if (infoEl) infoEl.innerHTML += `<br>⚠️ Ошибка: ${error.message}`;
             }
             
-            // Вариант 3: ilike
-            if (!profile) {
-              if (infoEl) infoEl.innerHTML += `<br>📌 3. ILIKE: "${identifier}"`;
-              const { data, error } = await supabaseClient
-                .from('profiles')
-                .select('*')
-                .ilike('username', identifier)
-                .maybeSingle();
-              
-              if (error && error.code !== 'PGRST116') throw error;
+            if (data) {
               profile = data;
+              if (infoEl) infoEl.innerHTML += `<br>✅ Найдено!`;
+            } else {
+              if (infoEl) infoEl.innerHTML += `<br>⛔ Не найдено`;
             }
           }
 
           if (!profile) {
-            // Показываем все записи для ручного поиска
-            if (infoEl && allProfiles && allProfiles.length > 0) {
-              infoEl.innerHTML += `<br><br>🔍 Все доступные записи из таблицы profiles:`;
-              allProfiles.forEach((p, idx) => {
-                infoEl.innerHTML += `<br>${idx + 1}. ${JSON.stringify(p)}`;
-              });
-            }
-            
-            messageEl.textContent = `❌ Пользователь с ${isUuid ? 'UUID' : 'username'} "${identifier}" не найден в таблице profiles`;
+            messageEl.textContent = `❌ Пользователь "${identifier}" не найден`;
             messageEl.style.color = 'red';
-            if (infoEl) infoEl.innerHTML += `<br>❌ Все варианты поиска не дали результатов`;
             showToast('Пользователь не найден', 'error');
             return;
           }
 
           if (infoEl) {
-            infoEl.innerHTML += `<br>✅ НАЙДЕН! Полные данные:`;
-            infoEl.innerHTML += `<br>${JSON.stringify(profile, null, 2)}`;
+            infoEl.innerHTML += `<br>✅ НАЙДЕН! ID: ${profile.id}, username: ${profile.username}`;
           }
-          
+
           messageEl.textContent = `Пользователь найден! Выдача подписки...`;
 
           const subscriptionData = {
@@ -1078,8 +1038,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
             updated_at: new Date().toISOString()
           };
 
-          if (infoEl) infoEl.innerHTML += `<br>📝 Данные подписки: ${JSON.stringify(subscriptionData)}`;
-
           const { error: subError } = await supabaseClient
             .from('subscriptions')
             .upsert(subscriptionData, { 
@@ -1089,7 +1047,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
 
           if (subError) throw subError;
 
-          // Конфетти при успехе
           if (window.confetti) {
             confetti({
               particleCount: 100,
@@ -1098,18 +1055,16 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
             });
           }
 
-          messageEl.textContent = `✅ Подписка оформлена для пользователя "${profile.username || identifier}" до ${endDateStr} (макс. ${maxDevices} устройств)`;
+          messageEl.textContent = `✅ Подписка оформлена для "${profile.username || identifier}" до ${endDateStr}`;
           messageEl.style.color = 'lime';
           showToast('Подписка успешно выдана!', 'success');
-          
-          if (infoEl) infoEl.innerHTML += `<br>✅ Подписка успешно оформлена!`;
 
           identifierInput.value = '';
           dateInput.value = '';
           devicesInput.value = '10';
           document.getElementById('clear-identifier')?.classList.add('hidden');
         } catch (err) {
-          console.error('Ошибка выдачи подписки:', err);
+          console.error('Ошибка:', err);
           messageEl.textContent = 'Ошибка: ' + (err.message || 'неизвестно');
           messageEl.style.color = 'red';
           showToast('Ошибка: ' + err.message, 'error');
@@ -1117,6 +1072,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
         }
       }
 
+      // Запускаем приложение после загрузки DOM
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeApp);
       } else {
