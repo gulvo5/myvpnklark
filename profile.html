@@ -78,6 +78,11 @@
       font-size: 14px;
       display: inline-block;
     }
+    .error-details {
+      font-size: 12px;
+      color: #ff9999;
+      word-break: break-word;
+    }
     @media (max-width: 640px) {
       img.logo {
         max-height: 120px;
@@ -191,7 +196,7 @@
       </div>
       
       <div class="mb-4 text-sm text-yellow-400 bg-yellow-500/10 p-3 rounded-xl">
-        ⚠️ В системе email сохраняется без домена (например: "maxsimpiska" вместо "maxsimpiska@gmail.com")
+        ⚠️ Поиск пользователя по username (часть email до @) в таблице profile
       </div>
       
       <div class="mb-6">
@@ -217,6 +222,7 @@
         Выдать / Обновить подписку
       </button>
       
+      <div id="admin-debug" class="text-xs text-gray-500 mt-2 p-2 border border-white/10 rounded hidden"></div>
       <p id="admin-message" class="text-center text-yellow-400 min-h-[1.5rem]"></p>
     </div>
 
@@ -487,6 +493,7 @@
         const dateInput = document.getElementById('admin-end-date');
         const devicesInput = document.getElementById('admin-max-devices');
         const messageEl = document.getElementById('admin-message');
+        const debugEl = document.getElementById('admin-debug');
 
         if (!emailInput || !dateInput || !devicesInput || !messageEl) {
           console.error('Не найдены элементы админ-панели');
@@ -529,30 +536,95 @@
 
         messageEl.textContent = 'Поиск пользователя...';
         messageEl.style.color = 'yellow';
+        
+        if (debugEl) {
+          debugEl.classList.remove('hidden');
+          debugEl.innerHTML = `Поиск username: "${username}" в таблице profile...`;
+        }
 
         try {
-          // Ищем пользователя в таблице profile по username (локальная часть email)
-          const { data: profile, error: profileError } = await supabaseClient
-            .from('profile')
-            .select('id, email')
-            .eq('email', username)
-            .maybeSingle();
+          // Сначала проверим, какие таблицы вообще доступны
+          const { data: tables, error: tablesError } = await supabaseClient
+            .from('information_schema.tables')
+            .select('table_name')
+            .eq('table_schema', 'public')
+            .in('table_name', ['profile', 'profiles', 'users', 'Profile']);
+          
+          if (!tablesError && tables && debugEl) {
+            debugEl.innerHTML += `<br>Доступные таблицы: ${tables.map(t => t.table_name).join(', ')}`;
+          }
 
-          if (profileError) throw profileError;
+          // Пробуем найти пользователя в разных возможных таблицах
+          let userRecord = null;
+          let foundInTable = '';
 
-          if (!profile) {
-            messageEl.textContent = `Пользователь "${username}" не найден в таблице profile`;
+          // Пробуем таблицу 'profile' (как у вас в коде)
+          try {
+            const { data, error } = await supabaseClient
+              .from('profile')
+              .select('id, email')
+              .eq('email', username)
+              .maybeSingle();
+            
+            if (!error && data) {
+              userRecord = data;
+              foundInTable = 'profile';
+            }
+          } catch (e) {
+            if (debugEl) debugEl.innerHTML += `<br>Ошибка при запросе profile: ${e.message}`;
+          }
+
+          // Если не нашли, пробуем 'profiles'
+          if (!userRecord) {
+            try {
+              const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('id, email')
+                .eq('email', username)
+                .maybeSingle();
+              
+              if (!error && data) {
+                userRecord = data;
+                foundInTable = 'profiles';
+              }
+            } catch (e) {
+              if (debugEl) debugEl.innerHTML += `<br>Ошибка при запросе profiles: ${e.message}`;
+            }
+          }
+
+          // Если не нашли, пробуем 'users'
+          if (!userRecord) {
+            try {
+              const { data, error } = await supabaseClient
+                .from('users')
+                .select('id, email')
+                .eq('email', username)
+                .maybeSingle();
+              
+              if (!error && data) {
+                userRecord = data;
+                foundInTable = 'users';
+              }
+            } catch (e) {
+              if (debugEl) debugEl.innerHTML += `<br>Ошибка при запросе users: ${e.message}`;
+            }
+          }
+
+          if (!userRecord) {
+            messageEl.textContent = `❌ Пользователь "${username}" не найден ни в одной таблице`;
             messageEl.style.color = 'red';
+            if (debugEl) debugEl.innerHTML += `<br>❌ Пользователь не найден`;
             return;
           }
 
-          messageEl.textContent = 'Пользователь найден! Выдача подписки...';
+          if (debugEl) debugEl.innerHTML += `<br>✅ Найден в таблице: ${foundInTable}, ID: ${userRecord.id}`;
+          messageEl.textContent = `Пользователь найден в таблице ${foundInTable}! Выдача подписки...`;
 
           // Обновляем или создаём подписку
           const { error } = await supabaseClient
             .from('subscriptions')
             .upsert({
-              user_id: profile.id,
+              user_id: userRecord.id,
               status: 'active',
               ends_at: endsAt + 'T23:59:59Z',
               max_devices: maxDevices,
@@ -564,6 +636,8 @@
 
           messageEl.textContent = `✅ Подписка выдана пользователю "${username}" до ${endDateStr} (макс. ${maxDevices} устройств)`;
           messageEl.style.color = 'lime';
+          
+          if (debugEl) debugEl.innerHTML += `<br>✅ Подписка успешно выдана`;
 
           emailInput.value = '';
           dateInput.value = '';
@@ -572,6 +646,7 @@
           console.error('Ошибка выдачи подписки:', err);
           messageEl.textContent = 'Ошибка: ' + (err.message || 'неизвестно');
           messageEl.style.color = 'red';
+          if (debugEl) debugEl.innerHTML += `<br>❌ Ошибка: ${err.message}`;
         }
       }
 
