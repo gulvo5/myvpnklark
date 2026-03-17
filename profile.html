@@ -200,11 +200,11 @@
       </div>
       
       <div class="mb-4 text-sm text-yellow-400 bg-yellow-500/10 p-3 rounded-xl">
-        ⚠️ Поиск пользователя по <span class="font-bold">username</span> в таблице <span class="font-bold">profile</span>
+        ⚠️ Поиск пользователя по <span class="font-bold">username</span> в таблице <span class="font-bold">profiles</span>
       </div>
       
       <div class="mb-6">
-        <label class="block text-gray-400 mb-2">Username пользователя (то, что до @ или просто username)</label>
+        <label class="block text-gray-400 mb-2">Username пользователя</label>
         <input id="admin-username" type="text" placeholder="maxsimpiska" 
                class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
       </div>
@@ -540,13 +540,13 @@
         
         if (infoEl) {
           infoEl.classList.remove('hidden');
-          infoEl.innerHTML = `🔍 Поиск username: <b>"${username}"</b> в таблице <b>profile</b> (поле username)...`;
+          infoEl.innerHTML = `🔍 Поиск username: <b>"${username}"</b> в таблице <b>profiles</b> (поле username)...`;
         }
 
         try {
-          // Ищем пользователя в таблице profile по полю username
+          // Ищем пользователя в таблице profiles по полю username
           const { data: profile, error: profileError } = await supabaseClient
-            .from('profile')
+            .from('profiles')
             .select('id, username')
             .eq('username', username)
             .maybeSingle();
@@ -557,7 +557,7 @@
           }
 
           if (!profile) {
-            messageEl.textContent = `❌ Пользователь с username "${username}" не найден в таблице profile`;
+            messageEl.textContent = `❌ Пользователь с username "${username}" не найден в таблице profiles`;
             messageEl.style.color = 'red';
             if (infoEl) infoEl.innerHTML += `<br>❌ Пользователь не найден`;
             return;
