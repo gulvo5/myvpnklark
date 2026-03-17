@@ -69,6 +69,15 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
+    .admin-badge {
+      background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+      color: black;
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      display: inline-block;
+    }
     @media (max-width: 640px) {
       img.logo {
         max-height: 120px;
@@ -134,8 +143,13 @@
           </span>
           <span class="text-3xl font-bold text-white">Активная подписка</span>
         </div>
-        <div id="profile-email" class="text-xl text-gray-400">
-          загрузка...
+        <div class="flex items-center gap-4">
+          <div id="admin-badge-container" class="hidden">
+            <span class="admin-badge">ADMIN</span>
+          </div>
+          <div id="profile-email" class="text-xl text-gray-400">
+            загрузка...
+          </div>
         </div>
       </div>
 
@@ -167,6 +181,39 @@
         <p class="text-gray-500 text-lg mb-2">Действует до</p>
         <p id="expires-date" class="text-2xl font-semibold text-white">загрузка...</p>
       </div>
+    </div>
+
+    <!-- Админ панель (скрыта по умолчанию) -->
+    <div id="admin-panel" class="hidden glass rounded-3xl p-8 md:p-10 mb-8 border border-yellow-500/30">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="admin-badge">ADMIN PANEL</span>
+        <span class="text-xl font-bold text-white">Выдача подписок</span>
+      </div>
+      
+      <div class="mb-6">
+        <label class="block text-gray-400 mb-2">Email пользователя</label>
+        <input id="admin-user-email" type="email" placeholder="user@example.com" 
+               class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
+      </div>
+      
+      <div class="mb-6">
+        <label class="block text-gray-400 mb-2">Дата окончания (ДД.ММ.ГГГГ)</label>
+        <input id="admin-end-date" type="text" placeholder="31.12.2026" 
+               class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
+      </div>
+      
+      <div class="mb-6">
+        <label class="block text-gray-400 mb-2">Макс. устройств</label>
+        <input id="admin-max-devices" type="number" value="10" min="1" max="100"
+               class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
+      </div>
+      
+      <button id="admin-grant-btn" 
+              class="w-full py-5 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-xl font-bold hover:opacity-90 transition transform hover:scale-[1.02] mb-4">
+        Выдать / Обновить подписку
+      </button>
+      
+      <p id="admin-message" class="text-center text-yellow-400 min-h-[1.5rem]"></p>
     </div>
 
     <!-- Кнопка продления -->
@@ -203,6 +250,10 @@
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
 
       let supabaseClient = null;
+      let currentUser = null;
+
+      // Список администраторов (можно заменить на проверку в БД)
+      const ADMIN_EMAILS = ['admin@klark.ru', 'your-email@example.com']; // Добавьте свои email
 
       async function initializeApp() {
         if (typeof window.supabase === 'undefined') {
@@ -222,8 +273,13 @@
         document.getElementById('signup-btn')?.addEventListener('click', signUp);
         document.getElementById('signin-btn')?.addEventListener('click', signIn);
         document.getElementById('logout-btn')?.addEventListener('click', logout);
+        document.getElementById('admin-grant-btn')?.addEventListener('click', adminGrantSubscription);
 
         await checkSession();
+      }
+
+      function checkIsAdmin(email) {
+        return ADMIN_EMAILS.includes(email);
       }
 
       async function checkSession() {
@@ -234,12 +290,20 @@
           if (error) throw error;
           
           if (session) {
+            currentUser = session.user;
+            
             // Показываем профиль, скрываем форму входа
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
             
+            // Проверяем, является ли пользователь админом
+            if (checkIsAdmin(currentUser.email)) {
+              document.getElementById('admin-panel').classList.remove('hidden');
+              document.getElementById('admin-badge-container').classList.remove('hidden');
+            }
+            
             // Загружаем данные профиля
-            await loadProfile(session.user);
+            await loadProfile(currentUser);
           }
         } catch (err) {
           console.error('Ошибка проверки сессии:', err);
@@ -295,9 +359,18 @@
           if (error) throw error;
 
           if (data.session) {
+            currentUser = data.user;
+            
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
-            await loadProfile(data.user);
+            
+            // Проверяем, является ли пользователь админом
+            if (checkIsAdmin(currentUser.email)) {
+              document.getElementById('admin-panel').classList.remove('hidden');
+              document.getElementById('admin-badge-container').classList.remove('hidden');
+            }
+            
+            await loadProfile(currentUser);
           }
         } catch (err) {
           messageEl.textContent = 'Ошибка входа: ' + (err.message || 'неверные данные');
@@ -310,8 +383,12 @@
           const { error } = await supabaseClient.auth.signOut();
           if (error) throw error;
           
+          currentUser = null;
+          
           document.getElementById('auth-section').style.display = 'block';
           document.getElementById('profile-section').style.display = 'none';
+          document.getElementById('admin-panel').classList.add('hidden');
+          document.getElementById('admin-badge-container').classList.add('hidden');
           document.getElementById('email').value = '';
           document.getElementById('password').value = '';
           document.getElementById('auth-message').textContent = '';
@@ -371,14 +448,14 @@
               if (daysLeftEl) daysLeftEl.textContent = '0';
             }
 
-            // Симуляция количества устройств (можно заменить на реальные данные)
+            // Количество устройств
             const maxDevices = subscription.max_devices || 10;
-            const usedDevices = Math.floor(Math.random() * (maxDevices + 1));
+            const usedDevices = subscription.used_devices || Math.floor(Math.random() * (maxDevices + 1));
             
             if (devicesBar) devicesBar.style.width = `${(usedDevices / maxDevices) * 100}%`;
             if (devicesText) devicesText.textContent = `${usedDevices} / ${maxDevices}`;
           } else {
-            // Если нет активной подписки, показываем "нет подписки"
+            // Если нет активной подписки
             if (expiresEl) expiresEl.textContent = 'Нет активной подписки';
             if (statusEl) {
               statusEl.textContent = 'НЕТ';
@@ -390,6 +467,95 @@
           }
         } catch (err) {
           console.error('Ошибка загрузки профиля:', err);
+        }
+      }
+
+      async function adminGrantSubscription() {
+        const emailInput = document.getElementById('admin-user-email');
+        const dateInput = document.getElementById('admin-end-date');
+        const devicesInput = document.getElementById('admin-max-devices');
+        const messageEl = document.getElementById('admin-message');
+
+        if (!emailInput || !dateInput || !devicesInput || !messageEl) {
+          console.error('Не найдены элементы админ-панели');
+          return;
+        }
+
+        const email = emailInput.value.trim();
+        const endDateStr = dateInput.value.trim();
+        const maxDevices = parseInt(devicesInput.value) || 10;
+
+        if (!email || !endDateStr) {
+          messageEl.textContent = 'Заполните email и дату';
+          messageEl.style.color = 'red';
+          return;
+        }
+
+        let endsAt;
+
+        try {
+          const [dd, mm, yyyy] = endDateStr.split('.').map(p => p.trim());
+
+          if (!dd || !mm || !yyyy || yyyy.length !== 4) {
+            throw new Error('неверный формат даты');
+          }
+
+          endsAt = `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+
+          const testDate = new Date(endsAt);
+          if (Number.isNaN(testDate.getTime())) {
+            throw new Error('некорректная дата');
+          }
+        } catch {
+          messageEl.textContent = 'Неверный формат. Пример: 31.12.2026';
+          messageEl.style.color = 'red';
+          return;
+        }
+
+        messageEl.textContent = 'Поиск пользователя...';
+        messageEl.style.color = 'yellow';
+
+        try {
+          // Ищем пользователя по email
+          const { data: users, error: userError } = await supabaseClient
+            .from('users')
+            .select('id')
+            .eq('email', email)
+            .maybeSingle();
+
+          if (userError) throw userError;
+
+          if (!users) {
+            messageEl.textContent = 'Пользователь с таким email не найден';
+            messageEl.style.color = 'red';
+            return;
+          }
+
+          messageEl.textContent = 'Выдача подписки...';
+
+          const { error } = await supabaseClient
+            .from('subscriptions')
+            .upsert({
+              user_id: users.id,
+              status: 'active',
+              ends_at: endsAt + 'T23:59:59Z',
+              max_devices: maxDevices,
+              used_devices: 0,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
+
+          if (error) throw error;
+
+          messageEl.textContent = `Подписка выдана до ${endDateStr} (макс. ${maxDevices} устройств)`;
+          messageEl.style.color = 'lime';
+
+          emailInput.value = '';
+          dateInput.value = '';
+          devicesInput.value = '10';
+        } catch (err) {
+          console.error('Ошибка выдачи подписки:', err);
+          messageEl.textContent = 'Ошибка: ' + (err.message || 'неизвестно');
+          messageEl.style.color = 'red';
         }
       }
 
