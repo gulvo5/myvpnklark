@@ -366,7 +366,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
       
       <div class="mb-4 text-sm text-yellow-400 bg-yellow-500/10 p-3 rounded-xl flex items-center gap-2">
         <i class="fa-regular fa-circle-info"></i>
-        <span>Поиск пользователя по <span class="font-bold">username</span> или <span class="font-bold">ID (uuid)</span> в таблице <span class="font-bold">profile</span></span>
+        <span>Поиск пользователя по <span class="font-bold">username</span> или <span class="font-bold">ID (uuid)</span> в таблице <span class="font-bold">profiles</span></span>
       </div>
       
       <div class="mb-6 relative z-10">
@@ -915,44 +915,44 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
         
         if (infoEl) {
           infoEl.classList.remove('hidden');
-          infoEl.innerHTML = `🔍 Поиск: <b>"${identifier}"</b> в таблице <b>profile</b>...`;
+          infoEl.innerHTML = `🔍 Поиск: <b>"${identifier}"</b> в таблице <b>profiles</b>...`;
         }
 
         try {
-          // Проверяем структуру таблицы profile
-          if (infoEl) infoEl.innerHTML += `<br>🔍 Проверяем структуру таблицы profile...`;
+          // Проверяем структуру таблицы profiles
+          if (infoEl) infoEl.innerHTML += `<br>🔍 Проверяем структуру таблицы profiles...`;
           
           // Пробуем получить список всех колонок
           const { data: columns, error: columnsError } = await supabaseClient
             .from('information_schema.columns')
             .select('column_name, data_type')
-            .eq('table_name', 'profile')
+            .eq('table_name', 'profiles')
             .eq('table_schema', 'public');
           
           if (columnsError) {
             if (infoEl) infoEl.innerHTML += `<br>❌ Не удалось получить структуру: ${columnsError.message}`;
           } else if (columns && columns.length > 0) {
             const columnList = columns.map(c => `${c.column_name} (${c.data_type})`).join(', ');
-            if (infoEl) infoEl.innerHTML += `<br>📋 Колонки в таблице profile: ${columnList}`;
+            if (infoEl) infoEl.innerHTML += `<br>📋 Колонки в таблице profiles: ${columnList}`;
           } else {
-            if (infoEl) infoEl.innerHTML += `<br>❌ Таблица profile не найдена или не имеет колонок`;
+            if (infoEl) infoEl.innerHTML += `<br>❌ Таблица profiles не найдена или не имеет колонок`;
           }
 
-          // Получаем все записи из таблицы profile
-          if (infoEl) infoEl.innerHTML += `<br>🔍 Загружаем все записи из profile...`;
+          // Получаем все записи из таблицы profiles
+          if (infoEl) infoEl.innerHTML += `<br>🔍 Загружаем все записи из profiles...`;
           
           const { data: allProfiles, error: allError } = await supabaseClient
-            .from('profile')
+            .from('profiles')
             .select('*')
             .limit(50);
           
           if (allError) {
-            if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка доступа к таблице profile: ${allError.message}`;
+            if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка доступа к таблице profiles: ${allError.message}`;
             throw allError;
           }
           
           if (infoEl) {
-            infoEl.innerHTML += `<br>📊 Всего записей в таблице profile: ${allProfiles?.length || 0}`;
+            infoEl.innerHTML += `<br>📊 Всего записей в таблице profiles: ${allProfiles?.length || 0}`;
             
             if (allProfiles && allProfiles.length > 0) {
               infoEl.innerHTML += `<br>📋 Первые 5 записей:`;
@@ -970,7 +970,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
             
             // Ищем по полю id
             const { data, error } = await supabaseClient
-              .from('profile')
+              .from('profiles')
               .select('*')
               .eq('id', identifier)
               .maybeSingle();
@@ -991,7 +991,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
               const otherFields = ['user_id', 'uuid', 'auth_id'];
               for (const field of otherFields) {
                 const { data, error } = await supabaseClient
-                  .from('profile')
+                  .from('profiles')
                   .select('*')
                   .eq(field, identifier)
                   .maybeSingle();
@@ -1010,7 +1010,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
             // Вариант 1: точное совпадение
             if (infoEl) infoEl.innerHTML += `<br>📌 1. Точное совпадение в username: "${identifier}"`;
             let { data, error } = await supabaseClient
-              .from('profile')
+              .from('profiles')
               .select('*')
               .eq('username', identifier)
               .maybeSingle();
@@ -1023,7 +1023,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
               const lowerIdentifier = identifier.toLowerCase();
               if (infoEl) infoEl.innerHTML += `<br>📌 2. Нижний регистр: "${lowerIdentifier}"`;
               const { data, error } = await supabaseClient
-                .from('profile')
+                .from('profiles')
                 .select('*')
                 .eq('username', lowerIdentifier)
                 .maybeSingle();
@@ -1036,7 +1036,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
             if (!profile) {
               if (infoEl) infoEl.innerHTML += `<br>📌 3. ILIKE: "${identifier}"`;
               const { data, error } = await supabaseClient
-                .from('profile')
+                .from('profiles')
                 .select('*')
                 .ilike('username', identifier)
                 .maybeSingle();
@@ -1049,13 +1049,13 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
           if (!profile) {
             // Показываем все записи для ручного поиска
             if (infoEl && allProfiles && allProfiles.length > 0) {
-              infoEl.innerHTML += `<br><br>🔍 Все доступные записи из таблицы profile:`;
+              infoEl.innerHTML += `<br><br>🔍 Все доступные записи из таблицы profiles:`;
               allProfiles.forEach((p, idx) => {
                 infoEl.innerHTML += `<br>${idx + 1}. ${JSON.stringify(p)}`;
               });
             }
             
-            messageEl.textContent = `❌ Пользователь с ${isUuid ? 'UUID' : 'username'} "${identifier}" не найден в таблице profile`;
+            messageEl.textContent = `❌ Пользователь с ${isUuid ? 'UUID' : 'username'} "${identifier}" не найден в таблице profiles`;
             messageEl.style.color = 'red';
             if (infoEl) infoEl.innerHTML += `<br>❌ Все варианты поиска не дали результатов`;
             showToast('Пользователь не найден', 'error');
