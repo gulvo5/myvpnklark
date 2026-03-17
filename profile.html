@@ -86,6 +86,8 @@
       padding: 8px;
       border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.1);
+      max-height: 300px;
+      overflow-y: auto;
     }
     .sql-box {
       font-size: 12px;
@@ -309,7 +311,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
       let currentUser = null;
 
       // Список администраторов (username)
-      const ADMIN_USERNAMES = ['maxsimpiska', 'admin', 'leongera2013']; // Добавьте свои username
+      const ADMIN_USERNAMES = ['maxsimpiska', 'admin', 'leongera2013'];
 
       async function initializeApp() {
         if (typeof window.supabase === 'undefined') {
@@ -325,7 +327,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         console.log('Supabase клиент создан');
 
-        // Назначаем обработчики
         document.getElementById('signup-btn')?.addEventListener('click', signUp);
         document.getElementById('signin-btn')?.addEventListener('click', signIn);
         document.getElementById('logout-btn')?.addEventListener('click', logout);
@@ -335,19 +336,16 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
         await checkSession();
       }
 
-      // Функция для получения username из email (до @)
       function getUsernameFromEmail(email) {
         if (!email) return '';
         return email.split('@')[0].toLowerCase();
       }
 
-      // Проверка является ли пользователь админом (по username)
       function checkIsAdmin(email) {
         const username = getUsernameFromEmail(email);
         return ADMIN_USERNAMES.includes(username);
       }
 
-      // Функция для проверки, является ли строка UUID
       function isUUID(str) {
         const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         return uuidPattern.test(str);
@@ -361,7 +359,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
         infoEl.innerHTML = '⏳ Проверка подключения к таблице subscriptions...';
         
         try {
-          // Пробуем создать тестовую запись
           const testData = {
             user_id: '00000000-0000-0000-0000-000000000000',
             status: 'test',
@@ -379,7 +376,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
           } else {
             infoEl.innerHTML = '✅ Таблица subscriptions доступна! Удаляю тестовую запись...';
             
-            // Удаляем тестовую запись
             await supabaseClient
               .from('subscriptions')
               .delete()
@@ -402,18 +398,15 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
           if (session) {
             currentUser = session.user;
             
-            // Показываем профиль, скрываем форму входа
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
             
-            // Проверяем, является ли пользователь админом (по username)
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('setup-section').classList.remove('hidden');
               document.getElementById('admin-badge-container').classList.remove('hidden');
             }
             
-            // Загружаем данные профиля
             await loadProfile(currentUser);
           }
         } catch (err) {
@@ -475,7 +468,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
             
-            // Проверяем, является ли пользователь админом (по username)
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('setup-section').classList.remove('hidden');
@@ -512,13 +504,11 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
 
       async function loadProfile(user) {
         try {
-          // Показываем email пользователя
           const emailEl = document.getElementById('profile-email');
           if (emailEl && user.email) {
             emailEl.textContent = user.email;
           }
 
-          // Загружаем подписку
           const { data: subscription, error } = await supabaseClient
             .from('subscriptions')
             .select('*')
@@ -634,42 +624,64 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
         }
 
         try {
+          // Проверяем структуру таблицы profiles
+          if (infoEl) infoEl.innerHTML += `<br>🔍 Проверяем таблицу profiles...`;
+          
+          const { data: allProfiles, error: allError } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .limit(20);
+          
+          if (allError) {
+            if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка доступа к таблице profiles: ${allError.message}`;
+            throw allError;
+          }
+          
+          if (infoEl) {
+            infoEl.innerHTML += `<br>📊 Всего записей в таблице: ${allProfiles?.length || 0}`;
+            
+            if (allProfiles && allProfiles.length > 0) {
+              infoEl.innerHTML += `<br>📋 Первые 5 записей:`;
+              allProfiles.slice(0, 5).forEach((profile, index) => {
+                infoEl.innerHTML += `<br>  ${index + 1}. ID: ${profile.id}, username: "${profile.username || 'нет'}"`;
+              });
+            }
+          }
+
           let profile = null;
           const isUuid = isUUID(identifier);
 
           if (isUuid) {
-            // Поиск по UUID
-            if (infoEl) infoEl.innerHTML += `<br>🔍 Определен как UUID`;
+            if (infoEl) infoEl.innerHTML += `<br>🔍 Определен как UUID, ищем по ID...`;
             const { data, error } = await supabaseClient
               .from('profiles')
-              .select('id, username')
+              .select('*')
               .eq('id', identifier)
               .maybeSingle();
             
             if (error) throw error;
             profile = data;
           } else {
-            // Поиск по username - несколько вариантов
-            if (infoEl) infoEl.innerHTML += `<br>🔍 Определен как username`;
+            if (infoEl) infoEl.innerHTML += `<br>🔍 Определен как username, начинаем поиск...`;
             
-            // Вариант 1: точное совпадение (как ввели)
-            if (infoEl) infoEl.innerHTML += `<br>📌 Пробуем точное совпадение: "${identifier}"`;
+            // Вариант 1: точное совпадение
+            if (infoEl) infoEl.innerHTML += `<br>📌 1. Точное совпадение: "${identifier}"`;
             let { data, error } = await supabaseClient
               .from('profiles')
-              .select('id, username')
+              .select('*')
               .eq('username', identifier)
               .maybeSingle();
             
             if (error) throw error;
             profile = data;
             
-            // Вариант 2: если не нашли, пробуем в нижнем регистре
+            // Вариант 2: нижний регистр
             if (!profile) {
               const lowerIdentifier = identifier.toLowerCase();
-              if (infoEl) infoEl.innerHTML += `<br>📌 Пробуем нижний регистр: "${lowerIdentifier}"`;
+              if (infoEl) infoEl.innerHTML += `<br>📌 2. Нижний регистр: "${lowerIdentifier}"`;
               const { data, error } = await supabaseClient
                 .from('profiles')
-                .select('id, username')
+                .select('*')
                 .eq('username', lowerIdentifier)
                 .maybeSingle();
               
@@ -677,12 +689,12 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
               profile = data;
             }
             
-            // Вариант 3: если не нашли, пробуем ilike (регистронезависимый поиск)
+            // Вариант 3: ilike (регистронезависимый)
             if (!profile) {
-              if (infoEl) infoEl.innerHTML += `<br>📌 Пробуем регистронезависимый поиск: "${identifier}"`;
+              if (infoEl) infoEl.innerHTML += `<br>📌 3. ILIKE: "${identifier}"`;
               const { data, error } = await supabaseClient
                 .from('profiles')
-                .select('id, username')
+                .select('*')
                 .ilike('username', identifier)
                 .maybeSingle();
               
@@ -690,37 +702,34 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
               profile = data;
             }
             
-            // Вариант 4: если все еще не нашли, покажем все похожие username для отладки
+            // Вариант 4: ilike с wildcards
             if (!profile) {
-              if (infoEl) infoEl.innerHTML += `<br>🔍 Ищем похожие username...`;
+              if (infoEl) infoEl.innerHTML += `<br>📌 4. ILIKE с %: "%${identifier}%"`;
               const { data, error } = await supabaseClient
                 .from('profiles')
-                .select('username')
+                .select('*')
                 .ilike('username', `%${identifier}%`)
-                .limit(5);
+                .maybeSingle();
               
               if (error) throw error;
-              
-              if (data && data.length > 0) {
-                const similarUsernames = data.map(p => p.username).join(', ');
-                if (infoEl) infoEl.innerHTML += `<br>📋 Похожие username: ${similarUsernames}`;
-              } else {
-                if (infoEl) infoEl.innerHTML += `<br>📋 Похожих username не найдено`;
-              }
+              profile = data;
             }
           }
 
           if (!profile) {
-            messageEl.textContent = `❌ Пользователь с ${isUuid ? 'UUID' : 'username'} "${identifier}" не найден в таблице profiles`;
+            messageEl.textContent = `❌ Пользователь с ${isUuid ? 'UUID' : 'username'} "${identifier}" не найден`;
             messageEl.style.color = 'red';
-            if (infoEl) infoEl.innerHTML += `<br>❌ Пользователь не найден`;
+            if (infoEl) infoEl.innerHTML += `<br>❌ Все варианты поиска не дали результатов`;
             return;
           }
 
-          if (infoEl) infoEl.innerHTML += `<br>✅ Найден пользователь: ID = <b>${profile.id}</b>, username = <b>${profile.username}</b>`;
+          if (infoEl) {
+            infoEl.innerHTML += `<br>✅ НАЙДЕН! ID: <b>${profile.id}</b>`;
+            infoEl.innerHTML += `<br>📄 Данные профиля: ${JSON.stringify(profile, null, 2)}`;
+          }
+          
           messageEl.textContent = `Пользователь найден! Выдача подписки...`;
 
-          // Данные для подписки
           const subscriptionData = {
             user_id: profile.id,
             status: 'active',
@@ -730,9 +739,8 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
             updated_at: new Date().toISOString()
           };
 
-          if (infoEl) infoEl.innerHTML += `<br>📝 Данные: ${JSON.stringify(subscriptionData)}`;
+          if (infoEl) infoEl.innerHTML += `<br>📝 Данные подписки: ${JSON.stringify(subscriptionData)}`;
 
-          // Используем upsert вместо insert
           const { error: subError } = await supabaseClient
             .from('subscriptions')
             .upsert(subscriptionData, { 
@@ -747,7 +755,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
           
           if (infoEl) infoEl.innerHTML += `<br>✅ Подписка успешно оформлена!`;
 
-          // Очищаем поля
           identifierInput.value = '';
           dateInput.value = '';
           devicesInput.value = '10';
@@ -759,7 +766,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
         }
       }
 
-      // Запуск приложения
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeApp);
       } else {
