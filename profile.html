@@ -190,9 +190,13 @@
         <span class="text-xl font-bold text-white">Выдача подписок</span>
       </div>
       
+      <div class="mb-4 text-sm text-yellow-400 bg-yellow-500/10 p-3 rounded-xl">
+        ⚠️ В системе email сохраняется без домена (например: "maxsimpiska" вместо "maxsimpiska@gmail.com")
+      </div>
+      
       <div class="mb-6">
-        <label class="block text-gray-400 mb-2">Email пользователя</label>
-        <input id="admin-user-email" type="email" placeholder="user@example.com" 
+        <label class="block text-gray-400 mb-2">Email пользователя (можно с доменом или без)</label>
+        <input id="admin-user-email" type="text" placeholder="maxsimpiska или maxsimpiska@gmail.com" 
                class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
       </div>
       
@@ -252,8 +256,8 @@
       let supabaseClient = null;
       let currentUser = null;
 
-      // Список администраторов (можно заменить на проверку в БД)
-      const ADMIN_EMAILS = ['admin@klark.ru', 'your-email@example.com']; // Добавьте свои email
+      // Список администраторов (локальная часть email без домена)
+      const ADMIN_USERNAMES = ['maxsimpiska', 'admin', 'yourusername']; // Добавьте свои username
 
       async function initializeApp() {
         if (typeof window.supabase === 'undefined') {
@@ -278,8 +282,16 @@
         await checkSession();
       }
 
+      // Функция для получения username из email (до @)
+      function getUsernameFromEmail(email) {
+        if (!email) return '';
+        return email.split('@')[0].toLowerCase();
+      }
+
+      // Проверка является ли пользователь админом (по username)
       function checkIsAdmin(email) {
-        return ADMIN_EMAILS.includes(email);
+        const username = getUsernameFromEmail(email);
+        return ADMIN_USERNAMES.includes(username);
       }
 
       async function checkSession() {
@@ -296,7 +308,7 @@
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
             
-            // Проверяем, является ли пользователь админом
+            // Проверяем, является ли пользователь админом (по username)
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('admin-badge-container').classList.remove('hidden');
@@ -364,7 +376,7 @@
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
             
-            // Проверяем, является ли пользователь админом
+            // Проверяем, является ли пользователь админом (по username)
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('admin-badge-container').classList.remove('hidden');
@@ -481,7 +493,7 @@
           return;
         }
 
-        const email = emailInput.value.trim();
+        let email = emailInput.value.trim();
         const endDateStr = dateInput.value.trim();
         const maxDevices = parseInt(devicesInput.value) || 10;
 
@@ -491,6 +503,9 @@
           return;
         }
 
+        // Извлекаем username из email (если введён полный email)
+        const username = email.includes('@') ? email.split('@')[0] : email;
+        
         let endsAt;
 
         try {
@@ -516,27 +531,28 @@
         messageEl.style.color = 'yellow';
 
         try {
-          // Ищем пользователя по email
-          const { data: users, error: userError } = await supabaseClient
-            .from('users')
-            .select('id')
-            .eq('email', email)
+          // Ищем пользователя в таблице profile по username (локальная часть email)
+          const { data: profile, error: profileError } = await supabaseClient
+            .from('profile')
+            .select('id, email')
+            .eq('email', username)
             .maybeSingle();
 
-          if (userError) throw userError;
+          if (profileError) throw profileError;
 
-          if (!users) {
-            messageEl.textContent = 'Пользователь с таким email не найден';
+          if (!profile) {
+            messageEl.textContent = `Пользователь "${username}" не найден в таблице profile`;
             messageEl.style.color = 'red';
             return;
           }
 
-          messageEl.textContent = 'Выдача подписки...';
+          messageEl.textContent = 'Пользователь найден! Выдача подписки...';
 
+          // Обновляем или создаём подписку
           const { error } = await supabaseClient
             .from('subscriptions')
             .upsert({
-              user_id: users.id,
+              user_id: profile.id,
               status: 'active',
               ends_at: endsAt + 'T23:59:59Z',
               max_devices: maxDevices,
@@ -546,7 +562,7 @@
 
           if (error) throw error;
 
-          messageEl.textContent = `Подписка выдана до ${endDateStr} (макс. ${maxDevices} устройств)`;
+          messageEl.textContent = `✅ Подписка выдана пользователю "${username}" до ${endDateStr} (макс. ${maxDevices} устройств)`;
           messageEl.style.color = 'lime';
 
           emailInput.value = '';
