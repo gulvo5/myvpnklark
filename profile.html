@@ -200,12 +200,12 @@
       </div>
       
       <div class="mb-4 text-sm text-yellow-400 bg-yellow-500/10 p-3 rounded-xl">
-        ⚠️ Поиск пользователя по username (часть email до @) в таблице <span class="font-bold">profiles</span>
+        ⚠️ Поиск пользователя по <span class="font-bold">username</span> в таблице <span class="font-bold">profile</span>
       </div>
       
       <div class="mb-6">
-        <label class="block text-gray-400 mb-2">Email пользователя (можно с доменом или без)</label>
-        <input id="admin-user-email" type="text" placeholder="maxsimpiska или maxsimpiska@gmail.com" 
+        <label class="block text-gray-400 mb-2">Username пользователя (то, что до @ или просто username)</label>
+        <input id="admin-username" type="text" placeholder="maxsimpiska" 
                class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
       </div>
       
@@ -266,7 +266,7 @@
       let supabaseClient = null;
       let currentUser = null;
 
-      // Список администраторов (локальная часть email без домена)
+      // Список администраторов (username)
       const ADMIN_USERNAMES = ['maxsimpiska', 'admin', 'ваш_username']; // Добавьте свои username
 
       async function initializeApp() {
@@ -493,30 +493,27 @@
       }
 
       async function adminGrantSubscription() {
-        const emailInput = document.getElementById('admin-user-email');
+        const usernameInput = document.getElementById('admin-username');
         const dateInput = document.getElementById('admin-end-date');
         const devicesInput = document.getElementById('admin-max-devices');
         const messageEl = document.getElementById('admin-message');
         const infoEl = document.getElementById('admin-info');
 
-        if (!emailInput || !dateInput || !devicesInput || !messageEl) {
+        if (!usernameInput || !dateInput || !devicesInput || !messageEl) {
           console.error('Не найдены элементы админ-панели');
           return;
         }
 
-        let email = emailInput.value.trim();
+        const username = usernameInput.value.trim().toLowerCase();
         const endDateStr = dateInput.value.trim();
         const maxDevices = parseInt(devicesInput.value) || 10;
 
-        if (!email || !endDateStr) {
-          messageEl.textContent = 'Заполните email и дату';
+        if (!username || !endDateStr) {
+          messageEl.textContent = 'Заполните username и дату';
           messageEl.style.color = 'red';
           return;
         }
 
-        // Извлекаем username из email (если введён полный email)
-        const username = email.includes('@') ? email.split('@')[0] : email;
-        
         let endsAt;
 
         try {
@@ -543,15 +540,15 @@
         
         if (infoEl) {
           infoEl.classList.remove('hidden');
-          infoEl.innerHTML = `🔍 Поиск username: <b>"${username}"</b> в таблице <b>profiles</b>...`;
+          infoEl.innerHTML = `🔍 Поиск username: <b>"${username}"</b> в таблице <b>profile</b> (поле username)...`;
         }
 
         try {
-          // Ищем пользователя в таблице profiles по полю email (username)
+          // Ищем пользователя в таблице profile по полю username
           const { data: profile, error: profileError } = await supabaseClient
-            .from('profiles')
-            .select('id, email')
-            .eq('email', username)
+            .from('profile')
+            .select('id, username')
+            .eq('username', username)
             .maybeSingle();
 
           if (profileError) {
@@ -560,13 +557,13 @@
           }
 
           if (!profile) {
-            messageEl.textContent = `❌ Пользователь с username "${username}" не найден в таблице profiles`;
+            messageEl.textContent = `❌ Пользователь с username "${username}" не найден в таблице profile`;
             messageEl.style.color = 'red';
             if (infoEl) infoEl.innerHTML += `<br>❌ Пользователь не найден`;
             return;
           }
 
-          if (infoEl) infoEl.innerHTML += `<br>✅ Найден пользователь: ID = <b>${profile.id}</b>, email = <b>${profile.email}</b>`;
+          if (infoEl) infoEl.innerHTML += `<br>✅ Найден пользователь: ID = <b>${profile.id}</b>, username = <b>${profile.username}</b>`;
           messageEl.textContent = `Пользователь найден! Выдача подписки...`;
 
           // Обновляем или создаём подписку
@@ -589,7 +586,7 @@
           if (infoEl) infoEl.innerHTML += `<br>✅ Подписка успешно выдана!`;
 
           // Очищаем поля
-          emailInput.value = '';
+          usernameInput.value = '';
           dateInput.value = '';
           devicesInput.value = '10';
         } catch (err) {
