@@ -644,15 +644,6 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
                class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
       </div>
       
-      <div class="mb-6 relative z-10">
-        <label class="block text-gray-400 mb-2 flex items-center gap-2">
-          <i class="fa-regular fa-link"></i> Happ ссылка (опционально)
-        </label>
-        <input id="admin-happ-link" type="text" placeholder="happ://crypto/..." 
-               class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
-        <p class="text-xs text-gray-500 mt-1">Если не указать, сгенерируется автоматически</p>
-      </div>
-      
       <div class="flex gap-3 mb-4 relative z-10">
         <button id="admin-grant-btn" 
                 class="flex-1 py-5 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-xl font-bold hover:opacity-90 transition transform hover:scale-[1.02] flex items-center justify-center gap-2">
@@ -729,9 +720,6 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
       // Provider ID для Happ
       const PROVIDER_ID = 'vqMWWxA9';
 
-      // API ключ для Happ (если нужен)
-      const HAPP_API_KEY = ''; // Добавьте если есть
-
       // Toast уведомления
       function showToast(message, type = 'info') {
         const toast = document.getElementById('toast');
@@ -777,29 +765,32 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         }
       }
 
-      // Генерация Happ ссылки через API
-      async function generateHappLink(userId, subscriptionId, endDate) {
+      // Функция для проверки лимита устройств
+      async function checkDeviceLimit(userId) {
         try {
-          // Формируем данные для ссылки
-          const subscriptionData = {
-            provider_id: PROVIDER_ID,
-            user_id: userId,
-            subscription_id: subscriptionId,
-            expires_at: endDate,
-            devices_limit: 3
+          const { data: devices, error } = await supabaseClient
+            .from('user_devices')
+            .select('*')
+            .eq('user_id', userId);
+          
+          if (error) throw error;
+          
+          const { data: subscription } = await supabaseClient
+            .from('subscriptions')
+            .select('max_devices')
+            .eq('user_id', userId)
+            .maybeSingle();
+          
+          const maxDevices = subscription?.max_devices || 3;
+          
+          return {
+            current: devices?.length || 0,
+            max: maxDevices,
+            canAdd: (devices?.length || 0) < maxDevices
           };
-
-          // Кодируем в base64
-          const encodedData = btoa(JSON.stringify(subscriptionData));
-          
-          // Создаем ссылку формата happ://crypto/[provider_id]/[encoded_data]
-          const happUrl = `happ://crypto/${PROVIDER_ID}/${encodedData}`;
-          
-          return happUrl;
         } catch (err) {
-          console.error('Ошибка генерации Happ ссылки:', err);
-          // Возвращаем простую ссылку как запасной вариант
-          return `happ://crypto/${PROVIDER_ID}/${userId}`;
+          console.error('Ошибка проверки лимита:', err);
+          return { current: 0, max: 3, canAdd: false };
         }
       }
 
@@ -850,17 +841,24 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
               .from('user_devices')
               .update({ last_seen: new Date().toISOString() })
               .eq('id', existingDevice.id);
+            
+            // Проверяем лимит даже для существующего устройства
+            const { current, max } = await checkDeviceLimit(userId);
+            
+            // Обновляем отображение
+            const devicesText = document.getElementById('devices-text');
+            const devicesBar = document.getElementById('devices-bar');
+            if (devicesText) devicesText.textContent = `${current} / ${max}`;
+            if (devicesBar) devicesBar.style.width = `${(current / max) * 100}%`;
+            
             return true;
           }
           
-          // Проверяем лимит устройств
-          const { data: devicesCount } = await supabaseClient
-            .rpc('get_user_devices_count', { p_user_id: userId });
+          // Проверяем лимит перед добавлением нового устройства
+          const { current, max, canAdd } = await checkDeviceLimit(userId);
           
-          const maxDevices = 3; // Максимум 3 устройства
-          
-          if (devicesCount >= maxDevices) {
-            showToast('Достигнут лимит устройств (макс. 3). Удалите одно из устройств в профиле.', 'warning');
+          if (!canAdd) {
+            showToast(`Достигнут лимит устройств (макс. ${max}). Удалите одно из устройств в профиле.`, 'warning');
             return false;
           }
           
@@ -878,6 +876,14 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           if (error) throw error;
           
           showToast('Устройство успешно зарегистрировано!', 'success');
+          
+          // Обновляем отображение
+          const { current: newCurrent, max: newMax } = await checkDeviceLimit(userId);
+          const devicesText = document.getElementById('devices-text');
+          const devicesBar = document.getElementById('devices-bar');
+          if (devicesText) devicesText.textContent = `${newCurrent} / ${newMax}`;
+          if (devicesBar) devicesBar.style.width = `${(newCurrent / newMax) * 100}%`;
+          
           return true;
           
         } catch (err) {
@@ -903,16 +909,18 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           const devicesText = document.getElementById('devices-text');
           const devicesBar = document.getElementById('devices-bar');
           
+          const { current, max } = await checkDeviceLimit(userId);
+          
           if (!devices || devices.length === 0) {
             devicesContainer.classList.add('hidden');
-            if (devicesText) devicesText.textContent = `0 / 3`;
+            if (devicesText) devicesText.textContent = `0 / ${max}`;
             if (devicesBar) devicesBar.style.width = '0%';
             return;
           }
           
           devicesContainer.classList.remove('hidden');
-          if (devicesText) devicesText.textContent = `${devices.length} / 3`;
-          if (devicesBar) devicesBar.style.width = `${(devices.length / 3) * 100}%`;
+          if (devicesText) devicesText.textContent = `${current} / ${max}`;
+          if (devicesBar) devicesBar.style.width = `${(current / max) * 100}%`;
           
           let html = '';
           devices.forEach(device => {
@@ -967,6 +975,37 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           showToast('Ошибка удаления устройства', 'error');
         }
       };
+
+      // Генерация Happ ссылки
+      async function generateHappLink(userId, subscriptionId, endDate) {
+        try {
+          // Проверяем лимит устройств
+          const { current, max } = await checkDeviceLimit(userId);
+          
+          // Формируем данные для ссылки в правильном формате
+          const subscriptionData = {
+            provider_id: PROVIDER_ID,
+            user_id: userId,
+            sub_id: subscriptionId,
+            expires: endDate,
+            devices_limit: max,
+            devices_current: current,
+            timestamp: Date.now()
+          };
+
+          // Кодируем в base64 (без btoa для кириллицы)
+          const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(subscriptionData))));
+          
+          // Правильный формат ссылки Happ
+          const happUrl = `happ://import/${encodedData}`;
+          
+          return happUrl;
+        } catch (err) {
+          console.error('Ошибка генерации Happ ссылки:', err);
+          // Возвращаем простую ссылку как запасной вариант
+          return `happ://import/${btoa(PROVIDER_ID)}`;
+        }
+      }
 
       async function initializeApp() {
         console.log('Supabase клиент создан');
@@ -1228,7 +1267,8 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
             
             if (!registered) {
               // Если лимит устройств достигнут, показываем предупреждение
-              showToast('Лимит устройств (3) достигнут. Удалите одно из устройств в профиле.', 'warning');
+              const { current, max } = await checkDeviceLimit(currentUser.id);
+              showToast(`Лимит устройств (${current}/${max}) достигнут. Удалите одно из устройств в профиле.`, 'warning');
             }
             
             if (checkIsAdmin(currentUser.email)) {
@@ -1296,8 +1336,12 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           const statusBadge = document.getElementById('subscription-status-badge');
           const subscriptionIdDisplay = document.getElementById('subscription-id-display');
 
-          // Загружаем список устройств
+          // Загружаем список устройств и проверяем лимит
           await loadDevices(user.id);
+          const { current, max, canAdd } = await checkDeviceLimit(user.id);
+
+          if (devicesText) devicesText.textContent = `${current} / ${max}`;
+          if (devicesBar) devicesBar.style.width = `${(current / max) * 100}%`;
 
           if (subscription) {
             if (subscription.ends_at) {
@@ -1376,7 +1420,6 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         const emailInput = document.getElementById('admin-email');
         const dateInput = document.getElementById('admin-end-date');
         const devicesInput = document.getElementById('admin-max-devices');
-        const happLinkInput = document.getElementById('admin-happ-link');
         const messageEl = document.getElementById('admin-message');
         const infoEl = document.getElementById('admin-info');
 
@@ -1388,7 +1431,6 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         const email = emailInput.value.trim().toLowerCase();
         const endDateStr = dateInput.value.trim();
         const maxDevices = parseInt(devicesInput.value) || 3;
-        const customHappLink = happLinkInput?.value.trim() || '';
 
         if (!email || !endDateStr) {
           messageEl.textContent = 'Заполните email и дату';
@@ -1501,10 +1543,7 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           if (subError) throw subError;
 
           // Генерируем Happ ссылку
-          let happUrl = customHappLink;
-          if (!happUrl) {
-            happUrl = await generateHappLink(userData.id, subscription.id, endsAt + 'T23:59:59Z');
-          }
+          const happUrl = await generateHappLink(userData.id, subscription.id, endsAt + 'T23:59:59Z');
           
           // Сохраняем Happ ссылку в отдельную таблицу
           const { error: happError } = await supabaseClient
@@ -1541,7 +1580,6 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           emailInput.value = '';
           dateInput.value = '';
           devicesInput.value = '3';
-          if (happLinkInput) happLinkInput.value = '';
           document.getElementById('clear-email')?.classList.add('hidden');
         } catch (err) {
           console.error('Ошибка выдачи подписки:', err);
