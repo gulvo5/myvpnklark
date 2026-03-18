@@ -553,23 +553,29 @@
 
       async function listAllUsers() {
         const diagEl = document.getElementById('diagnostic-info');
-        diagEl.innerHTML = '⏳ Загрузка пользователей из Authentication...\n';
+        diagEl.innerHTML = '⏳ Загрузка пользователей из auth.users...\n';
         
         try {
-          // Получаем список пользователей через Admin API
-          const { data: { users }, error } = await supabaseClient.auth.admin.listUsers();
+          // Пробуем получить пользователей через RPC
+          const { data, error } = await supabaseClient
+            .rpc('get_all_users');
           
           if (error) {
             diagEl.innerHTML += `❌ Ошибка: ${error.message}\n`;
+            diagEl.innerHTML += '⚠️ Нужно создать функцию get_all_users\n';
             return;
           }
           
-          diagEl.innerHTML += `✅ Всего пользователей: ${users.length}\n\n`;
+          if (!data || data.length === 0) {
+            diagEl.innerHTML += '❌ Нет пользователей или нет доступа\n';
+            return;
+          }
+          
+          diagEl.innerHTML += `✅ Всего пользователей: ${data.length}\n\n`;
           diagEl.innerHTML += '📋 Список пользователей:\n';
           
-          users.forEach((user, index) => {
+          data.forEach((user, index) => {
             diagEl.innerHTML += `${index + 1}. ${user.email} (ID: ${user.id})\n`;
-            diagEl.innerHTML += `   Создан: ${new Date(user.created_at).toLocaleDateString()}\n`;
           });
           
         } catch (err) {
@@ -582,48 +588,16 @@
         diagEl.innerHTML = '⏳ Синхронизация пользователей...\n';
         
         try {
-          // Получаем всех пользователей из auth
-          const { data: { users }, error: usersError } = await supabaseClient.auth.admin.listUsers();
+          const { data, error } = await supabaseClient
+            .rpc('sync_all_users');
           
-          if (usersError) {
-            diagEl.innerHTML += `❌ Ошибка получения пользователей: ${usersError.message}\n`;
+          if (error) {
+            diagEl.innerHTML += `❌ Ошибка: ${error.message}\n`;
+            diagEl.innerHTML += '⚠️ Нужно создать функцию sync_all_users\n';
             return;
           }
           
-          diagEl.innerHTML += `✅ Найдено пользователей в auth: ${users.length}\n`;
-          
-          let added = 0;
-          let errors = 0;
-          
-          for (const user of users) {
-            // Извлекаем username из email (часть до @)
-            const username = user.email.split('@')[0];
-            
-            // Добавляем или обновляем в profiles
-            const { error } = await supabaseClient
-              .from('profiles')
-              .upsert({
-                id: user.id,
-                username: username,
-                email: user.email
-              }, { 
-                onConflict: 'id',
-                ignoreDuplicates: false
-              });
-            
-            if (error) {
-              diagEl.innerHTML += `❌ Ошибка для ${user.email}: ${error.message}\n`;
-              errors++;
-            } else {
-              added++;
-            }
-          }
-          
-          diagEl.innerHTML += `\n✅ Успешно добавлено/обновлено: ${added}\n`;
-          if (errors > 0) diagEl.innerHTML += `⚠️ Ошибок: ${errors}\n`;
-          
-          // Показываем обновленный список
-          await listAllUsers();
+          diagEl.innerHTML += `✅ Результат: ${JSON.stringify(data)}\n`;
           
         } catch (err) {
           diagEl.innerHTML += `❌ Ошибка: ${err.message}\n`;
@@ -868,42 +842,43 @@
         }
 
         try {
-          // Ищем пользователя в auth.users по email
-          if (infoEl) infoEl.innerHTML += `\n🔍 Ищем в Authentication...\n`;
+          // Ищем пользователя через RPC функцию
+          if (infoEl) infoEl.innerHTML += `\n🔍 Ищем в auth.users...\n`;
           
-          const { data: { users }, error: usersError } = await supabaseClient.auth.admin.listUsers();
+          const { data: users, error: usersError } = await supabaseClient
+            .rpc('find_user_by_email', { search_email: email });
           
           if (usersError) {
-            if (infoEl) infoEl.innerHTML += `❌ Ошибка доступа к Authentication: ${usersError.message}\n`;
+            if (infoEl) infoEl.innerHTML += `❌ Ошибка: ${usersError.message}\n`;
             throw usersError;
           }
           
-          const user = users.find(u => u.email.toLowerCase() === email);
-          
-          if (!user) {
-            messageEl.textContent = `❌ Пользователь с email "${email}" не найден в Authentication`;
+          if (!users || users.length === 0) {
+            messageEl.textContent = `❌ Пользователь с email "${email}" не найден`;
             messageEl.style.color = 'red';
             if (infoEl) infoEl.innerHTML += `❌ Пользователь не найден\n`;
             showToast('Пользователь не найден', 'error');
             return;
           }
 
+          const user = users[0];
+
           if (infoEl) {
             infoEl.innerHTML += `✅ Найден пользователь:\n`;
             infoEl.innerHTML += `   ID: ${user.id}\n`;
             infoEl.innerHTML += `   Email: ${user.email}\n`;
-            infoEl.innerHTML += `   Создан: ${new Date(user.created_at).toLocaleDateString()}\n`;
           }
 
           // Создаем или обновляем запись в profiles
           if (infoEl) infoEl.innerHTML += `\n📝 Создаем запись в profiles...\n`;
           
+          const username = email.split('@')[0];
+          
           const { data: profile, error: profileError } = await supabaseClient
             .from('profiles')
             .upsert({
               id: user.id,
-              username: email.split('@')[0],
-              email: user.email
+              username: username
             }, { 
               onConflict: 'id',
               ignoreDuplicates: false
