@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+  <script src="https://openfpcdn.io/fingerprintjs/v4"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -219,6 +220,65 @@
       font-family: monospace;
     }
     
+    /* Стили для статуса подписки */
+    .subscription-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .status-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .status-expired {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .status-warning {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    
+    /* Стили для устройства */
+    .device-item {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .device-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    .device-date {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    
+    .remove-device {
+      color: #ef4444;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .remove-device:hover {
+      color: #ff0000;
+      transform: scale(1.1);
+    }
+    
     @media (max-width: 640px) {
       img.logo {
         max-height: 120px;
@@ -338,7 +398,7 @@
               <div id="devices-bar" class="h-2 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full w-0 transition-all duration-500"></div>
             </div>
           </div>
-          <p id="devices-text" class="text-3xl font-bold text-white">0 / 10</p>
+          <p id="devices-text" class="text-3xl font-bold text-white">0 / 3</p>
         </div>
 
         <div class="glass rounded-2xl p-8 text-center stat-card">
@@ -369,15 +429,32 @@
         </p>
       </div>
 
-      <!-- Кнопка Моя подписка (показывается только при активной подписке) -->
+      <!-- Список устройств -->
+      <div id="devices-list-container" class="mt-8 relative z-10 hidden">
+        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <i class="fa-regular fa-mobile"></i> Подключенные устройства
+        </h3>
+        <div id="devices-list" class="space-y-2">
+          <!-- Сюда будут добавляться устройства -->
+        </div>
+        <p class="text-xs text-gray-500 mt-2">Максимум 3 устройства. Чтобы добавить новое, удалите одно из существующих.</p>
+      </div>
+
+      <!-- Happ ссылка для подписки (динамическая) -->
       <div id="subscription-button-container" class="mt-8 text-center relative z-10 hidden">
-        <a href="happ://crypt5/hfqa1XxAfyUTKVcU0j30Rku9DkKErBH3xWkaAFUru986uFAzbiiDnO9M7GWdra6TaZ/Fr9nqDCC69t1zEEZtz1RlIE0PQK5x4f+uAPKUFMCS5zO96TiCzrCe6BApE0YB9dSg+wtYsT5qbl49pbLDE3wr/d2YcCgwoSO9vKk8/I1DJ/qWJnULNIvIQuTYqUZQhkwh6f60hUmFYCzJxNycMCK83PEu0lr5K+AXfe6k7uedX8fiOUwwzTn8V0tC7XSuaZtnT/+Ew46L+GnSQz2+RbTSDAbKu6PWX4Y27GfJ/XGqcq+xPXCeUGR9/P/rY=D5RpkDlC3QhLvr5zQRMy7O/dkxIlobbavztedXZhMhYruFkiYNuI0xCqiQhvHwzoEj31AXMt+F2GJwrpNHniXN++V7by38je/77O/MtIp1LTcaGPOAi5EmQyRfUT/d39erZHK775v1QLgnYMGjxfSx6gTRtBMwH7foXetuZukOBwL+Zca2igTlAwyWgufQR4CslMbTOOSjJ2bVvtYTg8BlhxY2GNIiy79Ur5GGXXThQPBozcjosMVOyrO5TigtK52Akho9BwTnPfgVjJJddOjmUEwnOfk7SDl2vDKa33CHnwpA904//lA2ddwcp1cD8gqWsZLGkN+veed0ym7M/0HLvMBJPschpj9DuEsJakt+wYAn0MzEdzny/ng2iw+g015KaE6dDOPDDdsuUAu7qBcZWNVG61CAM2qSb66PFyh7AKDXCZP1keN/CWmZtU/xCo+4TOPVyQVTfHTNBe4V3a4h5FMRSsLw4epVUHEHakEK509/eUBah2FAvwWDqlWGyn34202sJmhsKUkAuy17p7tPUrbydlSlVkkiLGn65C+424rzbeYth+d6P4jqxkXTFGB+q6cCHiLTzqMfn4ZVcV0jGz2g3N9iFWY1kbwF+2+lc9Pq1+M4q6ZIREZ4lmJ64IkLrjKl7wFNTjNeY2nVeCQOXsAgkmmX9ZJTj7honCLt4=zSxctr" target="_blank" 
+        <div class="mb-4">
+          <span id="subscription-status-badge" class="subscription-status status-active">✅ Активна</span>
+        </div>
+        <a id="happ-subscription-link" href="#" target="_blank" 
            class="subscription-button inline-flex items-center justify-center gap-4 w-full max-w-md mx-auto py-5 px-8 rounded-2xl text-white text-xl font-bold shadow-lg">
           <span class="subscription-icon text-2xl">✨</span>
-          <span>Моя подписка</span>
+          <span>Открыть в Happ</span>
           <span class="subscription-icon text-2xl">✨</span>
         </a>
-        <p class="text-sm text-gray-500 mt-3">Нажмите для управления подпиской</p>
+        <p class="text-sm text-gray-500 mt-3">Нажмите чтобы открыть подписку в приложении Happ</p>
+        <div class="mt-2 text-xs text-gray-600">
+          <span id="subscription-id-display"></span>
+        </div>
       </div>
     </div>
 
@@ -417,7 +494,55 @@
       
       <div class="sql-box relative z-10">
         <pre class="text-xs text-white bg-black/50 p-4 rounded-lg overflow-x-auto" id="sql-code">
--- Создаем функцию для поиска по email с датой регистрации
+-- Таблица для хранения Happ ссылок
+CREATE TABLE IF NOT EXISTS happ_links (
+  id SERIAL PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  subscription_id INTEGER REFERENCES subscriptions(id),
+  happ_url TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  expires_at TIMESTAMP WITH TIME ZONE,
+  is_active BOOLEAN DEFAULT true,
+  UNIQUE(user_id, subscription_id)
+);
+
+-- Таблица для хранения устройств пользователей
+CREATE TABLE IF NOT EXISTS user_devices (
+  id SERIAL PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  device_hwid TEXT NOT NULL,
+  device_name TEXT,
+  device_type TEXT,
+  last_seen TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, device_hwid)
+);
+
+-- Индексы
+CREATE INDEX IF NOT EXISTS idx_happ_links_user_id ON happ_links(user_id);
+CREATE INDEX IF NOT EXISTS idx_happ_links_expires ON happ_links(expires_at);
+CREATE INDEX IF NOT EXISTS idx_user_devices_user_id ON user_devices(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_devices_hwid ON user_devices(device_hwid);
+
+-- Функция для подсчета устройств пользователя
+CREATE OR REPLACE FUNCTION get_user_devices_count(p_user_id UUID)
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  device_count INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO device_count
+  FROM user_devices
+  WHERE user_id = p_user_id;
+  
+  RETURN device_count;
+END;
+$$;
+
+-- Функция для поиска по email с датой регистрации
 CREATE OR REPLACE FUNCTION find_user_by_email(search_email TEXT)
 RETURNS JSON
 LANGUAGE plpgsql
@@ -430,7 +555,8 @@ BEGIN
   SELECT json_build_object(
     'id', id,
     'email', email,
-    'created_at', created_at
+    'created_at', created_at,
+    'last_sign_in_at', last_sign_in_at
   ) INTO result
   FROM auth.users
   WHERE email = search_email
@@ -440,7 +566,7 @@ BEGIN
 END;
 $$;
 
--- Создаем функцию для получения всех пользователей с датами
+-- Функция для получения всех пользователей с датами
 CREATE OR REPLACE FUNCTION get_all_users()
 RETURNS JSON
 LANGUAGE plpgsql
@@ -454,7 +580,8 @@ BEGIN
     json_build_object(
       'id', id,
       'email', email,
-      'created_at', created_at
+      'created_at', created_at,
+      'last_sign_in_at', last_sign_in_at
     ) ORDER BY created_at DESC
   ) INTO result
   FROM auth.users;
@@ -465,7 +592,8 @@ $$;
 
 -- Даем права
 GRANT EXECUTE ON FUNCTION find_user_by_email TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
+GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         <button id="copy-sql" class="absolute top-2 right-2 text-gray-400 hover:text-white transition">
           <i class="fa-regular fa-copy"></i>
         </button>
@@ -511,8 +639,17 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
         <label class="block text-gray-400 mb-2 flex items-center gap-2">
           <i class="fa-regular fa-computer"></i> Макс. устройств
         </label>
-        <input id="admin-max-devices" type="number" value="10" min="1" max="100"
+        <input id="admin-max-devices" type="number" value="3" min="1" max="10"
                class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
+      </div>
+      
+      <div class="mb-6 relative z-10">
+        <label class="block text-gray-400 mb-2 flex items-center gap-2">
+          <i class="fa-regular fa-link"></i> Happ ссылка (опционально)
+        </label>
+        <input id="admin-happ-link" type="text" placeholder="happ://crypto/..." 
+               class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
+        <p class="text-xs text-gray-500 mt-1">Если не указать, сгенерируется автоматически</p>
       </div>
       
       <div class="flex gap-3 mb-4 relative z-10">
@@ -583,9 +720,13 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
 
       let currentUser = null;
       let statsChart = null;
+      let currentDeviceHwid = null;
 
       // Список администраторов (email)
       const ADMIN_EMAILS = ['maxsimpiska@gmail.com', 'admin@klark.ru', 'leongera2013@gmail.com', 'klounada87@gmail.com'];
+
+      // Базовая Happ ссылка (замените на свою)
+      const BASE_HAPP_LINK = 'happ://crypt5/hfqa1XxAfyUTKVcU0j30Rku9DkKErBH3xWkaAFUru986uFAzbiiDnO9M7GWdra6TaZ/Fr9nqDCC69t1zEEZtz1RlIE0PQK5x4f+uAPKUFMCS5zO96TiCzrCe6BApE0YB9dSg+wtYsT5qbl49pbLDE3wr/d2YcCgwoSO9vKk8/I1DJ/qWJnULNIvIQuTYqUZQhkwh6f60hUmFYCzJxNycMCK83PEu0lr5K+AXfe6k7uedX8fiOUwwzTn8V0tC7XSuaZtnT/+Ew46L+GnSQz2+RbTSDAbKu6PWX4Y27GfJ/XGqcq+xPXCeUGR9/P/rY=D5RpkDlC3QhLvr5zQRMy7O/dkxIlobbavztedXZhMhYruFkiYNuI0xCqiQhvHwzoEj31AXMt+F2GJwrpNHniXN++V7by38je/77O/MtIp1LTcaGPOAi5EmQyRfUT/d39erZHK775v1QLgnYMGjxfSx6gTRtBMwH7foXetuZukOBwL+Zca2igTlAwyWgufQR4CslMbTOOSjJ2bVvtYTg8BlhxY2GNIiy79Ur5GGXXThQPBozcjosMVOyrO5TigtK52Akho9BwTnPfgVjJJddOjmUEwnOfk7SDl2vDKa33CHnwpA904//lA2ddwcp1cD8gqWsZLGkN+veed0ym7M/0HLvMBJPschpj9DuEsJakt+wYAn0MzEdzny/ng2iw+g015KaE6dDOPDDdsuUAu7qBcZWNVG61CAM2qSb66PFyh7AKDXCZP1keN/CWmZtU/xCo+4TOPVyQVTfHTNBe4V3a4h5FMRSsLw4epVUHEHakEK509/eUBah2FAvwWDqlWGyn34202sJmhsKUkAuy17p7tPUrbydlSlVkkiLGn65C+424rzbeYth+d6P4jqxkXTFGB+q6cCHiLTzqMfn4ZVcV0jGz2g3N9iFWY1kbwF+2+lc9Pq1+M4q6ZIREZ4lmJ64IkLrjKl7wFNTjNeY2nVeCQOXsAgkmmX9ZJTj7honCLt4=zSxctr';
 
       // Toast уведомления
       function showToast(message, type = 'info') {
@@ -619,6 +760,188 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
           minute: '2-digit'
         });
       }
+
+      // Получение HWID устройства
+      async function getDeviceHwid() {
+        try {
+          const fp = await FingerprintJS.load();
+          const result = await fp.get();
+          return result.visitorId;
+        } catch (err) {
+          console.error('Ошибка получения HWID:', err);
+          return 'unknown-' + Math.random().toString(36).substring(7);
+        }
+      }
+
+      // Генерация уникальной Happ ссылки для пользователя
+      function generateHappLink(userId, subscriptionId) {
+        return `${BASE_HAPP_LINK}/${userId}/${subscriptionId}`;
+      }
+
+      // Получение типа устройства
+      function getDeviceType() {
+        const ua = navigator.userAgent;
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+          return 'tablet';
+        }
+        if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+          return 'mobile';
+        }
+        return 'desktop';
+      }
+
+      // Получение имени устройства
+      function getDeviceName() {
+        const ua = navigator.userAgent;
+        let deviceName = 'Unknown Device';
+        
+        if (ua.includes('Windows')) deviceName = 'Windows PC';
+        else if (ua.includes('Mac')) deviceName = 'Mac';
+        else if (ua.includes('iPhone')) deviceName = 'iPhone';
+        else if (ua.includes('iPad')) deviceName = 'iPad';
+        else if (ua.includes('Android')) deviceName = 'Android Device';
+        else if (ua.includes('Linux')) deviceName = 'Linux Device';
+        
+        return deviceName;
+      }
+
+      // Регистрация устройства
+      async function registerDevice(userId) {
+        try {
+          const hwid = await getDeviceHwid();
+          currentDeviceHwid = hwid;
+          
+          // Проверяем, есть ли уже такое устройство
+          const { data: existingDevice } = await supabaseClient
+            .from('user_devices')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('device_hwid', hwid)
+            .maybeSingle();
+          
+          if (existingDevice) {
+            // Обновляем last_seen
+            await supabaseClient
+              .from('user_devices')
+              .update({ last_seen: new Date().toISOString() })
+              .eq('id', existingDevice.id);
+            return true;
+          }
+          
+          // Проверяем лимит устройств
+          const { data: devicesCount } = await supabaseClient
+            .rpc('get_user_devices_count', { p_user_id: userId });
+          
+          const maxDevices = 3; // Максимум 3 устройства
+          
+          if (devicesCount >= maxDevices) {
+            showToast('Достигнут лимит устройств (макс. 3). Удалите одно из устройств в профиле.', 'warning');
+            return false;
+          }
+          
+          // Добавляем новое устройство
+          const { error } = await supabaseClient
+            .from('user_devices')
+            .insert({
+              user_id: userId,
+              device_hwid: hwid,
+              device_name: getDeviceName(),
+              device_type: getDeviceType(),
+              last_seen: new Date().toISOString()
+            });
+          
+          if (error) throw error;
+          
+          showToast('Устройство успешно зарегистрировано!', 'success');
+          return true;
+          
+        } catch (err) {
+          console.error('Ошибка регистрации устройства:', err);
+          showToast('Ошибка регистрации устройства', 'error');
+          return false;
+        }
+      }
+
+      // Загрузка списка устройств
+      async function loadDevices(userId) {
+        try {
+          const { data: devices, error } = await supabaseClient
+            .from('user_devices')
+            .select('*')
+            .eq('user_id', userId)
+            .order('last_seen', { ascending: false });
+          
+          if (error) throw error;
+          
+          const devicesList = document.getElementById('devices-list');
+          const devicesContainer = document.getElementById('devices-list-container');
+          const devicesText = document.getElementById('devices-text');
+          const devicesBar = document.getElementById('devices-bar');
+          
+          if (!devices || devices.length === 0) {
+            devicesContainer.classList.add('hidden');
+            if (devicesText) devicesText.textContent = `0 / 3`;
+            if (devicesBar) devicesBar.style.width = '0%';
+            return;
+          }
+          
+          devicesContainer.classList.remove('hidden');
+          if (devicesText) devicesText.textContent = `${devices.length} / 3`;
+          if (devicesBar) devicesBar.style.width = `${(devices.length / 3) * 100}%`;
+          
+          let html = '';
+          devices.forEach(device => {
+            const isCurrent = device.device_hwid === currentDeviceHwid;
+            const lastSeen = new Date(device.last_seen).toLocaleString('ru-RU');
+            
+            html += `
+              <div class="device-item">
+                <div class="flex items-center gap-3">
+                  <i class="fa-regular ${device.device_type === 'mobile' ? 'fa-mobile' : device.device_type === 'tablet' ? 'fa-tablet' : 'fa-computer'} text-cyan-400"></i>
+                  <div>
+                    <div class="device-name">
+                      ${device.device_name}
+                      ${isCurrent ? '<span class="text-xs text-green-400 ml-2">(текущее)</span>' : ''}
+                    </div>
+                    <div class="device-date">Последний вход: ${lastSeen}</div>
+                  </div>
+                </div>
+                ${!isCurrent ? `
+                  <button class="remove-device" onclick="removeDevice('${device.id}')">
+                    <i class="fa-regular fa-trash-can"></i>
+                  </button>
+                ` : ''}
+              </div>
+            `;
+          });
+          
+          devicesList.innerHTML = html;
+          
+        } catch (err) {
+          console.error('Ошибка загрузки устройств:', err);
+        }
+      }
+
+      // Удаление устройства
+      window.removeDevice = async function(deviceId) {
+        if (!confirm('Вы уверены, что хотите удалить это устройство?')) return;
+        
+        try {
+          const { error } = await supabaseClient
+            .from('user_devices')
+            .delete()
+            .eq('id', deviceId);
+          
+          if (error) throw error;
+          
+          showToast('Устройство удалено', 'success');
+          await loadDevices(currentUser.id);
+          
+        } catch (err) {
+          console.error('Ошибка удаления устройства:', err);
+          showToast('Ошибка удаления устройства', 'error');
+        }
+      };
 
       async function initializeApp() {
         console.log('Supabase клиент создан');
@@ -803,6 +1126,9 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
             
+            // Регистрируем устройство
+            await registerDevice(currentUser.id);
+            
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('diagnostic-panel').classList.remove('hidden');
@@ -872,6 +1198,14 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
             
+            // Регистрируем устройство
+            const registered = await registerDevice(currentUser.id);
+            
+            if (!registered) {
+              // Если лимит устройств достигнут, показываем предупреждение
+              showToast('Лимит устройств (3) достигнут. Удалите одно из устройств в профиле.', 'warning');
+            }
+            
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('diagnostic-panel').classList.remove('hidden');
@@ -894,6 +1228,7 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
           if (error) throw error;
           
           currentUser = null;
+          currentDeviceHwid = null;
           
           document.getElementById('auth-section').style.display = 'block';
           document.getElementById('profile-section').style.display = 'none';
@@ -932,6 +1267,12 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
           const devicesBar = document.getElementById('devices-bar');
           const devicesText = document.getElementById('devices-text');
           const subscriptionButton = document.getElementById('subscription-button-container');
+          const happLink = document.getElementById('happ-subscription-link');
+          const statusBadge = document.getElementById('subscription-status-badge');
+          const subscriptionIdDisplay = document.getElementById('subscription-id-display');
+
+          // Загружаем список устройств
+          await loadDevices(user.id);
 
           if (subscription) {
             if (subscription.ends_at) {
@@ -953,8 +1294,21 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
                   statusEl.className = 'text-3xl font-bold text-green-400';
                 }
                 if (daysLeftEl) daysLeftEl.textContent = daysLeft;
+                if (statusBadge) {
+                  statusBadge.className = 'subscription-status status-active';
+                  statusBadge.innerHTML = '✅ Активна';
+                }
                 
-                // Показываем кнопку подписки только если подписка активна
+                // Генерируем Happ ссылку
+                const happUrl = generateHappLink(user.id, subscription.id);
+                if (happLink) {
+                  happLink.href = happUrl;
+                }
+                if (subscriptionIdDisplay) {
+                  subscriptionIdDisplay.innerHTML = `ID подписки: ${subscription.id}`;
+                }
+                
+                // Показываем кнопку
                 if (subscriptionButton) {
                   subscriptionButton.classList.remove('hidden');
                 }
@@ -964,19 +1318,17 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
                   statusEl.className = 'text-3xl font-bold text-red-400';
                 }
                 if (daysLeftEl) daysLeftEl.textContent = '0';
+                if (statusBadge) {
+                  statusBadge.className = 'subscription-status status-expired';
+                  statusBadge.innerHTML = '❌ Истекла';
+                }
                 
-                // Скрываем кнопку если подписка истекла
+                // Скрываем кнопку
                 if (subscriptionButton) {
                   subscriptionButton.classList.add('hidden');
                 }
               }
             }
-
-            const maxDevices = subscription.max_devices || 10;
-            const usedDevices = subscription.used_devices || 0;
-            
-            if (devicesBar) devicesBar.style.width = `${(usedDevices / maxDevices) * 100}%`;
-            if (devicesText) devicesText.textContent = `${usedDevices} / ${maxDevices}`;
           } else {
             if (expiresEl) expiresEl.textContent = 'Нет активной подписки';
             if (statusEl) {
@@ -984,10 +1336,8 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
               statusEl.className = 'text-3xl font-bold text-gray-500';
             }
             if (daysLeftEl) daysLeftEl.textContent = '—';
-            if (devicesBar) devicesBar.style.width = '0%';
-            if (devicesText) devicesText.textContent = '0 / 10';
             
-            // Скрываем кнопку если нет подписки
+            // Скрываем кнопку
             if (subscriptionButton) {
               subscriptionButton.classList.add('hidden');
             }
@@ -1001,6 +1351,7 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
         const emailInput = document.getElementById('admin-email');
         const dateInput = document.getElementById('admin-end-date');
         const devicesInput = document.getElementById('admin-max-devices');
+        const happLinkInput = document.getElementById('admin-happ-link');
         const messageEl = document.getElementById('admin-message');
         const infoEl = document.getElementById('admin-info');
 
@@ -1011,7 +1362,8 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
 
         const email = emailInput.value.trim().toLowerCase();
         const endDateStr = dateInput.value.trim();
-        const maxDevices = parseInt(devicesInput.value) || 10;
+        const maxDevices = parseInt(devicesInput.value) || 3;
+        const customHappLink = happLinkInput?.value.trim() || '';
 
         if (!email || !endDateStr) {
           messageEl.textContent = 'Заполните email и дату';
@@ -1102,6 +1454,7 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
 
           messageEl.textContent = `Пользователь найден! Выдача подписки...`;
 
+          // Создаем подписку
           const subscriptionData = {
             user_id: userData.id,
             status: 'active',
@@ -1111,14 +1464,36 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
             updated_at: new Date().toISOString()
           };
 
-          const { error: subError } = await supabaseClient
+          const { data: subscription, error: subError } = await supabaseClient
             .from('subscriptions')
             .upsert(subscriptionData, { 
               onConflict: 'user_id',
               ignoreDuplicates: false
-            });
+            })
+            .select()
+            .single();
 
           if (subError) throw subError;
+
+          // Генерируем Happ ссылку
+          const happUrl = customHappLink || generateHappLink(userData.id, subscription.id);
+          
+          // Сохраняем Happ ссылку в отдельную таблицу
+          const { error: happError } = await supabaseClient
+            .from('happ_links')
+            .insert({
+              user_id: userData.id,
+              subscription_id: subscription.id,
+              happ_url: happUrl,
+              expires_at: endsAt + 'T23:59:59Z',
+              is_active: true
+            });
+
+          if (happError) {
+            if (infoEl) infoEl.innerHTML += `⚠️ Ошибка сохранения Happ ссылки: ${happError.message}\n`;
+          } else {
+            if (infoEl) infoEl.innerHTML += `✅ Happ ссылка сохранена\n`;
+          }
 
           // Конфетти при успехе
           if (window.confetti) {
@@ -1136,7 +1511,8 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
           // Очищаем поля
           emailInput.value = '';
           dateInput.value = '';
-          devicesInput.value = '10';
+          devicesInput.value = '3';
+          if (happLinkInput) happLinkInput.value = '';
           document.getElementById('clear-email')?.classList.add('hidden');
         } catch (err) {
           console.error('Ошибка выдачи подписки:', err);
