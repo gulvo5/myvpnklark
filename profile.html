@@ -89,9 +89,10 @@
       padding: 8px;
       border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.1);
-      max-height: 400px;
+      max-height: 500px;
       overflow-y: auto;
       font-family: monospace;
+      white-space: pre-wrap;
     }
     .sql-box {
       font-size: 12px;
@@ -143,6 +144,13 @@
     .stat-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .debug-panel {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
     }
     @media (max-width: 640px) {
       img.logo {
@@ -294,6 +302,29 @@
       </div>
     </div>
 
+    <!-- Диагностическая панель (для админов) -->
+    <div id="diagnostic-panel" class="hidden glass rounded-3xl p-8 mb-8 border border-purple-500/30">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="bg-purple-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+          <i class="fa-regular fa-microscope"></i> DIAGNOSTIC
+        </span>
+        <span class="text-xl font-bold text-white">Диагностика базы данных</span>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <button id="check-all-tables" class="py-3 bg-purple-600/30 border border-purple-500/50 rounded-xl text-purple-300 font-medium hover:bg-purple-600/50 transition">
+          🔍 Проверить все таблицы
+        </button>
+        <button id="fix-all-users" class="py-3 bg-green-600/30 border border-green-500/50 rounded-xl text-green-300 font-medium hover:bg-green-600/50 transition">
+          🛠️ Добавить всех пользователей
+        </button>
+      </div>
+      
+      <div id="diagnostic-info" class="info-box" style="max-height: 300px;">
+        Нажмите кнопку для диагностики...
+      </div>
+    </div>
+
     <!-- Инструкция по созданию таблицы (для админов) -->
     <div id="setup-section" class="hidden glass rounded-3xl p-8 mb-8 border border-green-500/30 relative overflow-hidden">
       <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-2xl"></div>
@@ -341,37 +372,15 @@ SELECT
   id,
   split_part(email, '@', 1) as username
 FROM auth.users
-ON CONFLICT (id) DO NOTHING;</pre>
+ON CONFLICT (id) DO NOTHING;
+
+-- 4. Проверка результатов
+SELECT 'profiles' as table_name, COUNT(*) as count FROM public.profiles
+UNION ALL
+SELECT 'auth.users', COUNT(*) FROM auth.users;</pre>
         <button id="copy-sql" class="absolute top-2 right-2 text-gray-400 hover:text-white transition">
           <i class="fa-regular fa-copy"></i>
         </button>
-      </div>
-      
-      <div class="flex gap-3 mt-4 relative z-10">
-        <button id="test-connection-btn" class="flex-1 py-3 bg-green-600/30 border border-green-500/50 rounded-xl text-green-300 font-medium hover:bg-green-600/50 transition flex items-center justify-center gap-2">
-          <i class="fa-regular fa-plug"></i> Проверить подключение
-        </button>
-        <button id="view-stats-btn" class="flex-1 py-3 bg-blue-600/30 border border-blue-500/50 rounded-xl text-blue-300 font-medium hover:bg-blue-600/50 transition flex items-center justify-center gap-2">
-          <i class="fa-regular fa-chart-line"></i> Статистика
-        </button>
-      </div>
-    </div>
-
-    <!-- Статистика (скрыта) -->
-    <div id="stats-section" class="hidden glass rounded-3xl p-8 mb-8 border border-blue-500/30">
-      <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-        <i class="fa-regular fa-chart-pie text-blue-400"></i> Статистика подписок
-      </h3>
-      <canvas id="stats-chart" class="w-full h-48"></canvas>
-      <div id="stats-numbers" class="grid grid-cols-2 gap-4 mt-4">
-        <div class="text-center">
-          <p class="text-gray-400 text-sm">Всего подписок</p>
-          <p id="total-subs" class="text-2xl font-bold text-white">0</p>
-        </div>
-        <div class="text-center">
-          <p class="text-gray-400 text-sm">Активных</p>
-          <p id="active-subs" class="text-2xl font-bold text-green-400">0</p>
-        </div>
       </div>
     </div>
 
@@ -533,6 +542,8 @@ ON CONFLICT (id) DO NOTHING;</pre>
         document.getElementById('admin-grant-btn')?.addEventListener('click', adminGrantSubscription);
         document.getElementById('test-connection-btn')?.addEventListener('click', testConnection);
         document.getElementById('view-stats-btn')?.addEventListener('click', toggleStats);
+        document.getElementById('check-all-tables')?.addEventListener('click', checkAllTables);
+        document.getElementById('fix-all-users')?.addEventListener('click', fixAllUsers);
         document.getElementById('copy-support-btn')?.addEventListener('click', () => copyToClipboard('@CKOPO4'));
         document.getElementById('copy-sql')?.addEventListener('click', () => {
           const sql = document.getElementById('sql-code').textContent;
@@ -611,12 +622,86 @@ ON CONFLICT (id) DO NOTHING;</pre>
         return ADMIN_USERNAMES.includes(username);
       }
 
+      async function checkAllTables() {
+        const diagEl = document.getElementById('diagnostic-info');
+        diagEl.innerHTML = '⏳ Проверка таблиц...\n';
+        
+        try {
+          // Проверяем таблицу profiles
+          diagEl.innerHTML += '\n🔍 Проверка таблицы profiles...\n';
+          const { data: profiles, error: profilesError } = await supabaseClient
+            .from('profiles')
+            .select('*');
+          
+          if (profilesError) {
+            diagEl.innerHTML += `❌ Ошибка profiles: ${profilesError.message}\n`;
+          } else {
+            diagEl.innerHTML += `✅ profiles: ${profiles?.length || 0} записей\n`;
+            if (profiles && profiles.length > 0) {
+              diagEl.innerHTML += '📋 Список username в profiles:\n';
+              profiles.forEach((p, i) => {
+                diagEl.innerHTML += `  ${i+1}. ${p.username} (ID: ${p.id})\n`;
+              });
+            }
+          }
+
+          // Проверяем auth.users через RPC
+          diagEl.innerHTML += '\n🔍 Проверка auth.users...\n';
+          const { data: users, error: usersError } = await supabaseClient
+            .rpc('get_users_count');
+          
+          if (usersError) {
+            diagEl.innerHTML += `❌ Не удалось получить auth.users: ${usersError.message}\n`;
+            diagEl.innerHTML += '⚠️ Нужно создать функцию get_users_count\n';
+          }
+
+          // Проверяем таблицу subscriptions
+          diagEl.innerHTML += '\n🔍 Проверка таблицы subscriptions...\n';
+          const { data: subs, error: subsError } = await supabaseClient
+            .from('subscriptions')
+            .select('*');
+          
+          if (subsError) {
+            diagEl.innerHTML += `❌ Ошибка subscriptions: ${subsError.message}\n`;
+          } else {
+            diagEl.innerHTML += `✅ subscriptions: ${subs?.length || 0} записей\n`;
+          }
+
+        } catch (err) {
+          diagEl.innerHTML += `❌ Ошибка: ${err.message}\n`;
+        }
+      }
+
+      async function fixAllUsers() {
+        const diagEl = document.getElementById('diagnostic-info');
+        diagEl.innerHTML = '⏳ Добавление всех пользователей...\n';
+        
+        try {
+          // Сначала пробуем через RPC если есть
+          const { data, error } = await supabaseClient
+            .rpc('add_all_users_to_profiles');
+          
+          if (error) {
+            diagEl.innerHTML += `❌ Ошибка: ${error.message}\n`;
+            diagEl.innerHTML += '⚠️ Нужно выполнить SQL из секции SETUP\n';
+          } else {
+            diagEl.innerHTML += `✅ Результат: ${JSON.stringify(data)}\n`;
+          }
+          
+          // Проверяем результат
+          await checkAllTables();
+          
+        } catch (err) {
+          diagEl.innerHTML += `❌ Ошибка: ${err.message}\n`;
+        }
+      }
+
       async function testConnection() {
         const infoEl = document.getElementById('admin-info');
         if (!infoEl) return;
         
         infoEl.classList.remove('hidden');
-        infoEl.innerHTML = '⏳ Проверка подключения к таблице subscriptions...';
+        infoEl.innerHTML = '⏳ Проверка подключения к таблице subscriptions...\n';
         
         try {
           const testData = {
@@ -632,21 +717,21 @@ ON CONFLICT (id) DO NOTHING;</pre>
             .insert(testData);
             
           if (error) {
-            infoEl.innerHTML += `<br>❌ Ошибка: ${error.message}`;
+            infoEl.innerHTML += `❌ Ошибка: ${error.message}\n`;
             showToast('Ошибка подключения', 'error');
           } else {
-            infoEl.innerHTML += `<br>✅ Таблица subscriptions доступна! Удаляю тестовую запись...`;
+            infoEl.innerHTML += '✅ Таблица subscriptions доступна! Удаляю тестовую запись...\n';
             
             await supabaseClient
               .from('subscriptions')
               .delete()
               .eq('user_id', '00000000-0000-0000-0000-000000000000');
               
-            infoEl.innerHTML += `<br>✅ Таблица subscriptions готова к работе!`;
+            infoEl.innerHTML += '✅ Таблица subscriptions готова к работе!\n';
             showToast('Подключение успешно', 'success');
           }
         } catch (err) {
-          infoEl.innerHTML += `<br>❌ Ошибка: ${err.message}`;
+          infoEl.innerHTML += `❌ Ошибка: ${err.message}\n`;
           showToast('Ошибка подключения', 'error');
         }
       }
@@ -717,6 +802,7 @@ ON CONFLICT (id) DO NOTHING;</pre>
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('setup-section').classList.remove('hidden');
+              document.getElementById('diagnostic-panel').classList.remove('hidden');
               document.getElementById('admin-badge-container').classList.remove('hidden');
             }
             
@@ -785,6 +871,7 @@ ON CONFLICT (id) DO NOTHING;</pre>
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('setup-section').classList.remove('hidden');
+              document.getElementById('diagnostic-panel').classList.remove('hidden');
               document.getElementById('admin-badge-container').classList.remove('hidden');
             }
             
@@ -808,6 +895,7 @@ ON CONFLICT (id) DO NOTHING;</pre>
           document.getElementById('profile-section').style.display = 'none';
           document.getElementById('admin-panel').classList.add('hidden');
           document.getElementById('setup-section').classList.add('hidden');
+          document.getElementById('diagnostic-panel').classList.add('hidden');
           document.getElementById('admin-badge-container').classList.add('hidden');
           document.getElementById('email').value = '';
           document.getElementById('password').value = '';
@@ -937,66 +1025,63 @@ ON CONFLICT (id) DO NOTHING;</pre>
         
         if (infoEl) {
           infoEl.classList.remove('hidden');
-          infoEl.innerHTML = `🔍 Поиск username: <b>"${username}"</b>...`;
+          infoEl.innerHTML = `🔍 Поиск username: <b>"${username}"</b>...\n`;
         }
 
         try {
-          // Сначала проверяем есть ли пользователь в profiles
-          if (infoEl) infoEl.innerHTML += `<br>🔍 Ищем в таблице profiles...`;
+          // Сначала показываем всех пользователей в profiles
+          if (infoEl) infoEl.innerHTML += `\n🔍 Загружаем всех пользователей из profiles...\n`;
           
-          let { data: profile, error: profileError } = await supabaseClient
+          const { data: allProfiles, error: profilesError } = await supabaseClient
+            .from('profiles')
+            .select('id, username');
+          
+          if (profilesError) {
+            if (infoEl) infoEl.innerHTML += `❌ Ошибка загрузки profiles: ${profilesError.message}\n`;
+          } else {
+            if (infoEl) {
+              infoEl.innerHTML += `📊 Всего в profiles: ${allProfiles?.length || 0}\n`;
+              if (allProfiles && allProfiles.length > 0) {
+                infoEl.innerHTML += '📋 Список username в profiles:\n';
+                allProfiles.forEach((p, i) => {
+                  infoEl.innerHTML += `  ${i+1}. "${p.username}" (ID: ${p.id})\n`;
+                });
+              }
+            }
+          }
+
+          // Ищем пользователя
+          let profile = null;
+          
+          // Сначала проверяем в profiles
+          if (infoEl) infoEl.innerHTML += `\n🔍 Ищем в profiles username: "${username}"...\n`;
+          
+          const { data: profileData, error: profileError } = await supabaseClient
             .from('profiles')
             .select('*')
             .eq('username', username)
             .maybeSingle();
 
-          // Если не нашли в profiles, проверяем auth.users
-          if (!profile) {
-            if (infoEl) infoEl.innerHTML += `<br>❌ Не найден в profiles, проверяем auth.users...`;
-            
-            // Ищем пользователя в auth.users по email
-            const { data: users, error: usersError } = await supabaseClient
-              .from('users')
-              .select('id, email')
-              .ilike('email', `${username}@%`)
-              .maybeSingle();
-            
-            if (usersError && usersError.code !== 'PGRST116') {
-              if (infoEl) infoEl.innerHTML += `<br>⚠️ Ошибка при поиске в auth.users: ${usersError.message}`;
-            }
-            
-            if (users) {
-              if (infoEl) infoEl.innerHTML += `<br>✅ Найден в auth.users! ID: ${users.id}`;
-              
-              // Создаем запись в profiles автоматически
-              const { data: newProfile, error: createError } = await supabaseClient
-                .from('profiles')
-                .insert({
-                  id: users.id,
-                  username: username
-                })
-                .select()
-                .single();
-              
-              if (createError) {
-                if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка создания profiles: ${createError.message}`;
-              } else {
-                profile = newProfile;
-                if (infoEl) infoEl.innerHTML += `<br>✅ Автоматически создан в profiles!`;
-              }
-            }
+          if (profileError) {
+            if (infoEl) infoEl.innerHTML += `⚠️ Ошибка поиска: ${profileError.message}\n`;
           }
 
+          if (profileData) {
+            profile = profileData;
+            if (infoEl) infoEl.innerHTML += `✅ Найден в profiles!\n`;
+          }
+
+          // Если не нашли, пробуем через другой подход
           if (!profile) {
-            messageEl.textContent = `❌ Пользователь "${username}" не найден ни в одной таблице`;
+            if (infoEl) infoEl.innerHTML += `❌ Не найден в profiles\n`;
+            messageEl.textContent = `❌ Пользователь "${username}" не найден`;
             messageEl.style.color = 'red';
-            if (infoEl) infoEl.innerHTML += `<br>❌ Пользователь не найден`;
             showToast('Пользователь не найден', 'error');
             return;
           }
 
           if (infoEl) {
-            infoEl.innerHTML += `<br>✅ НАЙДЕН! ID: ${profile.id}, username: ${profile.username}`;
+            infoEl.innerHTML += `\n✅ НАЙДЕН! ID: ${profile.id}, username: ${profile.username}\n`;
           }
 
           messageEl.textContent = `Пользователь найден! Выдача подписки...`;
@@ -1042,7 +1127,7 @@ ON CONFLICT (id) DO NOTHING;</pre>
           messageEl.textContent = 'Ошибка: ' + (err.message || 'неизвестно');
           messageEl.style.color = 'red';
           showToast('Ошибка: ' + err.message, 'error');
-          if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка: ${err.message}`;
+          if (infoEl) infoEl.innerHTML += `\n❌ Ошибка: ${err.message}\n`;
         }
       }
 
