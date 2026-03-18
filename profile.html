@@ -293,6 +293,18 @@
       border-radius: 4px;
       margin-left: 8px;
     }
+
+    /* Стили для отладки */
+    .debug-link {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 16px;
+      font-size: 11px;
+      word-break: break-all;
+      color: #9ca3af;
+    }
     
     @media (max-width: 640px) {
       img.logo {
@@ -470,6 +482,24 @@
         <p class="text-sm text-gray-500 mt-3">Нажмите чтобы открыть подписку в приложении Happ</p>
         <div class="mt-2 text-xs text-gray-600">
           <span id="subscription-id-display"></span>
+        </div>
+        
+        <!-- Отладочная информация -->
+        <div id="debug-link-container" class="debug-link hidden">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-yellow-400">🔧 Отладка Happ ссылки</span>
+            <button id="copy-debug-link" class="text-xs text-gray-400 hover:text-white transition">
+              <i class="fa-regular fa-copy"></i> Копировать
+            </button>
+          </div>
+          <div id="debug-link-display" class="text-xs break-all"></div>
+          <div class="text-xs text-gray-500 mt-2">
+            <p>Форматы для тестирования:</p>
+            <button class="test-format-btn text-blue-400 hover:text-blue-300 mr-2" data-format="0">Формат 1</button>
+            <button class="test-format-btn text-blue-400 hover:text-blue-300 mr-2" data-format="1">Формат 2</button>
+            <button class="test-format-btn text-blue-400 hover:text-blue-300 mr-2" data-format="2">Формат 3</button>
+            <button class="test-format-btn text-blue-400 hover:text-blue-300" data-format="3">Формат 4</button>
+          </div>
         </div>
       </div>
     </div>
@@ -729,6 +759,7 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
       let currentUser = null;
       let statsChart = null;
       let currentDeviceHwid = null;
+      let currentHappFormats = [];
 
       // Используем sessionStorage для отслеживания регистрации устройства
       function isDeviceRegisteredInSession() {
@@ -1059,7 +1090,7 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           // Проверяем лимит устройств
           const { current, max } = await checkDeviceLimit(userId);
           
-          // Формируем данные для ссылки в правильном формате
+          // Формируем данные для ссылки
           const subscriptionData = {
             provider_id: PROVIDER_ID,
             user_id: userId,
@@ -1070,17 +1101,26 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
             timestamp: Date.now()
           };
 
-          // Кодируем в base64 (без btoa для кириллицы)
-          const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(subscriptionData))));
+          // Кодируем в base64
+          const jsonStr = JSON.stringify(subscriptionData);
+          const encodedData = btoa(unescape(encodeURIComponent(jsonStr)));
           
-          // Правильный формат ссылки Happ
-          const happUrl = `happ://import/${encodedData}`;
+          // Генерируем разные форматы ссылок для тестирования
+          const formats = [
+            `happ://import/${encodedData}`,           // Формат 1
+            `happ://crypto/${encodedData}`,           // Формат 2
+            `happ://${PROVIDER_ID}/${encodedData}`,   // Формат 3
+            `happ://subscription/${encodedData}`      // Формат 4
+          ];
           
-          return happUrl;
+          currentHappFormats = formats;
+          
+          // Пока используем первый формат
+          return formats[0];
+          
         } catch (err) {
           console.error('Ошибка генерации Happ ссылки:', err);
-          // Возвращаем простую ссылку как запасной вариант
-          return `happ://import/${btoa(PROVIDER_ID)}`;
+          return `happ://${PROVIDER_ID}`;
         }
       }
 
@@ -1105,6 +1145,30 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         document.getElementById('copy-expires')?.addEventListener('click', () => {
           const date = document.getElementById('expires-date').textContent;
           if (date && date !== 'загрузка...') copyToClipboard(date);
+        });
+        
+        // Обработчик для копирования отладочной ссылки
+        document.getElementById('copy-debug-link')?.addEventListener('click', () => {
+          const debugDisplay = document.getElementById('debug-link-display');
+          if (debugDisplay) {
+            copyToClipboard(debugDisplay.textContent);
+          }
+        });
+
+        // Обработчики для тестирования разных форматов
+        document.querySelectorAll('.test-format-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const formatIndex = parseInt(e.target.dataset.format);
+            if (currentHappFormats[formatIndex]) {
+              const happLink = document.getElementById('happ-subscription-link');
+              const debugDisplay = document.getElementById('debug-link-display');
+              if (happLink && debugDisplay) {
+                happLink.href = currentHappFormats[formatIndex];
+                debugDisplay.textContent = currentHappFormats[formatIndex];
+                showToast(`Формат ${formatIndex + 1} установлен`, 'success');
+              }
+            }
+          });
         });
         
         // Быстрые даты
@@ -1414,6 +1478,8 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           const happLink = document.getElementById('happ-subscription-link');
           const statusBadge = document.getElementById('subscription-status-badge');
           const subscriptionIdDisplay = document.getElementById('subscription-id-display');
+          const debugContainer = document.getElementById('debug-link-container');
+          const debugDisplay = document.getElementById('debug-link-display');
 
           // Загружаем список устройств и проверяем лимит
           await loadDevices(user.id);
@@ -1454,6 +1520,12 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
                 }
                 if (subscriptionIdDisplay) {
                   subscriptionIdDisplay.innerHTML = `ID подписки: ${subscription.id}`;
+                }
+                
+                // Показываем отладочную информацию
+                if (debugContainer && debugDisplay) {
+                  debugContainer.classList.remove('hidden');
+                  debugDisplay.textContent = happUrl;
                 }
                 
                 // Показываем кнопку
