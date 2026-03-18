@@ -729,7 +729,15 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
       let currentUser = null;
       let statsChart = null;
       let currentDeviceHwid = null;
-      let deviceRegisteredInSession = false; // Флаг для отслеживания регистрации в текущей сессии
+
+      // Используем sessionStorage для отслеживания регистрации устройства
+      function isDeviceRegisteredInSession() {
+        return sessionStorage.getItem('deviceRegistered') === 'true';
+      }
+
+      function setDeviceRegisteredInSession(value) {
+        sessionStorage.setItem('deviceRegistered', value ? 'true' : 'false');
+      }
 
       // Список администраторов (email)
       const ADMIN_EMAILS = ['maxsimpiska@gmail.com', 'admin@klark.ru', 'leongera2013@gmail.com', 'klounada87@gmail.com'];
@@ -845,9 +853,33 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
 
       // Регистрация устройства (только один раз за сессию)
       async function registerDevice(userId) {
-        // Если устройство уже зарегистрировано в этой сессии, пропускаем
-        if (deviceRegisteredInSession) {
-          console.log('Устройство уже зарегистрировано в этой сессии');
+        // Проверяем sessionStorage
+        if (isDeviceRegisteredInSession()) {
+          console.log('Устройство уже зарегистрировано в этой сессии (sessionStorage)');
+          
+          // Все равно обновляем currentDeviceHwid
+          const hwid = await getDeviceHwid();
+          currentDeviceHwid = hwid;
+          
+          // Обновляем last_seen для существующего устройства
+          try {
+            const { data: existingDevice } = await supabaseClient
+              .from('user_devices')
+              .select('*')
+              .eq('user_id', userId)
+              .eq('device_hwid', hwid)
+              .maybeSingle();
+            
+            if (existingDevice) {
+              await supabaseClient
+                .from('user_devices')
+                .update({ last_seen: new Date().toISOString() })
+                .eq('id', existingDevice.id);
+            }
+          } catch (err) {
+            console.error('Ошибка обновления last_seen:', err);
+          }
+          
           return true;
         }
 
@@ -870,7 +902,8 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
               .update({ last_seen: new Date().toISOString() })
               .eq('id', existingDevice.id);
             
-            deviceRegisteredInSession = true;
+            // Сохраняем в sessionStorage
+            setDeviceRegisteredInSession(true);
             
             // Обновляем отображение
             const { current, max } = await checkDeviceLimit(userId);
@@ -903,7 +936,8 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           
           if (error) throw error;
           
-          deviceRegisteredInSession = true;
+          // Сохраняем в sessionStorage
+          setDeviceRegisteredInSession(true);
           showToast('Новое устройство зарегистрировано', 'success');
           
           // Обновляем отображение
@@ -1337,7 +1371,8 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           
           currentUser = null;
           currentDeviceHwid = null;
-          deviceRegisteredInSession = false; // Сбрасываем флаг при выходе
+          // Сбрасываем sessionStorage при выходе
+          setDeviceRegisteredInSession(false);
           
           document.getElementById('auth-section').style.display = 'block';
           document.getElementById('profile-section').style.display = 'none';
