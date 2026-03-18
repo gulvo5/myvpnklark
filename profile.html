@@ -279,6 +279,21 @@
       transform: scale(1.1);
     }
     
+    .remove-device-disabled {
+      color: #6b7280;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+    
+    .admin-only-badge {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+    
     @media (max-width: 640px) {
       img.logo {
         max-height: 120px;
@@ -433,11 +448,12 @@
       <div id="devices-list-container" class="mt-8 relative z-10 hidden">
         <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
           <i class="fa-regular fa-mobile"></i> Подключенные устройства
+          <span id="admin-device-note" class="text-xs text-red-400 hidden">(только админ может удалять)</span>
         </h3>
         <div id="devices-list" class="space-y-2">
           <!-- Сюда будут добавляться устройства -->
         </div>
-        <p class="text-xs text-gray-500 mt-2">Максимум 3 устройства. Чтобы добавить новое, удалите одно из существующих.</p>
+        <p class="text-xs text-gray-500 mt-2">Максимум 3 устройства. При достижении лимита новое устройство не сможет войти.</p>
       </div>
 
       <!-- Happ ссылка для подписки (динамическая) -->
@@ -713,6 +729,7 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
       let currentUser = null;
       let statsChart = null;
       let currentDeviceHwid = null;
+      let deviceRegisteredInSession = false; // Флаг для отслеживания регистрации в текущей сессии
 
       // Список администраторов (email)
       const ADMIN_EMAILS = ['maxsimpiska@gmail.com', 'admin@klark.ru', 'leongera2013@gmail.com', 'klounada87@gmail.com'];
@@ -751,6 +768,11 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           hour: '2-digit',
           minute: '2-digit'
         });
+      }
+
+      // Проверка является ли пользователь админом
+      function isAdmin() {
+        return currentUser && ADMIN_EMAILS.includes(currentUser.email);
       }
 
       // Получение HWID устройства
@@ -821,13 +843,19 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         return deviceName;
       }
 
-      // Регистрация устройства
+      // Регистрация устройства (только один раз за сессию)
       async function registerDevice(userId) {
+        // Если устройство уже зарегистрировано в этой сессии, пропускаем
+        if (deviceRegisteredInSession) {
+          console.log('Устройство уже зарегистрировано в этой сессии');
+          return true;
+        }
+
         try {
           const hwid = await getDeviceHwid();
           currentDeviceHwid = hwid;
           
-          // Проверяем, есть ли уже такое устройство
+          // Проверяем, есть ли уже такое устройство в БД
           const { data: existingDevice } = await supabaseClient
             .from('user_devices')
             .select('*')
@@ -836,16 +864,16 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
             .maybeSingle();
           
           if (existingDevice) {
-            // Обновляем last_seen
+            // Просто обновляем last_seen, не создаем новую запись
             await supabaseClient
               .from('user_devices')
               .update({ last_seen: new Date().toISOString() })
               .eq('id', existingDevice.id);
             
-            // Проверяем лимит даже для существующего устройства
-            const { current, max } = await checkDeviceLimit(userId);
+            deviceRegisteredInSession = true;
             
             // Обновляем отображение
+            const { current, max } = await checkDeviceLimit(userId);
             const devicesText = document.getElementById('devices-text');
             const devicesBar = document.getElementById('devices-bar');
             if (devicesText) devicesText.textContent = `${current} / ${max}`;
@@ -858,11 +886,11 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           const { current, max, canAdd } = await checkDeviceLimit(userId);
           
           if (!canAdd) {
-            showToast(`Достигнут лимит устройств (макс. ${max}). Удалите одно из устройств в профиле.`, 'warning');
+            showToast(`Достигнут лимит устройств (макс. ${max}). Это устройство не может быть добавлено.`, 'warning');
             return false;
           }
           
-          // Добавляем новое устройство
+          // Добавляем новое устройство (только если его еще нет)
           const { error } = await supabaseClient
             .from('user_devices')
             .insert({
@@ -875,7 +903,8 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           
           if (error) throw error;
           
-          showToast('Устройство успешно зарегистрировано!', 'success');
+          deviceRegisteredInSession = true;
+          showToast('Новое устройство зарегистрировано', 'success');
           
           // Обновляем отображение
           const { current: newCurrent, max: newMax } = await checkDeviceLimit(userId);
@@ -908,6 +937,7 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           const devicesContainer = document.getElementById('devices-list-container');
           const devicesText = document.getElementById('devices-text');
           const devicesBar = document.getElementById('devices-bar');
+          const adminDeviceNote = document.getElementById('admin-device-note');
           
           const { current, max } = await checkDeviceLimit(userId);
           
@@ -921,6 +951,13 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           devicesContainer.classList.remove('hidden');
           if (devicesText) devicesText.textContent = `${current} / ${max}`;
           if (devicesBar) devicesBar.style.width = `${(current / max) * 100}%`;
+          
+          // Показываем заметку об админе только если пользователь не админ
+          if (!isAdmin()) {
+            adminDeviceNote.classList.remove('hidden');
+          } else {
+            adminDeviceNote.classList.add('hidden');
+          }
           
           let html = '';
           devices.forEach(device => {
@@ -939,8 +976,8 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
                     <div class="device-date">Последний вход: ${lastSeen}</div>
                   </div>
                 </div>
-                ${!isCurrent ? `
-                  <button class="remove-device" onclick="removeDevice('${device.id}')">
+                ${isAdmin() && !isCurrent ? `
+                  <button class="remove-device" onclick="removeDevice('${device.id}')" title="Удалить устройство (только админ)">
                     <i class="fa-regular fa-trash-can"></i>
                   </button>
                 ` : ''}
@@ -955,8 +992,14 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         }
       }
 
-      // Удаление устройства
+      // Удаление устройства (доступно только админам)
       window.removeDevice = async function(deviceId) {
+        // Проверяем, является ли пользователь админом
+        if (!isAdmin()) {
+          showToast('Только администратор может удалять устройства', 'error');
+          return;
+        }
+        
         if (!confirm('Вы уверены, что хотите удалить это устройство?')) return;
         
         try {
@@ -1190,7 +1233,7 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
             
-            // Регистрируем устройство
+            // Регистрируем устройство (только один раз за сессию)
             await registerDevice(currentUser.id);
             
             if (checkIsAdmin(currentUser.email)) {
@@ -1262,13 +1305,13 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
             
-            // Регистрируем устройство
+            // Регистрируем устройство (только один раз за сессию)
             const registered = await registerDevice(currentUser.id);
             
             if (!registered) {
               // Если лимит устройств достигнут, показываем предупреждение
               const { current, max } = await checkDeviceLimit(currentUser.id);
-              showToast(`Лимит устройств (${current}/${max}) достигнут. Удалите одно из устройств в профиле.`, 'warning');
+              showToast(`Лимит устройств (${current}/${max}) достигнут. Это устройство не может быть добавлено.`, 'warning');
             }
             
             if (checkIsAdmin(currentUser.email)) {
@@ -1294,6 +1337,7 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           
           currentUser = null;
           currentDeviceHwid = null;
+          deviceRegisteredInSession = false; // Сбрасываем флаг при выходе
           
           document.getElementById('auth-section').style.display = 'block';
           document.getElementById('profile-section').style.display = 'none';
