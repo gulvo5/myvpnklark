@@ -366,21 +366,20 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
       
       <div class="mb-4 text-sm text-yellow-400 bg-yellow-500/10 p-3 rounded-xl flex items-center gap-2">
         <i class="fa-regular fa-circle-info"></i>
-        <span>Поиск пользователя по <span class="font-bold">username</span> или <span class="font-bold">ID (uuid)</span> в таблице <span class="font-bold">profiles</span></span>
+        <span>Поиск по <span class="font-bold">username</span> в таблице <span class="font-bold">profiles</span></span>
       </div>
       
       <div class="mb-6 relative z-10">
         <label class="block text-gray-400 mb-2 flex items-center gap-2">
-          <i class="fa-regular fa-user"></i> Username или UUID пользователя
+          <i class="fa-regular fa-user"></i> Username пользователя
         </label>
         <div class="relative">
-          <input id="admin-identifier" type="text" placeholder="leongera2013 или 4bc7f33c-ca1a-438f-9ada-f6ad39fbc78a" 
+          <input id="admin-username" type="text" placeholder="leongera2013" 
                  class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white pr-24">
-          <button id="clear-identifier" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white px-3 py-1 hidden">
+          <button id="clear-username" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white px-3 py-1 hidden">
             <i class="fa-regular fa-circle-xmark"></i>
           </button>
         </div>
-        <p class="text-xs text-gray-500 mt-1">Можно ввести username или полный UUID</p>
       </div>
       
       <div class="mb-6 relative z-10">
@@ -545,8 +544,8 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
         });
 
         // Очистка поля
-        document.getElementById('admin-identifier')?.addEventListener('input', function() {
-          const clearBtn = document.getElementById('clear-identifier');
+        document.getElementById('admin-username')?.addEventListener('input', function() {
+          const clearBtn = document.getElementById('clear-username');
           if (this.value.length > 0) {
             clearBtn.classList.remove('hidden');
           } else {
@@ -554,8 +553,8 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
           }
         });
         
-        document.getElementById('clear-identifier')?.addEventListener('click', function() {
-          document.getElementById('admin-identifier').value = '';
+        document.getElementById('clear-username')?.addEventListener('click', function() {
+          document.getElementById('admin-username').value = '';
           this.classList.add('hidden');
         });
 
@@ -592,11 +591,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
         return ADMIN_USERNAMES.includes(username);
       }
 
-      function isUUID(str) {
-        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        return uuidPattern.test(str);
-      }
-
       async function testConnection() {
         const infoEl = document.getElementById('admin-info');
         if (!infoEl) return;
@@ -605,9 +599,6 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
         infoEl.innerHTML = '⏳ Проверка подключения к таблице subscriptions...';
         
         try {
-          // Сначала проверим само подключение
-          infoEl.innerHTML += `<br>🔍 Проверяем подключение к Supabase...`;
-          
           const testData = {
             user_id: '00000000-0000-0000-0000-000000000000',
             status: 'test',
@@ -879,23 +870,23 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
       }
 
       async function adminGrantSubscription() {
-        const identifierInput = document.getElementById('admin-identifier');
+        const usernameInput = document.getElementById('admin-username');
         const dateInput = document.getElementById('admin-end-date');
         const devicesInput = document.getElementById('admin-max-devices');
         const messageEl = document.getElementById('admin-message');
         const infoEl = document.getElementById('admin-info');
 
-        if (!identifierInput || !dateInput || !devicesInput || !messageEl) {
+        if (!usernameInput || !dateInput || !devicesInput || !messageEl) {
           console.error('Не найдены элементы админ-панели');
           return;
         }
 
-        const identifier = identifierInput.value.trim();
+        const username = usernameInput.value.trim();
         const endDateStr = dateInput.value.trim();
         const maxDevices = parseInt(devicesInput.value) || 10;
 
-        if (!identifier || !endDateStr) {
-          messageEl.textContent = 'Заполните идентификатор и дату';
+        if (!username || !endDateStr) {
+          messageEl.textContent = 'Заполните username и дату';
           messageEl.style.color = 'red';
           return;
         }
@@ -926,30 +917,17 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
         
         if (infoEl) {
           infoEl.classList.remove('hidden');
-          infoEl.innerHTML = `🔍 Поиск: <b>"${identifier}"</b> в таблице <b>profiles</b>...`;
+          infoEl.innerHTML = `🔍 Поиск username: <b>"${username}"</b> в таблице <b>profiles</b> (поле username)...`;
         }
 
         try {
-          // 1. Проверяем, существует ли таблица
-          if (infoEl) infoEl.innerHTML += `<br>🔍 Проверяем доступ к таблице profiles...`;
-          
-          const { data: testData, error: testError } = await supabaseClient
-            .from('profiles')
-            .select('count', { count: 'exact', head: true });
-          
-          if (testError) {
-            if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка доступа: ${testError.message}`;
-            throw testError;
-          }
-          
-          if (infoEl) infoEl.innerHTML += `<br>✅ Таблица profiles доступна`;
-
-          // 2. Получаем все записи
-          if (infoEl) infoEl.innerHTML += `<br>🔍 Загружаем ВСЕ записи...`;
+          // Сначала покажем все записи для диагностики
+          if (infoEl) infoEl.innerHTML += `<br>🔍 Загружаем все записи из таблицы profiles...`;
           
           const { data: allProfiles, error: allError } = await supabaseClient
             .from('profiles')
-            .select('*');
+            .select('id, username')
+            .limit(50);
           
           if (allError) {
             if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка загрузки: ${allError.message}`;
@@ -960,65 +938,36 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
             infoEl.innerHTML += `<br>📊 Всего записей: ${allProfiles?.length || 0}`;
             
             if (allProfiles && allProfiles.length > 0) {
-              infoEl.innerHTML += `<br>📋 Все записи:`;
+              infoEl.innerHTML += `<br>📋 Все доступные username:`;
               allProfiles.forEach((profile, index) => {
-                infoEl.innerHTML += `<br>${index + 1}. ID: ${profile.id}, username: "${profile.username || 'нет'}"`;
+                infoEl.innerHTML += `<br>  ${index + 1}. "${profile.username}" (ID: ${profile.id})`;
               });
             } else {
-              infoEl.innerHTML += `<br>❌ Таблица profiles ПУСТАЯ!`;
+              infoEl.innerHTML += `<br>❌ Таблица profiles пуста!`;
               messageEl.textContent = '❌ Таблица profiles пуста';
               messageEl.style.color = 'red';
               return;
             }
           }
 
-          // 3. Ищем пользователя
-          let profile = null;
-          const isUuid = isUUID(identifier);
+          // Ищем точное совпадение по username
+          if (infoEl) infoEl.innerHTML += `<br>🔍 Ищем точное совпадение: "${username}"`;
+          
+          const { data: profile, error: profileError } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('username', username)
+            .maybeSingle();
 
-          if (isUuid) {
-            if (infoEl) infoEl.innerHTML += `<br>🔍 Ищем UUID в поле id: "${identifier}"`;
-            
-            const { data, error } = await supabaseClient
-              .from('profiles')
-              .select('*')
-              .eq('id', identifier)
-              .maybeSingle();
-            
-            if (error) {
-              if (infoEl) infoEl.innerHTML += `<br>⚠️ Ошибка: ${error.message}`;
-            }
-            
-            if (data) {
-              profile = data;
-              if (infoEl) infoEl.innerHTML += `<br>✅ Найдено!`;
-            } else {
-              if (infoEl) infoEl.innerHTML += `<br>⛔ Не найдено`;
-            }
-          } else {
-            if (infoEl) infoEl.innerHTML += `<br>🔍 Ищем username: "${identifier}"`;
-            
-            const { data, error } = await supabaseClient
-              .from('profiles')
-              .select('*')
-              .eq('username', identifier)
-              .maybeSingle();
-            
-            if (error) {
-              if (infoEl) infoEl.innerHTML += `<br>⚠️ Ошибка: ${error.message}`;
-            }
-            
-            if (data) {
-              profile = data;
-              if (infoEl) infoEl.innerHTML += `<br>✅ Найдено!`;
-            } else {
-              if (infoEl) infoEl.innerHTML += `<br>⛔ Не найдено`;
-            }
+          if (profileError) {
+            if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка поиска: ${profileError.message}`;
+            throw profileError;
           }
 
           if (!profile) {
-            messageEl.textContent = `❌ Пользователь "${identifier}" не найден`;
+            messageEl.textContent = `❌ Пользователь с username "${username}" не найден`;
             messageEl.style.color = 'red';
+            if (infoEl) infoEl.innerHTML += `<br>❌ Пользователь не найден`;
             showToast('Пользователь не найден', 'error');
             return;
           }
@@ -1047,6 +996,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
 
           if (subError) throw subError;
 
+          // Конфетти при успехе
           if (window.confetti) {
             confetti({
               particleCount: 100,
@@ -1055,16 +1005,17 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
             });
           }
 
-          messageEl.textContent = `✅ Подписка оформлена для "${profile.username || identifier}" до ${endDateStr}`;
+          messageEl.textContent = `✅ Подписка оформлена для пользователя "${profile.username}" до ${endDateStr} (макс. ${maxDevices} устройств)`;
           messageEl.style.color = 'lime';
           showToast('Подписка успешно выдана!', 'success');
 
-          identifierInput.value = '';
+          // Очищаем поля
+          usernameInput.value = '';
           dateInput.value = '';
           devicesInput.value = '10';
-          document.getElementById('clear-identifier')?.classList.add('hidden');
+          document.getElementById('clear-username')?.classList.add('hidden');
         } catch (err) {
-          console.error('Ошибка:', err);
+          console.error('Ошибка выдачи подписки:', err);
           messageEl.textContent = 'Ошибка: ' + (err.message || 'неизвестно');
           messageEl.style.color = 'red';
           showToast('Ошибка: ' + err.message, 'error');
