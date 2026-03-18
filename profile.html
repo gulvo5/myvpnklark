@@ -152,6 +152,46 @@
       padding: 16px;
       margin-bottom: 20px;
     }
+    
+    /* Стили для кнопки подписки */
+    .subscription-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    .subscription-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+      z-index: -1;
+    }
+    
+    .subscription-button:hover::before {
+      left: 100%;
+    }
+    
+    .subscription-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .subscription-icon {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
     @media (max-width: 640px) {
       img.logo {
         max-height: 120px;
@@ -300,6 +340,17 @@
           </span>
         </p>
       </div>
+
+      <!-- Кнопка Моя подписка (красивая) -->
+      <div class="mt-8 text-center relative z-10">
+        <a href="happ://crypt5/hfqa1XxAfyUTKVcU0j30Rku9DkKErBH3xWkaAFUru986uFAzbiiDnO9M7GWdra6TaZ/Fr9nqDCC69t1zEEZtz1RlIE0PQK5x4f+uAPKUFMCS5zO96TiCzrCe6BApE0YB9dSg+wtYsT5qbl49pbLDE3wr/d2YcCgwoSO9vKk8/I1DJ/qWJnULNIvIQuTYqUZQhkwh6f60hUmFYCzJxNycMCK83PEu0lr5K+AXfe6k7uedX8fiOUwwzTn8V0tC7XSuaZtnT/+Ew46L+GnSQz2+RbTSDAbKu6PWX4Y27GfJ/XGqcq+xPXCeUGR9/P/rY=D5RpkDlC3QhLvr5zQRMy7O/dkxIlobbavztedXZhMhYruFkiYNuI0xCqiQhvHwzoEj31AXMt+F2GJwrpNHniXN++V7by38je/77O/MtIp1LTcaGPOAi5EmQyRfUT/d39erZHK775v1QLgnYMGjxfSx6gTRtBMwH7foXetuZukOBwL+Zca2igTlAwyWgufQR4CslMbTOOSjJ2bVvtYTg8BlhxY2GNIiy79Ur5GGXXThQPBozcjosMVOyrO5TigtK52Akho9BwTnPfgVjJJddOjmUEwnOfk7SDl2vDKa33CHnwpA904//lA2ddwcp1cD8gqWsZLGkN+veed0ym7M/0HLvMBJPschpj9DuEsJakt+wYAn0MzEdzny/ng2iw+g015KaE6dDOPDDdsuUAu7qBcZWNVG61CAM2qSb66PFyh7AKDXCZP1keN/CWmZtU/xCo+4TOPVyQVTfHTNBe4V3a4h5FMRSsLw4epVUHEHakEK509/eUBah2FAvwWDqlWGyn34202sJmhsKUkAuy17p7tPUrbydlSlVkkiLGn65C+424rzbeYth+d6P4jqxkXTFGB+q6cCHiLTzqMfn4ZVcV0jGz2g3N9iFWY1kbwF+2+lc9Pq1+M4q6ZIREZ4lmJ64IkLrjKl7wFNTjNeY2nVeCQOXsAgkmmX9ZJTj7honCLt4=zSxctr" target="_blank" 
+           class="subscription-button inline-flex items-center justify-center gap-4 w-full max-w-md mx-auto py-5 px-8 rounded-2xl text-white text-xl font-bold shadow-lg">
+          <span class="subscription-icon text-2xl">✨</span>
+          <span>Моя подписка</span>
+          <span class="subscription-icon text-2xl">✨</span>
+        </a>
+        <p class="text-sm text-gray-500 mt-3">Нажмите для управления подпиской</p>
+      </div>
     </div>
 
     <!-- Диагностическая панель (для админов) -->
@@ -350,11 +401,11 @@ DECLARE
 BEGIN
   SELECT json_build_object(
     'id', id,
-    'email', email,
-    'created_at', created_at
+    'email', email
   ) INTO result
   FROM auth.users
-  WHERE email = search_email;
+  WHERE email = search_email
+  LIMIT 1;
   
   RETURN result;
 END;
@@ -373,12 +424,10 @@ BEGIN
   SELECT json_agg(
     json_build_object(
       'id', id,
-      'email', email,
-      'created_at', created_at
+      'email', email
     )
   ) INTO result
-  FROM auth.users
-  ORDER BY created_at DESC;
+  FROM auth.users;
   
   RETURN COALESCE(result, '[]'::JSON);
 END;
@@ -456,18 +505,7 @@ GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
       <p id="admin-message" class="text-center text-yellow-400 min-h-[1.5rem]"></p>
     </div>
 
-    <!-- Кнопка продления -->
-    <div class="text-center mb-8">
-      <a href="https://t.me/CKOPO4" target="_blank"
-         class="btn-modern inline-flex justify-center items-center gap-5 w-full max-w-lg mx-auto py-7 px-10 rounded-3xl text-2xl font-bold shadow-2xl group relative overflow-hidden">
-        <span class="relative z-10 flex items-center gap-3">
-          <i class="fa-regular fa-rocket"></i> Продлить подписку
-          <span class="text-xl bg-black/40 px-6 py-3 rounded-2xl text-white">от 50 ₽</span>
-        </span>
-        <span class="absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-500 opacity-0 group-hover:opacity-20 transition"></span>
-      </a>
-    </div>
-
+    <!-- Кнопка продления (старая, теперь не нужна) -->
     <!-- Кнопка выхода -->
     <div class="text-center">
       <button id="logout-btn" 
