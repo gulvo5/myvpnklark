@@ -302,26 +302,46 @@
         <span class="bg-green-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
           <i class="fa-regular fa-database"></i> SETUP
         </span>
-        <span class="text-xl font-bold text-white">Создание таблицы subscriptions</span>
+        <span class="text-xl font-bold text-white">SQL для автоматического добавления</span>
       </div>
       
       <div class="sql-box relative z-10">
         <p class="text-green-400 mb-2 flex items-center gap-2">
-          <i class="fa-regular fa-code"></i> 📋 Выполните этот SQL в редакторе Supabase:
+          <i class="fa-regular fa-code"></i> 📋 Выполните в SQL редакторе Supabase:
         </p>
         <pre class="text-xs text-white bg-black/50 p-4 rounded-lg overflow-x-auto" id="sql-code">
-CREATE TABLE IF NOT EXISTS subscriptions (
-  id SERIAL PRIMARY KEY,
-  user_id UUID NOT NULL UNIQUE,
-  status TEXT DEFAULT 'active',
-  ends_at TIMESTAMP WITH TIME ZONE,
-  max_devices INTEGER DEFAULT 10,
-  used_devices INTEGER DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- 1. Создаем функцию для автоматического добавления
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER 
+SET search_path = ''
+AS $$
+BEGIN
+  INSERT INTO public.profiles (id, username)
+  VALUES (
+    NEW.id,
+    split_part(NEW.email, '@', 1)
+  )
+  ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+END;
+$$;
 
-CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);</pre>
+-- 2. Создаем триггер
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
+-- 3. Добавляем всех существующих пользователей
+INSERT INTO public.profiles (id, username)
+SELECT 
+  id,
+  split_part(email, '@', 1) as username
+FROM auth.users
+ON CONFLICT (id) DO NOTHING;</pre>
         <button id="copy-sql" class="absolute top-2 right-2 text-gray-400 hover:text-white transition">
           <i class="fa-regular fa-copy"></i>
         </button>
@@ -366,7 +386,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
       
       <div class="mb-4 text-sm text-yellow-400 bg-yellow-500/10 p-3 rounded-xl flex items-center gap-2">
         <i class="fa-regular fa-circle-info"></i>
-        <span>Поиск по <span class="font-bold">username</span> в таблице <span class="font-bold">profiles</span></span>
+        <span>Автоматический поиск и создание в <span class="font-bold">profiles</span></span>
       </div>
       
       <div class="mb-6 relative z-10">
@@ -374,7 +394,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
           <i class="fa-regular fa-user"></i> Username пользователя
         </label>
         <div class="relative">
-          <input id="admin-username" type="text" placeholder="leongera2013" 
+          <input id="admin-username" type="text" placeholder="klounada87" 
                  class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white pr-24">
           <button id="clear-username" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white px-3 py-1 hidden">
             <i class="fa-regular fa-circle-xmark"></i>
@@ -480,7 +500,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
       let statsChart = null;
 
       // Список администраторов (username)
-      const ADMIN_USERNAMES = ['maxsimpiska', 'admin', 'leongera2013'];
+      const ADMIN_USERNAMES = ['maxsimpiska', 'admin', 'leongera2013', 'klounada87'];
 
       // Toast уведомления
       function showToast(message, type = 'info') {
@@ -881,7 +901,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
           return;
         }
 
-        const username = usernameInput.value.trim();
+        const username = usernameInput.value.trim().toLowerCase();
         const endDateStr = dateInput.value.trim();
         const maxDevices = parseInt(devicesInput.value) || 10;
 
@@ -917,55 +937,58 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
         
         if (infoEl) {
           infoEl.classList.remove('hidden');
-          infoEl.innerHTML = `🔍 Поиск username: <b>"${username}"</b> в таблице <b>profiles</b> (поле username)...`;
+          infoEl.innerHTML = `🔍 Поиск username: <b>"${username}"</b>...`;
         }
 
         try {
-          // Сначала покажем все записи для диагностики
-          if (infoEl) infoEl.innerHTML += `<br>🔍 Загружаем все записи из таблицы profiles...`;
+          // Сначала проверяем есть ли пользователь в profiles
+          if (infoEl) infoEl.innerHTML += `<br>🔍 Ищем в таблице profiles...`;
           
-          const { data: allProfiles, error: allError } = await supabaseClient
-            .from('profiles')
-            .select('id, username')
-            .limit(50);
-          
-          if (allError) {
-            if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка загрузки: ${allError.message}`;
-            throw allError;
-          }
-          
-          if (infoEl) {
-            infoEl.innerHTML += `<br>📊 Всего записей: ${allProfiles?.length || 0}`;
-            
-            if (allProfiles && allProfiles.length > 0) {
-              infoEl.innerHTML += `<br>📋 Все доступные username:`;
-              allProfiles.forEach((profile, index) => {
-                infoEl.innerHTML += `<br>  ${index + 1}. "${profile.username}" (ID: ${profile.id})`;
-              });
-            } else {
-              infoEl.innerHTML += `<br>❌ Таблица profiles пуста!`;
-              messageEl.textContent = '❌ Таблица profiles пуста';
-              messageEl.style.color = 'red';
-              return;
-            }
-          }
-
-          // Ищем точное совпадение по username
-          if (infoEl) infoEl.innerHTML += `<br>🔍 Ищем точное совпадение: "${username}"`;
-          
-          const { data: profile, error: profileError } = await supabaseClient
+          let { data: profile, error: profileError } = await supabaseClient
             .from('profiles')
             .select('*')
             .eq('username', username)
             .maybeSingle();
 
-          if (profileError) {
-            if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка поиска: ${profileError.message}`;
-            throw profileError;
+          // Если не нашли в profiles, проверяем auth.users
+          if (!profile) {
+            if (infoEl) infoEl.innerHTML += `<br>❌ Не найден в profiles, проверяем auth.users...`;
+            
+            // Ищем пользователя в auth.users по email
+            const { data: users, error: usersError } = await supabaseClient
+              .from('users')
+              .select('id, email')
+              .ilike('email', `${username}@%`)
+              .maybeSingle();
+            
+            if (usersError && usersError.code !== 'PGRST116') {
+              if (infoEl) infoEl.innerHTML += `<br>⚠️ Ошибка при поиске в auth.users: ${usersError.message}`;
+            }
+            
+            if (users) {
+              if (infoEl) infoEl.innerHTML += `<br>✅ Найден в auth.users! ID: ${users.id}`;
+              
+              // Создаем запись в profiles автоматически
+              const { data: newProfile, error: createError } = await supabaseClient
+                .from('profiles')
+                .insert({
+                  id: users.id,
+                  username: username
+                })
+                .select()
+                .single();
+              
+              if (createError) {
+                if (infoEl) infoEl.innerHTML += `<br>❌ Ошибка создания profiles: ${createError.message}`;
+              } else {
+                profile = newProfile;
+                if (infoEl) infoEl.innerHTML += `<br>✅ Автоматически создан в profiles!`;
+              }
+            }
           }
 
           if (!profile) {
-            messageEl.textContent = `❌ Пользователь с username "${username}" не найден`;
+            messageEl.textContent = `❌ Пользователь "${username}" не найден ни в одной таблице`;
             messageEl.style.color = 'red';
             if (infoEl) infoEl.innerHTML += `<br>❌ Пользователь не найден`;
             showToast('Пользователь не найден', 'error');
@@ -1005,7 +1028,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);<
             });
           }
 
-          messageEl.textContent = `✅ Подписка оформлена для пользователя "${profile.username}" до ${endDateStr} (макс. ${maxDevices} устройств)`;
+          messageEl.textContent = `✅ Подписка оформлена для "${profile.username}" до ${endDateStr} (макс. ${maxDevices} устройств)`;
           messageEl.style.color = 'lime';
           showToast('Подписка успешно выдана!', 'success');
 
