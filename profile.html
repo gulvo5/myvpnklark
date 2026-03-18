@@ -325,6 +325,74 @@
       </div>
     </div>
 
+    <!-- SQL инструкция -->
+    <div id="setup-section" class="hidden glass rounded-3xl p-8 mb-8 border border-green-500/30 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-2xl"></div>
+      
+      <div class="flex items-center gap-3 mb-4 relative z-10">
+        <span class="bg-green-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
+          <i class="fa-regular fa-database"></i> SQL SETUP
+        </span>
+        <span class="text-xl font-bold text-white">Выполните в SQL редакторе</span>
+      </div>
+      
+      <div class="sql-box relative z-10">
+        <pre class="text-xs text-white bg-black/50 p-4 rounded-lg overflow-x-auto" id="sql-code">
+-- Создаем функцию для поиска по email
+CREATE OR REPLACE FUNCTION find_user_by_email(search_email TEXT)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  result JSON;
+BEGIN
+  SELECT json_build_object(
+    'id', id,
+    'email', email,
+    'created_at', created_at
+  ) INTO result
+  FROM auth.users
+  WHERE email = search_email;
+  
+  RETURN result;
+END;
+$$;
+
+-- Создаем функцию для получения всех пользователей
+CREATE OR REPLACE FUNCTION get_all_users()
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  result JSON;
+BEGIN
+  SELECT json_agg(
+    json_build_object(
+      'id', id,
+      'email', email,
+      'created_at', created_at
+    )
+  ) INTO result
+  FROM auth.users
+  ORDER BY created_at DESC;
+  
+  RETURN COALESCE(result, '[]'::JSON);
+END;
+$$;
+
+-- Даем права
+GRANT EXECUTE ON FUNCTION find_user_by_email TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
+        <button id="copy-sql" class="absolute top-2 right-2 text-gray-400 hover:text-white transition">
+          <i class="fa-regular fa-copy"></i>
+        </button>
+      </div>
+    </div>
+
     <!-- Админ панель -->
     <div id="admin-panel" class="hidden glass rounded-3xl p-8 md:p-10 mb-8 border border-yellow-500/30 relative overflow-hidden">
       <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-2xl"></div>
@@ -484,6 +552,10 @@
         document.getElementById('list-all-users')?.addEventListener('click', listAllUsers);
         document.getElementById('fix-all-users')?.addEventListener('click', fixAllUsers);
         document.getElementById('copy-support-btn')?.addEventListener('click', () => copyToClipboard('@CKOPO4'));
+        document.getElementById('copy-sql')?.addEventListener('click', () => {
+          const sql = document.getElementById('sql-code').textContent;
+          copyToClipboard(sql);
+        });
         document.getElementById('copy-email')?.addEventListener('click', () => {
           if (currentUser?.email) copyToClipboard(currentUser.email);
         });
@@ -556,25 +628,26 @@
         diagEl.innerHTML = '⏳ Загрузка пользователей из auth.users...\n';
         
         try {
-          // Пробуем получить пользователей через RPC
-          const { data, error } = await supabaseClient
+          const { data: usersData, error } = await supabaseClient
             .rpc('get_all_users');
           
           if (error) {
             diagEl.innerHTML += `❌ Ошибка: ${error.message}\n`;
-            diagEl.innerHTML += '⚠️ Нужно создать функцию get_all_users\n';
+            diagEl.innerHTML += '⚠️ Нужно создать функцию get_all_users (смотрите SQL инструкцию)\n';
             return;
           }
           
-          if (!data || data.length === 0) {
-            diagEl.innerHTML += '❌ Нет пользователей или нет доступа\n';
+          const users = usersData || [];
+          
+          if (users.length === 0) {
+            diagEl.innerHTML += '❌ Нет пользователей\n';
             return;
           }
           
-          diagEl.innerHTML += `✅ Всего пользователей: ${data.length}\n\n`;
+          diagEl.innerHTML += `✅ Всего пользователей: ${users.length}\n\n`;
           diagEl.innerHTML += '📋 Список пользователей:\n';
           
-          data.forEach((user, index) => {
+          users.forEach((user, index) => {
             diagEl.innerHTML += `${index + 1}. ${user.email} (ID: ${user.id})\n`;
           });
           
@@ -588,16 +661,47 @@
         diagEl.innerHTML = '⏳ Синхронизация пользователей...\n';
         
         try {
-          const { data, error } = await supabaseClient
-            .rpc('sync_all_users');
+          // Сначала получаем всех пользователей
+          const { data: usersData, error: usersError } = await supabaseClient
+            .rpc('get_all_users');
           
-          if (error) {
-            diagEl.innerHTML += `❌ Ошибка: ${error.message}\n`;
-            diagEl.innerHTML += '⚠️ Нужно создать функцию sync_all_users\n';
+          if (usersError) {
+            diagEl.innerHTML += `❌ Ошибка получения пользователей: ${usersError.message}\n`;
             return;
           }
           
-          diagEl.innerHTML += `✅ Результат: ${JSON.stringify(data)}\n`;
+          const users = usersData || [];
+          diagEl.innerHTML += `✅ Найдено пользователей в auth: ${users.length}\n`;
+          
+          let added = 0;
+          let errors = 0;
+          
+          for (const user of users) {
+            const username = user.email.split('@')[0];
+            
+            const { error } = await supabaseClient
+              .from('profiles')
+              .upsert({
+                id: user.id,
+                username: username
+              }, { 
+                onConflict: 'id',
+                ignoreDuplicates: false
+              });
+            
+            if (error) {
+              diagEl.innerHTML += `❌ Ошибка для ${user.email}: ${error.message}\n`;
+              errors++;
+            } else {
+              added++;
+            }
+          }
+          
+          diagEl.innerHTML += `\n✅ Успешно добавлено/обновлено: ${added}\n`;
+          if (errors > 0) diagEl.innerHTML += `⚠️ Ошибок: ${errors}\n`;
+          
+          // Показываем обновленный список
+          await listAllUsers();
           
         } catch (err) {
           diagEl.innerHTML += `❌ Ошибка: ${err.message}\n`;
@@ -618,6 +722,7 @@
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('diagnostic-panel').classList.remove('hidden');
+              document.getElementById('setup-section').classList.remove('hidden');
               document.getElementById('admin-badge-container').classList.remove('hidden');
             }
             
@@ -686,6 +791,7 @@
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('diagnostic-panel').classList.remove('hidden');
+              document.getElementById('setup-section').classList.remove('hidden');
               document.getElementById('admin-badge-container').classList.remove('hidden');
             }
             
@@ -709,6 +815,7 @@
           document.getElementById('profile-section').style.display = 'none';
           document.getElementById('admin-panel').classList.add('hidden');
           document.getElementById('diagnostic-panel').classList.add('hidden');
+          document.getElementById('setup-section').classList.add('hidden');
           document.getElementById('admin-badge-container').classList.add('hidden');
           document.getElementById('email').value = '';
           document.getElementById('password').value = '';
@@ -845,15 +952,15 @@
           // Ищем пользователя через RPC функцию
           if (infoEl) infoEl.innerHTML += `\n🔍 Ищем в auth.users...\n`;
           
-          const { data: users, error: usersError } = await supabaseClient
+          const { data: userData, error: usersError } = await supabaseClient
             .rpc('find_user_by_email', { search_email: email });
-          
+
           if (usersError) {
             if (infoEl) infoEl.innerHTML += `❌ Ошибка: ${usersError.message}\n`;
             throw usersError;
           }
-          
-          if (!users || users.length === 0) {
+
+          if (!userData) {
             messageEl.textContent = `❌ Пользователь с email "${email}" не найден`;
             messageEl.style.color = 'red';
             if (infoEl) infoEl.innerHTML += `❌ Пользователь не найден\n`;
@@ -861,12 +968,10 @@
             return;
           }
 
-          const user = users[0];
-
           if (infoEl) {
             infoEl.innerHTML += `✅ Найден пользователь:\n`;
-            infoEl.innerHTML += `   ID: ${user.id}\n`;
-            infoEl.innerHTML += `   Email: ${user.email}\n`;
+            infoEl.innerHTML += `   ID: ${userData.id}\n`;
+            infoEl.innerHTML += `   Email: ${userData.email}\n`;
           }
 
           // Создаем или обновляем запись в profiles
@@ -877,7 +982,7 @@
           const { data: profile, error: profileError } = await supabaseClient
             .from('profiles')
             .upsert({
-              id: user.id,
+              id: userData.id,
               username: username
             }, { 
               onConflict: 'id',
@@ -896,7 +1001,7 @@
           messageEl.textContent = `Пользователь найден! Выдача подписки...`;
 
           const subscriptionData = {
-            user_id: user.id,
+            user_id: userData.id,
             status: 'active',
             ends_at: endsAt + 'T23:59:59Z',
             max_devices: maxDevices,
