@@ -493,9 +493,6 @@
             </button>
           </div>
           <div id="debug-link-display" class="text-xs break-all"></div>
-          <div class="text-xs text-gray-500 mt-2">
-            <p>Ссылка получена с бэкенда</p>
-          </div>
         </div>
       </div>
     </div>
@@ -743,9 +740,8 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
       const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
 
-      // Создаем клиент Supabase
-      const { createClient } = window.supabase;
-      const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      // Создаем клиент Supabase - ИСПРАВЛЕНО!
+      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: {
           persistSession: true,
           autoRefreshToken: true,
@@ -755,7 +751,6 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
       let currentUser = null;
       let statsChart = null;
       let currentDeviceHwid = null;
-      let currentHappFormats = [];
 
       // Используем sessionStorage для отслеживания регистрации устройства
       function isDeviceRegisteredInSession() {
@@ -1108,15 +1103,10 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           const data = await response.json();
           console.log('✅ Получена ссылка:', data.happUrl);
           
-          // Сохраняем для отладки
-          if (data.happUrl) {
-            currentHappFormats = [data.happUrl];
-            
-            // Обновляем отладочную информацию
-            const debugDisplay = document.getElementById('debug-link-display');
-            if (debugDisplay) {
-              debugDisplay.textContent = data.happUrl;
-            }
+          // Обновляем отладочную информацию
+          const debugDisplay = document.getElementById('debug-link-display');
+          if (debugDisplay && data.happUrl) {
+            debugDisplay.textContent = data.happUrl;
           }
           
           return data.happUrl;
