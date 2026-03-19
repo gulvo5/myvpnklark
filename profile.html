@@ -494,11 +494,7 @@
           </div>
           <div id="debug-link-display" class="text-xs break-all"></div>
           <div class="text-xs text-gray-500 mt-2">
-            <p>Форматы для тестирования:</p>
-            <button class="test-format-btn text-blue-400 hover:text-blue-300 mr-2" data-format="0">Формат 1</button>
-            <button class="test-format-btn text-blue-400 hover:text-blue-300 mr-2" data-format="1">Формат 2</button>
-            <button class="test-format-btn text-blue-400 hover:text-blue-300 mr-2" data-format="2">Формат 3</button>
-            <button class="test-format-btn text-blue-400 hover:text-blue-300" data-format="3">Формат 4</button>
+            <p>Ссылка получена с бэкенда</p>
           </div>
         </div>
       </div>
@@ -775,6 +771,9 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
 
       // Provider ID для Happ
       const PROVIDER_ID = 'vqMWWxA9';
+
+      // URL бэкенда на Raspberry Pi
+      const BACKEND_URL = 'http://192.168.0.113:5000/api/generate-happ-link';
 
       // Toast уведомления
       function showToast(message, type = 'info') {
@@ -1084,43 +1083,48 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         }
       };
 
-      // Генерация Happ ссылки
-      async function generateHappLink(userId, subscriptionId, endDate) {
+      // Генерация Happ ссылки через бэкенд
+      async function generateHappLink(userId, subscriptionId, endDate, hwid) {
         try {
-          // Проверяем лимит устройств
-          const { current, max } = await checkDeviceLimit(userId);
+          console.log('🔍 Отправляем запрос на бэкенд:', BACKEND_URL);
+          console.log('📱 Данные:', { userId, hwid });
           
-          // Формируем данные для ссылки
-          const subscriptionData = {
-            provider_id: PROVIDER_ID,
-            user_id: userId,
-            sub_id: subscriptionId,
-            expires: endDate,
-            devices_limit: max,
-            devices_current: current,
-            timestamp: Date.now()
-          };
+          const response = await fetch(BACKEND_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: userId,
+              hwid: hwid,
+              deviceName: getDeviceName(),
+              deviceType: getDeviceType()
+            })
+          });
 
-          // Кодируем в base64
-          const jsonStr = JSON.stringify(subscriptionData);
-          const encodedData = btoa(unescape(encodeURIComponent(jsonStr)));
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `HTTP error ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('✅ Получена ссылка:', data.happUrl);
           
-          // Генерируем разные форматы ссылок для тестирования
-          const formats = [
-            `happ://import/${encodedData}`,           // Формат 1
-            `happ://crypto/${encodedData}`,           // Формат 2
-            `happ://${PROVIDER_ID}/${encodedData}`,   // Формат 3
-            `happ://subscription/${encodedData}`      // Формат 4
-          ];
+          // Сохраняем для отладки
+          if (data.happUrl) {
+            currentHappFormats = [data.happUrl];
+            
+            // Обновляем отладочную информацию
+            const debugDisplay = document.getElementById('debug-link-display');
+            if (debugDisplay) {
+              debugDisplay.textContent = data.happUrl;
+            }
+          }
           
-          currentHappFormats = formats;
-          
-          // Пока используем первый формат
-          return formats[0];
-          
+          return data.happUrl;
+
         } catch (err) {
-          console.error('Ошибка генерации Happ ссылки:', err);
-          return `happ://${PROVIDER_ID}`;
+          console.error('❌ Ошибка при генерации Happ ссылки:', err);
+          showToast('Не удалось создать ссылку для Happ: ' + err.message, 'error');
+          return null;
         }
       }
 
@@ -1153,22 +1157,6 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           if (debugDisplay) {
             copyToClipboard(debugDisplay.textContent);
           }
-        });
-
-        // Обработчики для тестирования разных форматов
-        document.querySelectorAll('.test-format-btn').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            const formatIndex = parseInt(e.target.dataset.format);
-            if (currentHappFormats[formatIndex]) {
-              const happLink = document.getElementById('happ-subscription-link');
-              const debugDisplay = document.getElementById('debug-link-display');
-              if (happLink && debugDisplay) {
-                happLink.href = currentHappFormats[formatIndex];
-                debugDisplay.textContent = currentHappFormats[formatIndex];
-                showToast(`Формат ${formatIndex + 1} установлен`, 'success');
-              }
-            }
-          });
         });
         
         // Быстрые даты
@@ -1483,7 +1471,7 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
 
           // Загружаем список устройств и проверяем лимит
           await loadDevices(user.id);
-          const { current, max, canAdd } = await checkDeviceLimit(user.id);
+          const { current, max } = await checkDeviceLimit(user.id);
 
           if (devicesText) devicesText.textContent = `${current} / ${max}`;
           if (devicesBar) devicesBar.style.width = `${(current / max) * 100}%`;
@@ -1513,8 +1501,10 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
                   statusBadge.innerHTML = '✅ Активна';
                 }
                 
-                // Генерируем Happ ссылку
-                const happUrl = await generateHappLink(user.id, subscription.id, subscription.ends_at);
+                // Генерируем Happ ссылку с HWID
+                const hwid = currentDeviceHwid || await getDeviceHwid();
+                const happUrl = await generateHappLink(user.id, subscription.id, subscription.ends_at, hwid);
+                
                 if (happLink) {
                   happLink.href = happUrl;
                 }
@@ -1523,7 +1513,7 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
                 }
                 
                 // Показываем отладочную информацию
-                if (debugContainer && debugDisplay) {
+                if (debugContainer && debugDisplay && happUrl) {
                   debugContainer.classList.remove('hidden');
                   debugDisplay.textContent = happUrl;
                 }
@@ -1692,27 +1682,6 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
             .single();
 
           if (subError) throw subError;
-
-          // Генерируем Happ ссылку
-          const happUrl = await generateHappLink(userData.id, subscription.id, endsAt + 'T23:59:59Z');
-          
-          // Сохраняем Happ ссылку в отдельную таблицу
-          const { error: happError } = await supabaseClient
-            .from('happ_links')
-            .insert({
-              user_id: userData.id,
-              subscription_id: subscription.id,
-              happ_url: happUrl,
-              provider_id: PROVIDER_ID,
-              expires_at: endsAt + 'T23:59:59Z',
-              is_active: true
-            });
-
-          if (happError) {
-            if (infoEl) infoEl.innerHTML += `⚠️ Ошибка сохранения Happ ссылки: ${happError.message}\n`;
-          } else {
-            if (infoEl) infoEl.innerHTML += `✅ Happ ссылка сохранена\n`;
-          }
 
           // Конфетти при успехе
           if (window.confetti) {
