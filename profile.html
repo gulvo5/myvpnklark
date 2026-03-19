@@ -740,7 +740,7 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
       const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
 
-      // Создаем клиент Supabase - ИСПРАВЛЕНО!
+      // Создаем клиент Supabase
       const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: {
           persistSession: true,
@@ -808,15 +808,36 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         return currentUser && ADMIN_EMAILS.includes(currentUser.email);
       }
 
-      // Получение HWID устройства
+      // Получение HWID устройства - ИСПРАВЛЕНО
       async function getDeviceHwid() {
         try {
+          // Проверяем, загрузилась ли библиотека
+          if (typeof FingerprintJS === 'undefined') {
+            console.warn('FingerprintJS не загружен, используем запасной вариант');
+            // Запасной вариант: генерируем случайный ID и сохраняем в localStorage
+            let deviceId = localStorage.getItem('fallback_device_id');
+            if (!deviceId) {
+              deviceId = 'device_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+              localStorage.setItem('fallback_device_id', deviceId);
+            }
+            return deviceId;
+          }
+          
+          // Загружаем FingerprintJS
           const fp = await FingerprintJS.load();
+          // Получаем результат
           const result = await fp.get();
+          console.log('✅ HWID получен:', result.visitorId);
           return result.visitorId;
         } catch (err) {
           console.error('Ошибка получения HWID:', err);
-          return 'unknown-' + Math.random().toString(36).substring(7);
+          // Запасной вариант при ошибке
+          let deviceId = localStorage.getItem('fallback_device_id');
+          if (!deviceId) {
+            deviceId = 'device_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+            localStorage.setItem('fallback_device_id', deviceId);
+          }
+          return deviceId;
         }
       }
 
