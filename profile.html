@@ -154,7 +154,6 @@
       margin-bottom: 20px;
     }
     
-    /* Стили для кнопки подписки */
     .subscription-button {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       transition: all 0.3s ease;
@@ -193,7 +192,6 @@
       50% { transform: translateY(-5px); }
     }
     
-    /* Стили для списка пользователей */
     .user-item {
       border-bottom: 1px solid rgba(255,255,255,0.1);
       padding: 8px 0;
@@ -220,7 +218,6 @@
       font-family: monospace;
     }
     
-    /* Стили для статуса подписки */
     .subscription-status {
       display: inline-block;
       padding: 4px 12px;
@@ -241,13 +238,6 @@
       border: 1px solid rgba(239, 68, 68, 0.3);
     }
     
-    .status-warning {
-      background: rgba(245, 158, 11, 0.2);
-      color: #f59e0b;
-      border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-    
-    /* Стили для устройства */
     .device-item {
       background: rgba(255,255,255,0.05);
       border-radius: 8px;
@@ -279,22 +269,6 @@
       transform: scale(1.1);
     }
     
-    .remove-device-disabled {
-      color: #6b7280;
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-    
-    .admin-only-badge {
-      background: rgba(239, 68, 68, 0.2);
-      color: #ef4444;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-left: 8px;
-    }
-
-    /* Стили для отладки */
     .debug-link {
       background: rgba(0,0,0,0.3);
       border: 1px solid rgba(255,255,255,0.1);
@@ -315,7 +289,6 @@
 </head>
 <body>
 
-  <!-- Toast уведомления -->
   <div id="toast" class="toast"></div>
 
   <header class="pt-12 pb-10 px-4 md:px-8 text-center">
@@ -327,16 +300,8 @@
         onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200/000/fff?text=KLARK+VPN';"
       >
     </div>
-
-    <h1 class="text-5xl md:text-7xl font-black text-white tracking-tight">
-      Личный кабинет
-    </h1>
-
-    <p class="mt-3 text-xl md:text-3xl text-gray-300 font-light">
-      Управление подпиской KLARK VPN
-    </p>
-    
-    <!-- Кнопка копирования ссылки на поддержку -->
+    <h1 class="text-5xl md:text-7xl font-black text-white tracking-tight">Личный кабинет</h1>
+    <p class="mt-3 text-xl md:text-3xl text-gray-300 font-light">Управление подпиской KLARK VPN</p>
     <div class="mt-4 flex justify-center gap-4">
       <button id="copy-support-btn" class="text-sm text-gray-400 hover:text-white transition flex items-center gap-2">
         <i class="fa-regular fa-copy"></i> @CKOPO4
@@ -348,49 +313,35 @@
     </div>
   </header>
 
-  <!-- Блок авторизации -->
   <div id="auth-section" class="max-w-md mx-auto px-5 pb-12">
     <div class="glass rounded-3xl p-8 md:p-10">
       <h2 class="text-3xl font-bold text-white text-center mb-8">Вход / Регистрация</h2>
-      
       <div class="relative">
         <i class="fa-regular fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
-        <input id="email" type="email" placeholder="Email" 
-               class="w-full p-4 pl-12 mb-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-white/30 text-white">
+        <input id="email" type="email" placeholder="Email" class="w-full p-4 pl-12 mb-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-white/30 text-white">
       </div>
-      
       <div class="relative">
         <i class="fa-regular fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
-        <input id="password" type="password" placeholder="Пароль" 
-               class="w-full p-4 pl-12 mb-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-white/30 text-white">
+        <input id="password" type="password" placeholder="Пароль" class="w-full p-4 pl-12 mb-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-white/30 text-white">
         <button id="toggle-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
           <i class="fa-regular fa-eye"></i>
         </button>
       </div>
-      
-      <button id="signup-btn" 
-              class="w-full py-4 bg-white text-black rounded-xl font-bold mb-3 hover:bg-white/90 transition transform hover:scale-[1.02] relative overflow-hidden group">
+      <button id="signup-btn" class="w-full py-4 bg-white text-black rounded-xl font-bold mb-3 hover:bg-white/90 transition transform hover:scale-[1.02] relative overflow-hidden group">
         <span class="relative z-10">Зарегистрироваться</span>
         <span class="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-0 group-hover:opacity-20 transition"></span>
       </button>
-      
-      <button id="signin-btn" 
-              class="w-full py-4 border border-white/20 text-white rounded-xl font-bold hover:bg-white/10 transition transform hover:scale-[1.02] relative overflow-hidden group">
+      <button id="signin-btn" class="w-full py-4 border border-white/20 text-white rounded-xl font-bold hover:bg-white/10 transition transform hover:scale-[1.02] relative overflow-hidden group">
         <span class="relative z-10">Войти</span>
         <span class="absolute inset-0 bg-gradient-to-r from-green-500 to-teal-500 opacity-0 group-hover:opacity-20 transition"></span>
       </button>
-      
       <p id="auth-message" class="text-center mt-4 text-red-400 min-h-[1.5rem]"></p>
     </div>
   </div>
 
-  <!-- Блок профиля (показывается после входа) -->
   <div id="profile-section" class="hidden max-w-3xl mx-auto px-5 pb-16">
-    <!-- Информация о пользователе -->
     <div class="glass rounded-3xl p-8 md:p-12 mb-8 relative overflow-hidden">
-      <!-- Декоративный фон -->
       <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
-      
       <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 relative z-10">
         <div class="flex items-center gap-5">
           <span class="relative flex h-6 w-6 status-pulse">
@@ -400,7 +351,6 @@
           <span class="text-3xl font-bold text-white">Активная подписка</span>
         </div>
         <div class="flex items-center gap-4">
-          <!-- Админ бейдж показывается только админам -->
           <div id="admin-badge-container" class="hidden">
             <span class="admin-badge"><i class="fa-regular fa-crown mr-1"></i>ADMIN</span>
           </div>
@@ -412,141 +362,78 @@
           </div>
         </div>
       </div>
-
-      <!-- Статистика подписки -->
       <div class="grid md:grid-cols-3 gap-6 relative z-10">
         <div class="glass rounded-2xl p-8 text-center stat-card">
-          <div class="text-4xl mb-3 text-cyan-400">
-            <i class="fa-regular fa-computer"></i>
-          </div>
+          <div class="text-4xl mb-3 text-cyan-400"><i class="fa-regular fa-computer"></i></div>
           <p class="text-gray-500 text-base mb-3">Устройств</p>
-          <div class="mb-4">
-            <div class="h-2 bg-black/40 rounded-full overflow-hidden">
-              <div id="devices-bar" class="h-2 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full w-0 transition-all duration-500"></div>
-            </div>
-          </div>
+          <div class="mb-4"><div class="h-2 bg-black/40 rounded-full overflow-hidden"><div id="devices-bar" class="h-2 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full w-0 transition-all duration-500"></div></div></div>
           <p id="devices-text" class="text-3xl font-bold text-white">0 / 3</p>
         </div>
-
         <div class="glass rounded-2xl p-8 text-center stat-card">
-          <div class="text-4xl mb-3 text-green-400">
-            <i class="fa-regular fa-shield"></i>
-          </div>
+          <div class="text-4xl mb-3 text-green-400"><i class="fa-regular fa-shield"></i></div>
           <p class="text-gray-500 text-base mb-3">Статус</p>
           <p id="profile-status" class="text-3xl font-bold text-green-400">АКТИВНА</p>
         </div>
-
         <div class="glass rounded-2xl p-8 text-center stat-card">
-          <div class="text-4xl mb-3 text-yellow-400">
-            <i class="fa-regular fa-calendar"></i>
-          </div>
+          <div class="text-4xl mb-3 text-yellow-400"><i class="fa-regular fa-calendar"></i></div>
           <p class="text-gray-500 text-base mb-3">Дней осталось</p>
           <p id="days-left" class="text-3xl font-bold text-white">—</p>
         </div>
       </div>
-
-      <!-- Дата окончания -->
       <div class="mt-8 text-center relative z-10">
         <p class="text-gray-500 text-lg mb-2">Действует до</p>
         <p id="expires-date" class="text-2xl font-semibold text-white flex items-center justify-center gap-3">
           загрузка...
-          <span id="copy-expires" class="copy-btn text-gray-500 hover:text-white" title="Копировать дату">
-            <i class="fa-regular fa-copy"></i>
-          </span>
+          <span id="copy-expires" class="copy-btn text-gray-500 hover:text-white" title="Копировать дату"><i class="fa-regular fa-copy"></i></span>
         </p>
       </div>
-
-      <!-- Список устройств -->
       <div id="devices-list-container" class="mt-8 relative z-10 hidden">
         <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
           <i class="fa-regular fa-mobile"></i> Подключенные устройства
           <span id="admin-device-note" class="text-xs text-red-400 hidden">(только админ может удалять)</span>
         </h3>
-        <div id="devices-list" class="space-y-2">
-          <!-- Сюда будут добавляться устройства -->
-        </div>
+        <div id="devices-list" class="space-y-2"></div>
         <p class="text-xs text-gray-500 mt-2">Максимум 3 устройства. При достижении лимита новое устройство не сможет войти.</p>
       </div>
-
-      <!-- Happ ссылка для подписки (динамическая) -->
       <div id="subscription-button-container" class="mt-8 text-center relative z-10 hidden">
-        <div class="mb-4">
-          <span id="subscription-status-badge" class="subscription-status status-active">✅ Активна</span>
-        </div>
-        <a id="happ-subscription-link" href="#" target="_blank" 
-           class="subscription-button inline-flex items-center justify-center gap-4 w-full max-w-md mx-auto py-5 px-8 rounded-2xl text-white text-xl font-bold shadow-lg">
+        <div class="mb-4"><span id="subscription-status-badge" class="subscription-status status-active">✅ Активна</span></div>
+        <a id="happ-subscription-link" href="#" target="_blank" class="subscription-button inline-flex items-center justify-center gap-4 w-full max-w-md mx-auto py-5 px-8 rounded-2xl text-white text-xl font-bold shadow-lg">
           <span class="subscription-icon text-2xl">✨</span>
           <span>Открыть в Happ</span>
           <span class="subscription-icon text-2xl">✨</span>
         </a>
         <p class="text-sm text-gray-500 mt-3">Нажмите чтобы открыть подписку в приложении Happ</p>
-        <div class="mt-2 text-xs text-gray-600">
-          <span id="subscription-id-display"></span>
-        </div>
-        
-        <!-- Отладочная информация -->
+        <div class="mt-2 text-xs text-gray-600"><span id="subscription-id-display"></span></div>
         <div id="debug-link-container" class="debug-link hidden">
           <div class="flex justify-between items-center mb-2">
             <span class="text-xs font-bold text-yellow-400">🔧 Отладка Happ ссылки</span>
-            <button id="copy-debug-link" class="text-xs text-gray-400 hover:text-white transition">
-              <i class="fa-regular fa-copy"></i> Копировать
-            </button>
+            <button id="copy-debug-link" class="text-xs text-gray-400 hover:text-white transition"><i class="fa-regular fa-copy"></i> Копировать</button>
           </div>
           <div id="debug-link-display" class="text-xs break-all"></div>
         </div>
       </div>
     </div>
 
-    <!-- Диагностическая панель (только для админов) -->
     <div id="diagnostic-panel" class="hidden glass rounded-3xl p-8 mb-8 border border-purple-500/30">
       <div class="flex items-center gap-3 mb-4">
-        <span class="bg-purple-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
-          <i class="fa-regular fa-microscope"></i> AUTH USERS
-        </span>
+        <span class="bg-purple-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1"><i class="fa-regular fa-microscope"></i> AUTH USERS</span>
         <span class="text-xl font-bold text-white">Пользователи из Authentication</span>
       </div>
-      
       <div class="grid grid-cols-2 gap-4 mb-4">
-        <button id="list-all-users" class="py-3 bg-purple-600/30 border border-purple-500/50 rounded-xl text-purple-300 font-medium hover:bg-purple-600/50 transition">
-          📋 Показать всех пользователей
-        </button>
-        <button id="fix-all-users" class="py-3 bg-green-600/30 border border-green-500/50 rounded-xl text-green-300 font-medium hover:bg-green-600/50 transition">
-          🔄 Синхронизировать с profiles
-        </button>
+        <button id="list-all-users" class="py-3 bg-purple-600/30 border border-purple-500/50 rounded-xl text-purple-300 font-medium hover:bg-purple-600/50 transition">📋 Показать всех пользователей</button>
+        <button id="fix-all-users" class="py-3 bg-green-600/30 border border-green-500/50 rounded-xl text-green-300 font-medium hover:bg-green-600/50 transition">🔄 Синхронизировать с profiles</button>
       </div>
-      
-      <div id="diagnostic-info" class="info-box" style="max-height: 400px;">
-        Нажмите кнопку для просмотра пользователей...
-      </div>
+      <div id="diagnostic-info" class="info-box" style="max-height: 400px;">Нажмите кнопку для просмотра пользователей...</div>
     </div>
 
-    <!-- SQL инструкция (только для админов) -->
     <div id="setup-section" class="hidden glass rounded-3xl p-8 mb-8 border border-green-500/30 relative overflow-hidden">
       <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-2xl"></div>
-      
       <div class="flex items-center gap-3 mb-4 relative z-10">
-        <span class="bg-green-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
-          <i class="fa-regular fa-database"></i> SQL SETUP
-        </span>
+        <span class="bg-green-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1"><i class="fa-regular fa-database"></i> SQL SETUP</span>
         <span class="text-xl font-bold text-white">Выполните в SQL редакторе</span>
       </div>
-      
       <div class="sql-box relative z-10">
-        <pre class="text-xs text-white bg-black/50 p-4 rounded-lg overflow-x-auto" id="sql-code">
--- Таблица для хранения Happ ссылок
-CREATE TABLE IF NOT EXISTS happ_links (
-  id SERIAL PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  subscription_id INTEGER REFERENCES subscriptions(id),
-  happ_url TEXT NOT NULL,
-  provider_id TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  expires_at TIMESTAMP WITH TIME ZONE,
-  is_active BOOLEAN DEFAULT true,
-  UNIQUE(user_id, subscription_id)
-);
-
--- Таблица для хранения устройств пользователей
+        <pre class="text-xs text-white bg-black/50 p-4 rounded-lg overflow-x-auto" id="sql-code">-- Создаем таблицы и функции (полный SQL скрипт)
 CREATE TABLE IF NOT EXISTS user_devices (
   id SERIAL PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -558,161 +445,100 @@ CREATE TABLE IF NOT EXISTS user_devices (
   UNIQUE(user_id, device_hwid)
 );
 
--- Индексы
-CREATE INDEX IF NOT EXISTS idx_happ_links_user_id ON happ_links(user_id);
-CREATE INDEX IF NOT EXISTS idx_happ_links_expires ON happ_links(expires_at);
-CREATE INDEX IF NOT EXISTS idx_user_devices_user_id ON user_devices(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_devices_hwid ON user_devices(device_hwid);
+-- Включаем RLS
+ALTER TABLE public.user_devices ENABLE ROW LEVEL SECURITY;
 
--- Функция для подсчета устройств пользователя
-CREATE OR REPLACE FUNCTION get_user_devices_count(p_user_id UUID)
-RETURNS INTEGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-DECLARE
-  device_count INTEGER;
-BEGIN
-  SELECT COUNT(*) INTO device_count
-  FROM user_devices
-  WHERE user_id = p_user_id;
-  
-  RETURN device_count;
-END;
-$$;
+-- Политики RLS
+DROP POLICY IF EXISTS "Users can view own devices" ON public.user_devices;
+DROP POLICY IF EXISTS "Service role can insert devices" ON public.user_devices;
+DROP POLICY IF EXISTS "Service role can update devices" ON public.user_devices;
+DROP POLICY IF EXISTS "Service role can delete devices" ON public.user_devices;
 
--- Функция для поиска по email с датой регистрации
+CREATE POLICY "Users can view own devices" ON public.user_devices FOR SELECT TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "Service role can insert devices" ON public.user_devices FOR INSERT TO service_role WITH CHECK (true);
+CREATE POLICY "Service role can update devices" ON public.user_devices FOR UPDATE TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY "Service role can delete devices" ON public.user_devices FOR DELETE TO service_role USING (true);
+
+GRANT ALL ON public.user_devices TO authenticated;
+GRANT ALL ON public.user_devices TO service_role;
+
+-- Создаем функцию для поиска по email
 CREATE OR REPLACE FUNCTION find_user_by_email(search_email TEXT)
 RETURNS JSON
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = ''
 AS $$
-DECLARE
-  result JSON;
+DECLARE result JSON;
 BEGIN
-  SELECT json_build_object(
-    'id', id,
-    'email', email,
-    'created_at', created_at,
-    'last_sign_in_at', last_sign_in_at
-  ) INTO result
-  FROM auth.users
-  WHERE email = search_email
-  LIMIT 1;
-  
+  SELECT json_build_object('id', id, 'email', email, 'created_at', created_at) INTO result
+  FROM auth.users WHERE email = search_email LIMIT 1;
   RETURN result;
 END;
 $$;
 
--- Функция для получения всех пользователей с датами
+-- Создаем функцию для получения всех пользователей
 CREATE OR REPLACE FUNCTION get_all_users()
 RETURNS JSON
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = ''
 AS $$
-DECLARE
-  result JSON;
+DECLARE result JSON;
 BEGIN
-  SELECT json_agg(
-    json_build_object(
-      'id', id,
-      'email', email,
-      'created_at', created_at,
-      'last_sign_in_at', last_sign_in_at
-    ) ORDER BY created_at DESC
-  ) INTO result
-  FROM auth.users;
-  
+  SELECT json_agg(json_build_object('id', id, 'email', email, 'created_at', created_at)) INTO result FROM auth.users;
   RETURN COALESCE(result, '[]'::JSON);
 END;
 $$;
 
--- Даем права
 GRANT EXECUTE ON FUNCTION find_user_by_email TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
-        <button id="copy-sql" class="absolute top-2 right-2 text-gray-400 hover:text-white transition">
-          <i class="fa-regular fa-copy"></i>
-        </button>
+GRANT EXECUTE ON FUNCTION get_all_users TO anon, authenticated;</pre>
+        <button id="copy-sql" class="absolute top-2 right-2 text-gray-400 hover:text-white transition"><i class="fa-regular fa-copy"></i></button>
       </div>
     </div>
 
-    <!-- Админ панель (только для админов) -->
     <div id="admin-panel" class="hidden glass rounded-3xl p-8 md:p-10 mb-8 border border-yellow-500/30 relative overflow-hidden">
       <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-2xl"></div>
-      
       <div class="flex items-center gap-3 mb-6 relative z-10">
         <span class="admin-badge"><i class="fa-regular fa-crown mr-1"></i>ADMIN PANEL</span>
         <span class="text-xl font-bold text-white">Выдача подписок</span>
       </div>
-      
       <div class="mb-4 text-sm text-yellow-400 bg-yellow-500/10 p-3 rounded-xl flex items-center gap-2">
         <i class="fa-regular fa-circle-info"></i>
         <span>Поиск по <span class="font-bold">email</span> в Authentication</span>
       </div>
-      
       <div class="mb-6 relative z-10">
-        <label class="block text-gray-400 mb-2 flex items-center gap-2">
-          <i class="fa-regular fa-envelope"></i> Email пользователя
-        </label>
+        <label class="block text-gray-400 mb-2 flex items-center gap-2"><i class="fa-regular fa-envelope"></i> Email пользователя</label>
         <div class="relative">
-          <input id="admin-email" type="email" placeholder="user@example.com" 
-                 class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white pr-24">
-          <button id="clear-email" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white px-3 py-1 hidden">
-            <i class="fa-regular fa-circle-xmark"></i>
-          </button>
+          <input id="admin-email" type="email" placeholder="user@example.com" class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white pr-24">
+          <button id="clear-email" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white px-3 py-1 hidden"><i class="fa-regular fa-circle-xmark"></i></button>
         </div>
       </div>
-      
       <div class="mb-6 relative z-10">
-        <label class="block text-gray-400 mb-2 flex items-center gap-2">
-          <i class="fa-regular fa-calendar"></i> Дата окончания (ДД.ММ.ГГГГ)
-        </label>
-        <input id="admin-end-date" type="text" placeholder="31.12.2026" 
-               class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
+        <label class="block text-gray-400 mb-2 flex items-center gap-2"><i class="fa-regular fa-calendar"></i> Дата окончания (ДД.ММ.ГГГГ)</label>
+        <input id="admin-end-date" type="text" placeholder="31.12.2026" class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
       </div>
-      
       <div class="mb-6 relative z-10">
-        <label class="block text-gray-400 mb-2 flex items-center gap-2">
-          <i class="fa-regular fa-computer"></i> Макс. устройств
-        </label>
-        <input id="admin-max-devices" type="number" value="3" min="1" max="10"
-               class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
+        <label class="block text-gray-400 mb-2 flex items-center gap-2"><i class="fa-regular fa-computer"></i> Макс. устройств</label>
+        <input id="admin-max-devices" type="number" value="3" min="1" max="10" class="w-full p-4 bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-yellow-500/50 text-white">
       </div>
-      
       <div class="flex gap-3 mb-4 relative z-10">
-        <button id="admin-grant-btn" 
-                class="flex-1 py-5 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-xl font-bold hover:opacity-90 transition transform hover:scale-[1.02] flex items-center justify-center gap-2">
+        <button id="admin-grant-btn" class="flex-1 py-5 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-xl font-bold hover:opacity-90 transition transform hover:scale-[1.02] flex items-center justify-center gap-2">
           <i class="fa-regular fa-gift"></i> Выдать подписку
         </button>
-        <button id="quick-1month" class="px-4 py-5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition" title="1 месяц">
-          1м
-        </button>
-        <button id="quick-3month" class="px-4 py-5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition" title="3 месяца">
-          3м
-        </button>
-        <button id="quick-1year" class="px-4 py-5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition" title="1 год">
-          1г
-        </button>
+        <button id="quick-1month" class="px-4 py-5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition" title="1 месяц">1м</button>
+        <button id="quick-3month" class="px-4 py-5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition" title="3 месяца">3м</button>
+        <button id="quick-1year" class="px-4 py-5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition" title="1 год">1г</button>
       </div>
-      
       <div id="admin-info" class="info-box hidden mt-2"></div>
       <p id="admin-message" class="text-center text-yellow-400 min-h-[1.5rem]"></p>
     </div>
 
-    <!-- Кнопка выхода -->
     <div class="text-center">
-      <button id="logout-btn" 
-              class="px-12 py-5 border border-white/20 text-white rounded-2xl text-xl font-medium hover:bg-white/10 transition-all flex items-center gap-2 mx-auto">
+      <button id="logout-btn" class="px-12 py-5 border border-white/20 text-white rounded-2xl text-xl font-medium hover:bg-white/10 transition-all flex items-center gap-2 mx-auto">
         <i class="fa-regular fa-arrow-right-from-bracket"></i> Выйти из профиля
       </button>
     </div>
   </div>
 
-  <!-- Нижние кнопки навигации -->
   <footer class="grid grid-cols-2 gap-8 px-6 pb-20 max-w-3xl mx-auto">
     <a href="index.html" class="glass py-8 rounded-2xl text-xl font-bold flex items-center justify-center gap-3 hover:bg-white/5 transition-colors">
       <i class="fa-regular fa-arrow-left"></i> На главную
@@ -724,7 +550,6 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
 
   <script>
     (function() {
-      // Проверяем, загрузился ли Supabase
       if (typeof window.supabase === 'undefined') {
         console.error('Supabase не загрузился');
         document.addEventListener('DOMContentLoaded', function() {
@@ -740,81 +565,44 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
       const SUPABASE_URL = 'https://guubiysgtzcgicxichqg.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dWJpeXNndHpjZ2ljeGljaHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODU4NzksImV4cCI6MjA4OTE2MTg3OX0.n0wbEP1f-UjBVC8K_iVmESY32FDMKHTV-sFMtmRQc0s';
 
-      // Создаем клиент Supabase
       const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-        }
+        auth: { persistSession: true, autoRefreshToken: true }
       });
 
       let currentUser = null;
       let statsChart = null;
       let currentDeviceHwid = null;
 
-      // Используем sessionStorage для отслеживания регистрации устройства
-      function isDeviceRegisteredInSession() {
-        return sessionStorage.getItem('deviceRegistered') === 'true';
-      }
+      function isDeviceRegisteredInSession() { return sessionStorage.getItem('deviceRegistered') === 'true'; }
+      function setDeviceRegisteredInSession(value) { sessionStorage.setItem('deviceRegistered', value ? 'true' : 'false'); }
 
-      function setDeviceRegisteredInSession(value) {
-        sessionStorage.setItem('deviceRegistered', value ? 'true' : 'false');
-      }
-
-      // Список администраторов (email)
       const ADMIN_EMAILS = ['maxsimpiska@gmail.com', 'admin@klark.ru', 'leongera2013@gmail.com', 'klounada87@gmail.com'];
-
-      // Provider ID для Happ
       const PROVIDER_ID = 'vqMWWxA9';
-
-      // URL бэкенда на Raspberry Pi
       const BACKEND_URL = 'http://192.168.0.113:5000/api/generate-happ-link';
 
-      // Toast уведомления
       function showToast(message, type = 'info') {
         const toast = document.getElementById('toast');
         toast.textContent = message;
         toast.className = `toast ${type}`;
         toast.classList.add('show');
-        setTimeout(() => {
-          toast.classList.remove('show');
-        }, 3000);
+        setTimeout(() => { toast.classList.remove('show'); }, 3000);
       }
 
-      // Копирование в буфер
       async function copyToClipboard(text) {
-        try {
-          await navigator.clipboard.writeText(text);
-          showToast('Скопировано!', 'success');
-        } catch (err) {
-          showToast('Ошибка копирования', 'error');
-        }
+        try { await navigator.clipboard.writeText(text); showToast('Скопировано!', 'success'); } 
+        catch (err) { showToast('Ошибка копирования', 'error'); }
       }
 
-      // Форматирование даты
       function formatDate(dateString) {
         const date = new Date(dateString);
-        return date.toLocaleString('ru-RU', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
+        return date.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
       }
 
-      // Проверка является ли пользователь админом
-      function isAdmin() {
-        return currentUser && ADMIN_EMAILS.includes(currentUser.email);
-      }
+      function isAdmin() { return currentUser && ADMIN_EMAILS.includes(currentUser.email); }
 
-      // Получение HWID устройства - ИСПРАВЛЕНО
       async function getDeviceHwid() {
         try {
-          // Проверяем, загрузилась ли библиотека
           if (typeof FingerprintJS === 'undefined') {
-            console.warn('FingerprintJS не загружен, используем запасной вариант');
-            // Запасной вариант: генерируем случайный ID и сохраняем в localStorage
             let deviceId = localStorage.getItem('fallback_device_id');
             if (!deviceId) {
               deviceId = 'device_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -822,16 +610,10 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
             }
             return deviceId;
           }
-          
-          // Загружаем FingerprintJS
           const fp = await FingerprintJS.load();
-          // Получаем результат
           const result = await fp.get();
-          console.log('✅ HWID получен:', result.visitorId);
           return result.visitorId;
         } catch (err) {
-          console.error('Ошибка получения HWID:', err);
-          // Запасной вариант при ошибке
           let deviceId = localStorage.getItem('fallback_device_id');
           if (!deviceId) {
             deviceId = 'device_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -841,160 +623,77 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         }
       }
 
-      // Функция для проверки лимита устройств
       async function checkDeviceLimit(userId) {
         try {
-          const { data: devices, error } = await supabaseClient
-            .from('user_devices')
-            .select('*')
-            .eq('user_id', userId);
-          
+          const { data: devices, error } = await supabaseClient.from('user_devices').select('*').eq('user_id', userId);
           if (error) throw error;
-          
-          const { data: subscription } = await supabaseClient
-            .from('subscriptions')
-            .select('max_devices')
-            .eq('user_id', userId)
-            .maybeSingle();
-          
+          const { data: subscription } = await supabaseClient.from('subscriptions').select('max_devices').eq('user_id', userId).maybeSingle();
           const maxDevices = subscription?.max_devices || 3;
-          
-          return {
-            current: devices?.length || 0,
-            max: maxDevices,
-            canAdd: (devices?.length || 0) < maxDevices
-          };
+          return { current: devices?.length || 0, max: maxDevices, canAdd: (devices?.length || 0) < maxDevices };
         } catch (err) {
-          console.error('Ошибка проверки лимита:', err);
           return { current: 0, max: 3, canAdd: false };
         }
       }
 
-      // Получение типа устройства
       function getDeviceType() {
         const ua = navigator.userAgent;
-        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
-          return 'tablet';
-        }
-        if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
-          return 'mobile';
-        }
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return 'tablet';
+        if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) return 'mobile';
         return 'desktop';
       }
 
-      // Получение имени устройства
       function getDeviceName() {
         const ua = navigator.userAgent;
-        let deviceName = 'Unknown Device';
-        
-        if (ua.includes('Windows')) deviceName = 'Windows PC';
-        else if (ua.includes('Mac')) deviceName = 'Mac';
-        else if (ua.includes('iPhone')) deviceName = 'iPhone';
-        else if (ua.includes('iPad')) deviceName = 'iPad';
-        else if (ua.includes('Android')) deviceName = 'Android Device';
-        else if (ua.includes('Linux')) deviceName = 'Linux Device';
-        
-        return deviceName;
+        if (ua.includes('Windows')) return 'Windows PC';
+        if (ua.includes('Mac')) return 'Mac';
+        if (ua.includes('iPhone')) return 'iPhone';
+        if (ua.includes('iPad')) return 'iPad';
+        if (ua.includes('Android')) return 'Android Device';
+        if (ua.includes('Linux')) return 'Linux Device';
+        return 'Unknown Device';
       }
 
-      // Регистрация устройства (только один раз за сессию)
       async function registerDevice(userId) {
-        // Проверяем sessionStorage
         if (isDeviceRegisteredInSession()) {
-          console.log('Устройство уже зарегистрировано в этой сессии (sessionStorage)');
-          
-          // Все равно обновляем currentDeviceHwid
           const hwid = await getDeviceHwid();
           currentDeviceHwid = hwid;
-          
-          // Обновляем last_seen для существующего устройства
           try {
-            const { data: existingDevice } = await supabaseClient
-              .from('user_devices')
-              .select('*')
-              .eq('user_id', userId)
-              .eq('device_hwid', hwid)
-              .maybeSingle();
-            
-            if (existingDevice) {
-              await supabaseClient
-                .from('user_devices')
-                .update({ last_seen: new Date().toISOString() })
-                .eq('id', existingDevice.id);
-            }
-          } catch (err) {
-            console.error('Ошибка обновления last_seen:', err);
-          }
-          
+            const { data: existingDevice } = await supabaseClient.from('user_devices').select('*').eq('user_id', userId).eq('device_hwid', hwid).maybeSingle();
+            if (existingDevice) await supabaseClient.from('user_devices').update({ last_seen: new Date().toISOString() }).eq('id', existingDevice.id);
+          } catch (err) {}
           return true;
         }
-
         try {
           const hwid = await getDeviceHwid();
           currentDeviceHwid = hwid;
-          
-          // Проверяем, есть ли уже такое устройство в БД
-          const { data: existingDevice } = await supabaseClient
-            .from('user_devices')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('device_hwid', hwid)
-            .maybeSingle();
-          
+          const { data: existingDevice } = await supabaseClient.from('user_devices').select('*').eq('user_id', userId).eq('device_hwid', hwid).maybeSingle();
           if (existingDevice) {
-            // Просто обновляем last_seen, не создаем новую запись
-            await supabaseClient
-              .from('user_devices')
-              .update({ last_seen: new Date().toISOString() })
-              .eq('id', existingDevice.id);
-            
-            // Сохраняем в sessionStorage
+            await supabaseClient.from('user_devices').update({ last_seen: new Date().toISOString() }).eq('id', existingDevice.id);
             setDeviceRegisteredInSession(true);
-            
-            // Обновляем отображение
             const { current, max } = await checkDeviceLimit(userId);
             const devicesText = document.getElementById('devices-text');
             const devicesBar = document.getElementById('devices-bar');
             if (devicesText) devicesText.textContent = `${current} / ${max}`;
             if (devicesBar) devicesBar.style.width = `${(current / max) * 100}%`;
-            
             return true;
           }
-          
-          // Проверяем лимит перед добавлением нового устройства
           const { current, max, canAdd } = await checkDeviceLimit(userId);
-          
           if (!canAdd) {
             showToast(`Достигнут лимит устройств (макс. ${max}). Это устройство не может быть добавлено.`, 'warning');
             return false;
           }
-          
-          // Добавляем новое устройство (только если его еще нет)
-          const { error } = await supabaseClient
-            .from('user_devices')
-            .insert({
-              user_id: userId,
-              device_hwid: hwid,
-              device_name: getDeviceName(),
-              device_type: getDeviceType(),
-              last_seen: new Date().toISOString()
-            });
-          
+          const { error } = await supabaseClient.from('user_devices').insert({
+            user_id: userId, device_hwid: hwid, device_name: getDeviceName(), device_type: getDeviceType(), last_seen: new Date().toISOString()
+          });
           if (error) throw error;
-          
-          // Сохраняем в sessionStorage
           setDeviceRegisteredInSession(true);
           showToast('Новое устройство зарегистрировано', 'success');
-          
-          // Обновляем отображение
           const { current: newCurrent, max: newMax } = await checkDeviceLimit(userId);
           const devicesText = document.getElementById('devices-text');
           const devicesBar = document.getElementById('devices-bar');
           if (devicesText) devicesText.textContent = `${newCurrent} / ${newMax}`;
           if (devicesBar) devicesBar.style.width = `${(newCurrent / newMax) * 100}%`;
-          
           return true;
-          
         } catch (err) {
           console.error('Ошибка регистрации устройства:', err);
           showToast('Ошибка регистрации устройства', 'error');
@@ -1002,136 +701,76 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         }
       }
 
-      // Загрузка списка устройств
       async function loadDevices(userId) {
         try {
-          const { data: devices, error } = await supabaseClient
-            .from('user_devices')
-            .select('*')
-            .eq('user_id', userId)
-            .order('last_seen', { ascending: false });
-          
+          const { data: devices, error } = await supabaseClient.from('user_devices').select('*').eq('user_id', userId).order('last_seen', { ascending: false });
           if (error) throw error;
-          
           const devicesList = document.getElementById('devices-list');
           const devicesContainer = document.getElementById('devices-list-container');
           const devicesText = document.getElementById('devices-text');
           const devicesBar = document.getElementById('devices-bar');
           const adminDeviceNote = document.getElementById('admin-device-note');
-          
           const { current, max } = await checkDeviceLimit(userId);
-          
           if (!devices || devices.length === 0) {
             devicesContainer.classList.add('hidden');
             if (devicesText) devicesText.textContent = `0 / ${max}`;
             if (devicesBar) devicesBar.style.width = '0%';
             return;
           }
-          
           devicesContainer.classList.remove('hidden');
           if (devicesText) devicesText.textContent = `${current} / ${max}`;
           if (devicesBar) devicesBar.style.width = `${(current / max) * 100}%`;
-          
-          // Показываем заметку об админе только если пользователь не админ
-          if (!isAdmin()) {
-            adminDeviceNote.classList.remove('hidden');
-          } else {
-            adminDeviceNote.classList.add('hidden');
-          }
-          
+          if (!isAdmin()) adminDeviceNote.classList.remove('hidden');
+          else adminDeviceNote.classList.add('hidden');
           let html = '';
           devices.forEach(device => {
             const isCurrent = device.device_hwid === currentDeviceHwid;
             const lastSeen = new Date(device.last_seen).toLocaleString('ru-RU');
-            
             html += `
               <div class="device-item">
                 <div class="flex items-center gap-3">
                   <i class="fa-regular ${device.device_type === 'mobile' ? 'fa-mobile' : device.device_type === 'tablet' ? 'fa-tablet' : 'fa-computer'} text-cyan-400"></i>
                   <div>
-                    <div class="device-name">
-                      ${device.device_name}
-                      ${isCurrent ? '<span class="text-xs text-green-400 ml-2">(текущее)</span>' : ''}
-                    </div>
+                    <div class="device-name">${device.device_name}${isCurrent ? '<span class="text-xs text-green-400 ml-2">(текущее)</span>' : ''}</div>
                     <div class="device-date">Последний вход: ${lastSeen}</div>
                   </div>
                 </div>
-                ${isAdmin() && !isCurrent ? `
-                  <button class="remove-device" onclick="removeDevice('${device.id}')" title="Удалить устройство (только админ)">
-                    <i class="fa-regular fa-trash-can"></i>
-                  </button>
-                ` : ''}
-              </div>
-            `;
+                ${isAdmin() && !isCurrent ? `<button class="remove-device" onclick="removeDevice('${device.id}')" title="Удалить устройство (только админ)"><i class="fa-regular fa-trash-can"></i></button>` : ''}
+              </div>`;
           });
-          
           devicesList.innerHTML = html;
-          
-        } catch (err) {
-          console.error('Ошибка загрузки устройств:', err);
-        }
+        } catch (err) { console.error('Ошибка загрузки устройств:', err); }
       }
 
-      // Удаление устройства (доступно только админам)
       window.removeDevice = async function(deviceId) {
-        // Проверяем, является ли пользователь админом
-        if (!isAdmin()) {
-          showToast('Только администратор может удалять устройства', 'error');
-          return;
-        }
-        
+        if (!isAdmin()) { showToast('Только администратор может удалять устройства', 'error'); return; }
         if (!confirm('Вы уверены, что хотите удалить это устройство?')) return;
-        
         try {
-          const { error } = await supabaseClient
-            .from('user_devices')
-            .delete()
-            .eq('id', deviceId);
-          
+          const { error } = await supabaseClient.from('user_devices').delete().eq('id', deviceId);
           if (error) throw error;
-          
           showToast('Устройство удалено', 'success');
           await loadDevices(currentUser.id);
-          
-        } catch (err) {
-          console.error('Ошибка удаления устройства:', err);
-          showToast('Ошибка удаления устройства', 'error');
-        }
+        } catch (err) { showToast('Ошибка удаления устройства', 'error'); }
       };
 
-      // Генерация Happ ссылки через бэкенд
       async function generateHappLink(userId, subscriptionId, endDate, hwid) {
         try {
           console.log('🔍 Отправляем запрос на бэкенд:', BACKEND_URL);
           console.log('📱 Данные:', { userId, hwid });
-          
           const response = await fetch(BACKEND_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: userId,
-              hwid: hwid,
-              deviceName: getDeviceName(),
-              deviceType: getDeviceType()
-            })
+            body: JSON.stringify({ userId, hwid, deviceName: getDeviceName(), deviceType: getDeviceType() })
           });
-
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || `HTTP error ${response.status}`);
           }
-
           const data = await response.json();
           console.log('✅ Получена ссылка:', data.happUrl);
-          
-          // Обновляем отладочную информацию
           const debugDisplay = document.getElementById('debug-link-display');
-          if (debugDisplay && data.happUrl) {
-            debugDisplay.textContent = data.happUrl;
-          }
-          
+          if (debugDisplay && data.happUrl) debugDisplay.textContent = data.happUrl;
           return data.happUrl;
-
         } catch (err) {
           console.error('❌ Ошибка при генерации Happ ссылки:', err);
           showToast('Не удалось создать ссылку для Happ: ' + err.message, 'error');
@@ -1140,9 +779,6 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
       }
 
       async function initializeApp() {
-        console.log('Supabase клиент создан');
-
-        // Назначаем обработчики
         document.getElementById('signup-btn')?.addEventListener('click', signUp);
         document.getElementById('signin-btn')?.addEventListener('click', signIn);
         document.getElementById('logout-btn')?.addEventListener('click', logout);
@@ -1150,293 +786,118 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         document.getElementById('list-all-users')?.addEventListener('click', listAllUsers);
         document.getElementById('fix-all-users')?.addEventListener('click', fixAllUsers);
         document.getElementById('copy-support-btn')?.addEventListener('click', () => copyToClipboard('@CKOPO4'));
-        document.getElementById('copy-sql')?.addEventListener('click', () => {
-          const sql = document.getElementById('sql-code').textContent;
-          copyToClipboard(sql);
-        });
-        document.getElementById('copy-email')?.addEventListener('click', () => {
-          if (currentUser?.email) copyToClipboard(currentUser.email);
-        });
-        document.getElementById('copy-expires')?.addEventListener('click', () => {
-          const date = document.getElementById('expires-date').textContent;
-          if (date && date !== 'загрузка...') copyToClipboard(date);
-        });
-        
-        // Обработчик для копирования отладочной ссылки
-        document.getElementById('copy-debug-link')?.addEventListener('click', () => {
-          const debugDisplay = document.getElementById('debug-link-display');
-          if (debugDisplay) {
-            copyToClipboard(debugDisplay.textContent);
-          }
-        });
-        
-        // Быстрые даты
-        document.getElementById('quick-1month')?.addEventListener('click', () => {
-          const date = new Date();
-          date.setMonth(date.getMonth() + 1);
-          setEndDate(date);
-        });
-        document.getElementById('quick-3month')?.addEventListener('click', () => {
-          const date = new Date();
-          date.setMonth(date.getMonth() + 3);
-          setEndDate(date);
-        });
-        document.getElementById('quick-1year')?.addEventListener('click', () => {
-          const date = new Date();
-          date.setFullYear(date.getFullYear() + 1);
-          setEndDate(date);
-        });
-
-        // Очистка поля
-        document.getElementById('admin-email')?.addEventListener('input', function() {
-          const clearBtn = document.getElementById('clear-email');
-          if (this.value.length > 0) {
-            clearBtn.classList.remove('hidden');
-          } else {
-            clearBtn.classList.add('hidden');
-          }
-        });
-        
-        document.getElementById('clear-email')?.addEventListener('click', function() {
-          document.getElementById('admin-email').value = '';
-          this.classList.add('hidden');
-        });
-
-        // Показать/скрыть пароль
-        document.getElementById('toggle-password')?.addEventListener('click', function() {
-          const password = document.getElementById('password');
-          const icon = this.querySelector('i');
-          if (password.type === 'password') {
-            password.type = 'text';
-            icon.className = 'fa-regular fa-eye-slash';
-          } else {
-            password.type = 'password';
-            icon.className = 'fa-regular fa-eye';
-          }
-        });
-
+        document.getElementById('copy-sql')?.addEventListener('click', () => { copyToClipboard(document.getElementById('sql-code').textContent); });
+        document.getElementById('copy-email')?.addEventListener('click', () => { if (currentUser?.email) copyToClipboard(currentUser.email); });
+        document.getElementById('copy-expires')?.addEventListener('click', () => { const date = document.getElementById('expires-date').textContent; if (date && date !== 'загрузка...') copyToClipboard(date); });
+        document.getElementById('copy-debug-link')?.addEventListener('click', () => { const debugDisplay = document.getElementById('debug-link-display'); if (debugDisplay) copyToClipboard(debugDisplay.textContent); });
+        document.getElementById('quick-1month')?.addEventListener('click', () => { const date = new Date(); date.setMonth(date.getMonth() + 1); setEndDate(date); });
+        document.getElementById('quick-3month')?.addEventListener('click', () => { const date = new Date(); date.setMonth(date.getMonth() + 3); setEndDate(date); });
+        document.getElementById('quick-1year')?.addEventListener('click', () => { const date = new Date(); date.setFullYear(date.getFullYear() + 1); setEndDate(date); });
+        document.getElementById('admin-email')?.addEventListener('input', function() { document.getElementById('clear-email')?.classList.toggle('hidden', !this.value.length); });
+        document.getElementById('clear-email')?.addEventListener('click', function() { document.getElementById('admin-email').value = ''; this.classList.add('hidden'); });
+        document.getElementById('toggle-password')?.addEventListener('click', function() { const pwd = document.getElementById('password'); const icon = this.querySelector('i'); if (pwd.type === 'password') { pwd.type = 'text'; icon.className = 'fa-regular fa-eye-slash'; } else { pwd.type = 'password'; icon.className = 'fa-regular fa-eye'; } });
         await checkSession();
       }
 
-      function setEndDate(date) {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        document.getElementById('admin-end-date').value = `${day}.${month}.${year}`;
-      }
-
-      function checkIsAdmin(email) {
-        return ADMIN_EMAILS.includes(email);
-      }
+      function setEndDate(date) { document.getElementById('admin-end-date').value = `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear()}`; }
+      function checkIsAdmin(email) { return ADMIN_EMAILS.includes(email); }
 
       async function listAllUsers() {
         const diagEl = document.getElementById('diagnostic-info');
         diagEl.innerHTML = '⏳ Загрузка пользователей из auth.users...\n';
-        
         try {
-          const { data: usersData, error } = await supabaseClient
-            .rpc('get_all_users');
-          
-          if (error) {
-            diagEl.innerHTML += `❌ Ошибка: ${error.message}\n`;
-            diagEl.innerHTML += '⚠️ Нужно создать функцию get_all_users (смотрите SQL инструкцию)\n';
-            return;
-          }
-          
+          const { data: usersData, error } = await supabaseClient.rpc('get_all_users');
+          if (error) { diagEl.innerHTML += `❌ Ошибка: ${error.message}\n`; return; }
           const users = usersData || [];
-          
-          if (users.length === 0) {
-            diagEl.innerHTML += '❌ Нет пользователей\n';
-            return;
-          }
-          
-          diagEl.innerHTML += `✅ Всего пользователей: ${users.length}\n\n`;
-          diagEl.innerHTML += '📋 Список пользователей с датами регистрации:\n';
-          
-          users.forEach((user, index) => {
-            const regDate = formatDate(user.created_at);
-            diagEl.innerHTML += `<div class="user-item">`;
-            diagEl.innerHTML += `${index + 1}. <span class="user-email">${user.email}</span>\n`;
-            diagEl.innerHTML += `   <span class="user-date">📅 Зарегистрирован: ${regDate}</span>\n`;
-            diagEl.innerHTML += `   <span class="user-id">🆔 ID: ${user.id}</span>\n`;
-            diagEl.innerHTML += `</div>`;
-          });
-          
-        } catch (err) {
-          diagEl.innerHTML += `❌ Ошибка: ${err.message}\n`;
-        }
+          if (users.length === 0) { diagEl.innerHTML += '❌ Нет пользователей\n'; return; }
+          diagEl.innerHTML += `✅ Всего пользователей: ${users.length}\n\n📋 Список пользователей с датами регистрации:\n`;
+          users.forEach((user, idx) => { diagEl.innerHTML += `${idx + 1}. ${user.email} (ID: ${user.id})\n   📅 Зарегистрирован: ${formatDate(user.created_at)}\n`; });
+        } catch (err) { diagEl.innerHTML += `❌ Ошибка: ${err.message}\n`; }
       }
 
       async function fixAllUsers() {
         const diagEl = document.getElementById('diagnostic-info');
         diagEl.innerHTML = '⏳ Синхронизация пользователей...\n';
-        
         try {
-          // Сначала получаем всех пользователей
-          const { data: usersData, error: usersError } = await supabaseClient
-            .rpc('get_all_users');
-          
-          if (usersError) {
-            diagEl.innerHTML += `❌ Ошибка получения пользователей: ${usersError.message}\n`;
-            return;
-          }
-          
+          const { data: usersData, error } = await supabaseClient.rpc('get_all_users');
+          if (error) { diagEl.innerHTML += `❌ Ошибка получения пользователей: ${error.message}\n`; return; }
           const users = usersData || [];
           diagEl.innerHTML += `✅ Найдено пользователей в auth: ${users.length}\n`;
-          
-          let added = 0;
-          let errors = 0;
-          
+          let added = 0, errors = 0;
           for (const user of users) {
-            const username = user.email.split('@')[0];
-            
-            const { error } = await supabaseClient
-              .from('profiles')
-              .upsert({
-                id: user.id,
-                username: username
-              }, { 
-                onConflict: 'id',
-                ignoreDuplicates: false
-              });
-            
-            if (error) {
-              diagEl.innerHTML += `❌ Ошибка для ${user.email}: ${error.message}\n`;
-              errors++;
-            } else {
-              added++;
-            }
+            const { error } = await supabaseClient.from('profiles').upsert({ id: user.id, username: user.email.split('@')[0] }, { onConflict: 'id', ignoreDuplicates: false });
+            if (error) { diagEl.innerHTML += `❌ Ошибка для ${user.email}: ${error.message}\n`; errors++; } else added++;
           }
-          
-          diagEl.innerHTML += `\n✅ Успешно добавлено/обновлено: ${added}\n`;
-          if (errors > 0) diagEl.innerHTML += `⚠️ Ошибок: ${errors}\n`;
-          
-          // Показываем обновленный список
+          diagEl.innerHTML += `\n✅ Успешно добавлено/обновлено: ${added}\n${errors > 0 ? `⚠️ Ошибок: ${errors}\n` : ''}`;
           await listAllUsers();
-          
-        } catch (err) {
-          diagEl.innerHTML += `❌ Ошибка: ${err.message}\n`;
-        }
+        } catch (err) { diagEl.innerHTML += `❌ Ошибка: ${err.message}\n`; }
       }
 
       async function checkSession() {
         try {
           const { data: { session }, error } = await supabaseClient.auth.getSession();
           if (error) throw error;
-          
           if (session) {
             currentUser = session.user;
-            
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
-            
-            // Регистрируем устройство (только один раз за сессию)
             await registerDevice(currentUser.id);
-            
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('diagnostic-panel').classList.remove('hidden');
               document.getElementById('setup-section').classList.remove('hidden');
               document.getElementById('admin-badge-container').classList.remove('hidden');
             }
-            
             await loadProfile(currentUser);
           }
-        } catch (err) {
-          console.error('Ошибка проверки сессии:', err);
-        }
+        } catch (err) { console.error('Ошибка проверки сессии:', err); }
       }
 
       async function signUp() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const messageEl = document.getElementById('auth-message');
-
-        if (!email || !password) {
-          messageEl.textContent = 'Заполните все поля';
-          messageEl.style.color = 'red';
-          return;
-        }
-
+        if (!email || !password) { messageEl.textContent = 'Заполните все поля'; messageEl.style.color = 'red'; return; }
         try {
-          const { data, error } = await supabaseClient.auth.signUp({
-            email: email,
-            password: password
-          });
-
+          const { error } = await supabaseClient.auth.signUp({ email, password });
           if (error) throw error;
-
-          if (data.user) {
-            messageEl.textContent = 'Регистрация успешна! Проверьте email для подтверждения.';
-            messageEl.style.color = 'lime';
-            showToast('Регистрация успешна!', 'success');
-          }
-        } catch (err) {
-          messageEl.textContent = 'Ошибка: ' + (err.message || 'неизвестная ошибка');
-          messageEl.style.color = 'red';
-        }
+          messageEl.textContent = 'Регистрация успешна! Проверьте email для подтверждения.';
+          messageEl.style.color = 'lime';
+          showToast('Регистрация успешна!', 'success');
+        } catch (err) { messageEl.textContent = 'Ошибка: ' + (err.message || 'неизвестная ошибка'); messageEl.style.color = 'red'; }
       }
 
       async function signIn() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const messageEl = document.getElementById('auth-message');
-
-        if (!email || !password) {
-          messageEl.textContent = 'Заполните все поля';
-          messageEl.style.color = 'red';
-          return;
-        }
-
+        if (!email || !password) { messageEl.textContent = 'Заполните все поля'; messageEl.style.color = 'red'; return; }
         try {
-          const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-          });
-
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
           if (error) throw error;
-
           if (data.session) {
             currentUser = data.user;
-            
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('profile-section').style.display = 'block';
-            
-            // Регистрируем устройство (только один раз за сессию)
             const registered = await registerDevice(currentUser.id);
-            
-            if (!registered) {
-              // Если лимит устройств достигнут, показываем предупреждение
-              const { current, max } = await checkDeviceLimit(currentUser.id);
-              showToast(`Лимит устройств (${current}/${max}) достигнут. Это устройство не может быть добавлено.`, 'warning');
-            }
-            
+            if (!registered) { const { current, max } = await checkDeviceLimit(currentUser.id); showToast(`Лимит устройств (${current}/${max}) достигнут. Это устройство не может быть добавлено.`, 'warning'); }
             if (checkIsAdmin(currentUser.email)) {
               document.getElementById('admin-panel').classList.remove('hidden');
               document.getElementById('diagnostic-panel').classList.remove('hidden');
               document.getElementById('setup-section').classList.remove('hidden');
               document.getElementById('admin-badge-container').classList.remove('hidden');
             }
-            
             await loadProfile(currentUser);
             showToast('Вход выполнен успешно!', 'success');
           }
-        } catch (err) {
-          messageEl.textContent = 'Ошибка входа: ' + (err.message || 'неверные данные');
-          messageEl.style.color = 'red';
-        }
+        } catch (err) { messageEl.textContent = 'Ошибка входа: ' + (err.message || 'неверные данные'); messageEl.style.color = 'red'; }
       }
 
       async function logout() {
         try {
           const { error } = await supabaseClient.auth.signOut();
           if (error) throw error;
-          
-          currentUser = null;
-          currentDeviceHwid = null;
-          // Сбрасываем sessionStorage при выходе
-          setDeviceRegisteredInSession(false);
-          
+          currentUser = null; currentDeviceHwid = null; setDeviceRegisteredInSession(false);
           document.getElementById('auth-section').style.display = 'block';
           document.getElementById('profile-section').style.display = 'none';
           document.getElementById('admin-panel').classList.add('hidden');
@@ -1446,28 +907,16 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           document.getElementById('email').value = '';
           document.getElementById('password').value = '';
           document.getElementById('auth-message').textContent = '';
-          
           showToast('Выход выполнен', 'info');
-        } catch (err) {
-          console.error('Ошибка выхода:', err);
-        }
+        } catch (err) { console.error('Ошибка выхода:', err); }
       }
 
       async function loadProfile(user) {
         try {
           const emailEl = document.getElementById('profile-email');
-          if (emailEl && user.email) {
-            emailEl.textContent = user.email;
-          }
-
-          const { data: subscription, error } = await supabaseClient
-            .from('subscriptions')
-            .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle();
-
+          if (emailEl && user.email) emailEl.textContent = user.email;
+          const { data: subscription, error } = await supabaseClient.from('subscriptions').select('*').eq('user_id', user.id).maybeSingle();
           if (error && error.code !== 'PGRST116') throw error;
-
           const expiresEl = document.getElementById('expires-date');
           const statusEl = document.getElementById('profile-status');
           const daysLeftEl = document.getElementById('days-left');
@@ -1479,93 +928,39 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
           const subscriptionIdDisplay = document.getElementById('subscription-id-display');
           const debugContainer = document.getElementById('debug-link-container');
           const debugDisplay = document.getElementById('debug-link-display');
-
-          // Загружаем список устройств и проверяем лимит
           await loadDevices(user.id);
           const { current, max } = await checkDeviceLimit(user.id);
-
           if (devicesText) devicesText.textContent = `${current} / ${max}`;
           if (devicesBar) devicesBar.style.width = `${(current / max) * 100}%`;
-
-          if (subscription) {
-            if (subscription.ends_at) {
-              const endDate = new Date(subscription.ends_at);
-              const today = new Date();
-              const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-              
-              const formattedDate = endDate.toLocaleDateString('ru-RU', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              });
-              
-              if (expiresEl) expiresEl.textContent = formattedDate;
-              
-              if (daysLeft > 0) {
-                if (statusEl) {
-                  statusEl.textContent = 'АКТИВНА';
-                  statusEl.className = 'text-3xl font-bold text-green-400';
-                }
-                if (daysLeftEl) daysLeftEl.textContent = daysLeft;
-                if (statusBadge) {
-                  statusBadge.className = 'subscription-status status-active';
-                  statusBadge.innerHTML = '✅ Активна';
-                }
-                
-                // Генерируем Happ ссылку с HWID
-                const hwid = currentDeviceHwid || await getDeviceHwid();
-                const happUrl = await generateHappLink(user.id, subscription.id, subscription.ends_at, hwid);
-                
-                if (happLink) {
-                  happLink.href = happUrl;
-                }
-                if (subscriptionIdDisplay) {
-                  subscriptionIdDisplay.innerHTML = `ID подписки: ${subscription.id}`;
-                }
-                
-                // Показываем отладочную информацию
-                if (debugContainer && debugDisplay && happUrl) {
-                  debugContainer.classList.remove('hidden');
-                  debugDisplay.textContent = happUrl;
-                }
-                
-                // Показываем кнопку
-                if (subscriptionButton) {
-                  subscriptionButton.classList.remove('hidden');
-                }
-              } else {
-                if (statusEl) {
-                  statusEl.textContent = 'ИСТЕКЛА';
-                  statusEl.className = 'text-3xl font-bold text-red-400';
-                }
-                if (daysLeftEl) daysLeftEl.textContent = '0';
-                if (statusBadge) {
-                  statusBadge.className = 'subscription-status status-expired';
-                  statusBadge.innerHTML = '❌ Истекла';
-                }
-                
-                // Скрываем кнопку
-                if (subscriptionButton) {
-                  subscriptionButton.classList.add('hidden');
-                }
-              }
+          if (subscription && subscription.ends_at) {
+            const endDate = new Date(subscription.ends_at);
+            const today = new Date();
+            const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+            const formattedDate = endDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+            if (expiresEl) expiresEl.textContent = formattedDate;
+            if (daysLeft > 0) {
+              if (statusEl) { statusEl.textContent = 'АКТИВНА'; statusEl.className = 'text-3xl font-bold text-green-400'; }
+              if (daysLeftEl) daysLeftEl.textContent = daysLeft;
+              if (statusBadge) { statusBadge.className = 'subscription-status status-active'; statusBadge.innerHTML = '✅ Активна'; }
+              const hwid = currentDeviceHwid || await getDeviceHwid();
+              const happUrl = await generateHappLink(user.id, subscription.id, subscription.ends_at, hwid);
+              if (happLink) happLink.href = happUrl;
+              if (subscriptionIdDisplay) subscriptionIdDisplay.innerHTML = `ID подписки: ${subscription.id}`;
+              if (debugContainer && debugDisplay && happUrl) { debugContainer.classList.remove('hidden'); debugDisplay.textContent = happUrl; }
+              if (subscriptionButton) subscriptionButton.classList.remove('hidden');
+            } else {
+              if (statusEl) { statusEl.textContent = 'ИСТЕКЛА'; statusEl.className = 'text-3xl font-bold text-red-400'; }
+              if (daysLeftEl) daysLeftEl.textContent = '0';
+              if (statusBadge) { statusBadge.className = 'subscription-status status-expired'; statusBadge.innerHTML = '❌ Истекла'; }
+              if (subscriptionButton) subscriptionButton.classList.add('hidden');
             }
           } else {
             if (expiresEl) expiresEl.textContent = 'Нет активной подписки';
-            if (statusEl) {
-              statusEl.textContent = 'НЕТ';
-              statusEl.className = 'text-3xl font-bold text-gray-500';
-            }
+            if (statusEl) { statusEl.textContent = 'НЕТ'; statusEl.className = 'text-3xl font-bold text-gray-500'; }
             if (daysLeftEl) daysLeftEl.textContent = '—';
-            
-            // Скрываем кнопку
-            if (subscriptionButton) {
-              subscriptionButton.classList.add('hidden');
-            }
+            if (subscriptionButton) subscriptionButton.classList.add('hidden');
           }
-        } catch (err) {
-          console.error('Ошибка загрузки профиля:', err);
-        }
+        } catch (err) { console.error('Ошибка загрузки профиля:', err); }
       }
 
       async function adminGrantSubscription() {
@@ -1574,159 +969,41 @@ GRANT EXECUTE ON FUNCTION get_user_devices_count TO anon, authenticated;</pre>
         const devicesInput = document.getElementById('admin-max-devices');
         const messageEl = document.getElementById('admin-message');
         const infoEl = document.getElementById('admin-info');
-
-        if (!emailInput || !dateInput || !devicesInput || !messageEl) {
-          console.error('Не найдены элементы админ-панели');
-          return;
-        }
-
+        if (!emailInput || !dateInput || !devicesInput || !messageEl) return;
         const email = emailInput.value.trim().toLowerCase();
         const endDateStr = dateInput.value.trim();
         const maxDevices = parseInt(devicesInput.value) || 3;
-
-        if (!email || !endDateStr) {
-          messageEl.textContent = 'Заполните email и дату';
-          messageEl.style.color = 'red';
-          return;
-        }
-
+        if (!email || !endDateStr) { messageEl.textContent = 'Заполните email и дату'; messageEl.style.color = 'red'; return; }
         let endsAt;
-
         try {
           const [dd, mm, yyyy] = endDateStr.split('.').map(p => p.trim());
-
-          if (!dd || !mm || !yyyy || yyyy.length !== 4) {
-            throw new Error('неверный формат даты');
-          }
-
+          if (!dd || !mm || !yyyy || yyyy.length !== 4) throw new Error('неверный формат даты');
           endsAt = `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-
-          const testDate = new Date(endsAt);
-          if (Number.isNaN(testDate.getTime())) {
-            throw new Error('некорректная дата');
-          }
-        } catch {
-          messageEl.textContent = 'Неверный формат. Пример: 31.12.2026';
-          messageEl.style.color = 'red';
-          return;
-        }
-
-        messageEl.textContent = 'Поиск пользователя...';
-        messageEl.style.color = 'yellow';
-        
-        if (infoEl) {
-          infoEl.classList.remove('hidden');
-          infoEl.innerHTML = `🔍 Поиск email: <b>"${email}"</b> в Authentication...\n`;
-        }
-
+          if (isNaN(new Date(endsAt).getTime())) throw new Error('некорректная дата');
+        } catch { messageEl.textContent = 'Неверный формат. Пример: 31.12.2026'; messageEl.style.color = 'red'; return; }
+        messageEl.textContent = 'Поиск пользователя...'; messageEl.style.color = 'yellow';
+        if (infoEl) { infoEl.classList.remove('hidden'); infoEl.innerHTML = `🔍 Поиск email: "${email}" в Authentication...\n`; }
         try {
-          // Ищем пользователя через RPC функцию
           if (infoEl) infoEl.innerHTML += `\n🔍 Ищем в auth.users...\n`;
-          
-          const { data: userData, error: usersError } = await supabaseClient
-            .rpc('find_user_by_email', { search_email: email });
-
-          if (usersError) {
-            if (infoEl) infoEl.innerHTML += `❌ Ошибка: ${usersError.message}\n`;
-            throw usersError;
-          }
-
-          if (!userData) {
-            messageEl.textContent = `❌ Пользователь с email "${email}" не найден`;
-            messageEl.style.color = 'red';
-            if (infoEl) infoEl.innerHTML += `❌ Пользователь не найден\n`;
-            showToast('Пользователь не найден', 'error');
-            return;
-          }
-
-          if (infoEl) {
-            const regDate = formatDate(userData.created_at);
-            infoEl.innerHTML += `✅ Найден пользователь:\n`;
-            infoEl.innerHTML += `   ID: ${userData.id}\n`;
-            infoEl.innerHTML += `   Email: ${userData.email}\n`;
-            infoEl.innerHTML += `   📅 Зарегистрирован: ${regDate}\n`;
-          }
-
-          // Создаем или обновляем запись в profiles
-          if (infoEl) infoEl.innerHTML += `\n📝 Создаем запись в profiles...\n`;
-          
+          const { data: userData, error: usersError } = await supabaseClient.rpc('find_user_by_email', { search_email: email });
+          if (usersError) throw usersError;
+          if (!userData) { messageEl.textContent = `❌ Пользователь с email "${email}" не найден`; messageEl.style.color = 'red'; showToast('Пользователь не найден', 'error'); return; }
+          if (infoEl) infoEl.innerHTML += `✅ Найден пользователь: ID: ${userData.id}, Email: ${userData.email}, 📅 Зарегистрирован: ${formatDate(userData.created_at)}\n`;
           const username = email.split('@')[0];
-          
-          const { data: profile, error: profileError } = await supabaseClient
-            .from('profiles')
-            .upsert({
-              id: userData.id,
-              username: username
-            }, { 
-              onConflict: 'id',
-              ignoreDuplicates: false
-            })
-            .select()
-            .single();
-
-          if (profileError) {
-            if (infoEl) infoEl.innerHTML += `❌ Ошибка создания profiles: ${profileError.message}\n`;
-            throw profileError;
-          }
-
-          if (infoEl) infoEl.innerHTML += `✅ Запись в profiles создана/обновлена\n`;
-
-          messageEl.textContent = `Пользователь найден! Выдача подписки...`;
-
-          // Создаем подписку
-          const subscriptionData = {
-            user_id: userData.id,
-            status: 'active',
-            ends_at: endsAt + 'T23:59:59Z',
-            max_devices: maxDevices,
-            used_devices: 0,
-            updated_at: new Date().toISOString()
-          };
-
-          const { data: subscription, error: subError } = await supabaseClient
-            .from('subscriptions')
-            .upsert(subscriptionData, { 
-              onConflict: 'user_id',
-              ignoreDuplicates: false
-            })
-            .select()
-            .single();
-
+          await supabaseClient.from('profiles').upsert({ id: userData.id, username }, { onConflict: 'id', ignoreDuplicates: false }).select().single();
+          const subscriptionData = { user_id: userData.id, status: 'active', ends_at: endsAt + 'T23:59:59Z', max_devices: maxDevices, used_devices: 0, updated_at: new Date().toISOString() };
+          const { error: subError } = await supabaseClient.from('subscriptions').upsert(subscriptionData, { onConflict: 'user_id', ignoreDuplicates: false });
           if (subError) throw subError;
-
-          // Конфетти при успехе
-          if (window.confetti) {
-            confetti({
-              particleCount: 100,
-              spread: 70,
-              origin: { y: 0.6 }
-            });
-          }
-
+          if (window.confetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
           messageEl.textContent = `✅ Подписка оформлена для ${email} до ${endDateStr} (макс. ${maxDevices} устройств)`;
           messageEl.style.color = 'lime';
           showToast('Подписка успешно выдана!', 'success');
-
-          // Очищаем поля
-          emailInput.value = '';
-          dateInput.value = '';
-          devicesInput.value = '3';
-          document.getElementById('clear-email')?.classList.add('hidden');
-        } catch (err) {
-          console.error('Ошибка выдачи подписки:', err);
-          messageEl.textContent = 'Ошибка: ' + (err.message || 'неизвестно');
-          messageEl.style.color = 'red';
-          showToast('Ошибка: ' + err.message, 'error');
-          if (infoEl) infoEl.innerHTML += `\n❌ Ошибка: ${err.message}\n`;
-        }
+          emailInput.value = ''; dateInput.value = ''; devicesInput.value = '3'; document.getElementById('clear-email')?.classList.add('hidden');
+        } catch (err) { messageEl.textContent = 'Ошибка: ' + (err.message || 'неизвестно'); messageEl.style.color = 'red'; showToast('Ошибка: ' + err.message, 'error'); }
       }
 
-      // Запускаем приложение после загрузки DOM
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeApp);
-      } else {
-        initializeApp();
-      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initializeApp);
+      else initializeApp();
     })();
   </script>
 </body>
